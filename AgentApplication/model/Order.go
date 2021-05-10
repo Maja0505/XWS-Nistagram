@@ -7,7 +7,9 @@ import (
 
 type Order struct {
 	ID  uuid.UUID `json:"id"`
-	Product Product `json:"product" gorm:"not null"`
+	ProductID uuid.UUID `json:"product_id"`
+	Product Product
+	ProductType string
 	Amount int32 `json:"amount" gorm:"not null"`
 }
 

@@ -7,10 +7,13 @@ import (
 
 type ShoppingCart struct {
 	ID  uuid.UUID `json:"id"`
-	Orders []Order `json:"orders" gorm:"not null"`
+	Orders []Order `json:"orders" gorm:"polymorphic:Product;"`
 	TotalPrice float32 `json:"totalPrice" gorm:"not null"`
-	Customer User `json:"customer" gorm:"not null"`
-	PaymentDetails PaymentDetails `json:"paymentDetails" gorm:"not null"`
+	UserID uuid.UUID `json:"user_id"`
+	User User
+	PaymentDetailsID uuid.UUID `json:"paymentDetails_id"`
+	PaymentDetails PaymentDetails
+
 }
 
 func (shoppingCart *ShoppingCart) BeforeCreate(scope *gorm.DB) error {
