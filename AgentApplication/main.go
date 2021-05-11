@@ -5,7 +5,20 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 )
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
 
 func main() {
 
@@ -21,7 +34,14 @@ func main() {
 	paymentDetails := model.PaymentDetails{PhoneNumber: "+3816767987",Address:address}
 	shoppingCart := model.ShoppingCart{Orders:[]model.Order{order,order2},TotalPrice: 500,User: user,PaymentDetails: paymentDetails}
 
-	dsn := "host=localhost user=postgres password=root dbname=xml_postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	host := os.Getenv("DBHOST")
+	password := os.Getenv("PASSWORD")
+	dbname := os.Getenv("DBNAME")
+	dbport := os.Getenv("DBPORT")
+	user1 := os.Getenv("USER")
+
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", host, user1, password, dbname, dbport)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
