@@ -1,13 +1,12 @@
 package main
 
 import (
-	"XWS-Nistagram/AgentApplication/model"
+	"agentApplication/model"
 	"fmt"
-	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
 )
 
