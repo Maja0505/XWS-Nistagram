@@ -1,30 +1,35 @@
 package main
 
 import (
-
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
+	"os"
+	"time"
 	"userService/handler"
 	"userService/repository"
 	"userService/service"
 )
 
 func initDB() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Ping(context.TODO(), nil)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
-
 		log.Fatal(err)
-
+	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return client
 }
@@ -45,23 +50,37 @@ func initHandler(service *service.UserService) *handler.UserHandler{
 func handleFunc(handler *handler.UserHandler){
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/api/findAllUsers",handler.FindAll).Methods("GET")
-	router.HandleFunc("/api/create",handler.Create).Methods("POST")
-	router.HandleFunc("/api/update/{id}",handler.Update).Methods("PUT")
+	router.HandleFunc("/",handler.FindAll).Methods("GET")
+	router.HandleFunc("/create",handler.Create).Methods("POST")
+	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 
 
 	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router))
+
+
+
+}
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
 
 
 func main() {
 
 	database := initDB()
+	//fmt.Println(d.Collection("users").Find(context.TODO(),bson.M{}))
+
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)
 	handler := initHandler(userService)
-
 	handleFunc(handler)
+
 
 }

@@ -7,6 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+	"time"
 	"userService/model"
 )
 
@@ -15,17 +17,31 @@ type UserRepository struct {
 }
 
 func (repo *UserRepository) FindAll() (*[]model.User, error) {
-	ss := repo.Database.Database("user-service-database").Collection("users")
+	db := repo.Database.Database("user-service-database")
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	collection := db.Collection("users")
 	var users []model.User
-	cur, _ := ss.Find(context.TODO(),bson.M{})
-	_ = cur.All(context.TODO(),&users)
+	cur, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+		return nil,err
+
+	}
+	err = cur.All(ctx,&users)
+	if err != nil {
+		log.Fatal(err)
+		return nil,err
+
+	}
 	return &users,nil
 }
 
+
 func (repo *UserRepository) Create(user *model.User) error {
-	db := repo.Database.Database("user-service-database").Collection("users")
-	_,err := db.InsertOne(context.TODO(),&user)
-	if err != nil{
+	db := repo.Database.Database("user-service-database")
+	collection := db.Collection("users")
+	_, err := collection.InsertOne(context.TODO(), &user)
+	if err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -33,8 +49,9 @@ func (repo *UserRepository) Create(user *model.User) error {
 }
 
 func (repo *UserRepository) Update(id primitive.ObjectID, user *model.User) error {
-	db := repo.Database.Database("user-service-database").Collection("users")
-	_, err := db.UpdateOne(
+	db := repo.Database.Database("user-service-database")
+	collection := db.Collection("users")
+	_, err := collection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": id},
 		bson.D{
