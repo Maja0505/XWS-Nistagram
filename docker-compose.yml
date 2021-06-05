@@ -1,5 +1,6 @@
 version: '3'
 services:
+
   gateway:
     image: nginx:1.19.8-alpine
     ports:
@@ -19,6 +20,7 @@ services:
       - network1
     environment:
       PORT: ${USER_SERVICE_PORT}
+      HOST: mongo
     restart: on-failure
     depends_on:
       - mongo

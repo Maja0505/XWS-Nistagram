@@ -1,7 +1,7 @@
 package model
 
 type RegisteredUser struct  {
-	User
+	User `bson:",inline"`
 	Following int64 `bson:"following,omitempty"`
 	Followers int64 `bson:"followers,omitempty"`
 	NumberOfPosts int64 `bson:"number_of_posts,omitempty"`
