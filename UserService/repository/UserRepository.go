@@ -47,3 +47,14 @@ func (repo *UserRepository) Update(id primitive.ObjectID, user *model.User) erro
 	}
 	return nil
 }
+
+func (repo *UserRepository) FindUserByUsername(username string) ( *model.RegisteredUser, error){
+	db := repo.Database.Database("user-service-database").Collection("users")
+	var user model.RegisteredUser
+	err := db.FindOne(context.TODO(),bson.M{"username" : username}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
+
+}
