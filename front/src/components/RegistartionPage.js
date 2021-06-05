@@ -9,22 +9,11 @@ import {
   Radio,
 } from "@material-ui/core";
 
-import { Autocomplete } from "@material-ui/lab";
-
 import { useState } from "react";
 
 import axios from "axios";
 
 const RegistartionPage = () => {
-  const category = [
-    { name: "influencer" },
-    { name: "sports" },
-    { name: "new/media" },
-    { name: "business" },
-    { name: "brand" },
-    { name: "organization" },
-  ];
-
   const [user, setUser] = useState({ gender: 1 });
 
   const handleSubmitClick = () => {
@@ -102,24 +91,6 @@ const RegistartionPage = () => {
               }
             />
             <br></br>
-            <br></br>
-            <Autocomplete
-              id="combo-box-demo"
-              options={category}
-              getOptionLabel={(c) => c.name}
-              fullWidth
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Category"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-              onChange={(event, value) =>
-                setUser({ ...user, Category: value !== null ? value.name : "" })
-              }
-            />
             <br></br>
             <TextField
               color="primary"
