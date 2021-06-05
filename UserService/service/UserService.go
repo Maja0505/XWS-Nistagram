@@ -42,3 +42,10 @@ func (service *UserService) Update(stringId string, user *model.User) error {
 	return nil
 }
 
+func (service *UserService) FindUserByUsername(username string) (*model.RegisteredUser,error){
+	user,err := service.Repo.FindUserByUsername(username)
+	if err != nil{
+		return nil, err
+	}
+	return user, nil
+}

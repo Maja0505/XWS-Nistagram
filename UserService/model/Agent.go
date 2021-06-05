@@ -1,5 +1,5 @@
 package model
 
 type Agent struct {
-	RegisteredUser
+	RegisteredUser `bson:",inline"`
 }

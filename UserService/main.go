@@ -1,14 +1,16 @@
 package main
 
 import (
-
 	"context"
 	"fmt"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
+	"os"
 	"userService/handler"
 	"userService/repository"
 	"userService/service"
@@ -33,35 +35,75 @@ func initUserRepo(database *mongo.Client) *repository.UserRepository{
 	return &repository.UserRepository{Database: database}
 }
 
+func initVerificationRequestRepo(database *mongo.Client) *repository.VerificationRequestRepository{
+	return &repository.VerificationRequestRepository{Database: database}
+}
+
+
+
 func initUserService(userRepo *repository.UserRepository) *service.UserService{
 	return &service.UserService{Repo : userRepo}
 }
 
-func initHandler(service *service.UserService) *handler.UserHandler{
-	return &handler.UserHandler{Service: service}
+func initVerificationRequestService(verificationRequestRepo *repository.VerificationRequestRepository,userService *service.UserService) *service.VerificationRequestService{
+	return &service.VerificationRequestService{Repo : verificationRequestRepo,UserService:userService }
 }
 
 
-func handleFunc(handler *handler.UserHandler){
-	router := mux.NewRouter().StrictSlash(true)
+func initUserHandler(service *service.UserService) *handler.UserHandler{
+	return &handler.UserHandler{Service: service}
+}
 
-	router.HandleFunc("/api/findAllUsers",handler.FindAll).Methods("GET")
-	router.HandleFunc("/api/create",handler.Create).Methods("POST")
-	router.HandleFunc("/api/update/{id}",handler.Update).Methods("PUT")
+func initVerificationRequestHandler(service *service.VerificationRequestService) *handler.VerificationRequestHandler{
+	return &handler.VerificationRequestHandler{Service: service}
+}
 
 
-	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(":8000", router))
+func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
+
+	router.HandleFunc("/",handler.FindAll).Methods("GET")
+	router.HandleFunc("/create",handler.Create).Methods("POST")
+	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
+	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
+
+}
+func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,router *mux.Router){
+
+	router.HandleFunc("/verificationRequest/create",handler.Create).Methods("POST")
+
+}
+
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
 
 
 func main() {
-
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	database := initDB()
+
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)
-	handler := initHandler(userService)
+	userHandler := initUserHandler(userService)
 
-	handleFunc(handler)
+	verificationRequestRepo := initVerificationRequestRepo(database)
+	verificationRequestService := initVerificationRequestService(verificationRequestRepo,userService)
+	verificationRequestHandler := initVerificationRequestHandler(verificationRequestService)
+
+
+	router := mux.NewRouter().StrictSlash(true)
+	handleUserFunc(userHandler,router)
+	handleVerificationRequestFunc(verificationRequestHandler,router)
+
+	fmt.Println("Server running on port " + os.Getenv("USER_SERVICE_PORT"))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_SERVICE_PORT")),handlers.CORS(originsOk, methodsOk)(router)))
 
 }
+
