@@ -11,22 +11,26 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 	"userService/handler"
 	"userService/repository"
 	"userService/service"
 )
 
 func initDB() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://" + os.Getenv("HOST") + ":27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Ping(context.TODO(), nil)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
-
 		log.Fatal(err)
-
+	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return client
 }
@@ -38,8 +42,6 @@ func initUserRepo(database *mongo.Client) *repository.UserRepository{
 func initVerificationRequestRepo(database *mongo.Client) *repository.VerificationRequestRepository{
 	return &repository.VerificationRequestRepository{Database: database}
 }
-
-
 
 func initUserService(userRepo *repository.UserRepository) *service.UserService{
 	return &service.UserService{Repo : userRepo}
@@ -58,7 +60,6 @@ func initVerificationRequestHandler(service *service.VerificationRequestService)
 	return &handler.VerificationRequestHandler{Service: service}
 }
 
-
 func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 	router.HandleFunc("/",handler.FindAll).Methods("GET")
@@ -66,6 +67,20 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
 
+	fmt.Println("server running ")
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router))
+
+
+
+}
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
 func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,router *mux.Router){
 
@@ -88,6 +103,7 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	database := initDB()
+	//fmt.Println(d.Collection("users").Find(context.TODO(),bson.M{}))
 
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)
@@ -104,6 +120,5 @@ func main() {
 
 	fmt.Println("Server running on port " + os.Getenv("USER_SERVICE_PORT"))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_SERVICE_PORT")),handlers.CORS(originsOk, methodsOk)(router)))
-
 }
 
