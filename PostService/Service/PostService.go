@@ -7,6 +7,7 @@ import (
 	"XWS-Nistagram/PostService/Repository"
 	"fmt"
 	"github.com/gocql/gocql"
+	"image"
 )
 
 type PostService struct {
@@ -113,6 +114,14 @@ func (service *PostService) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocq
 	return userids, err
 }
 
+func (service *PostService) GetImage(imagepath string) ( image.Image, error) {
+	img, err := service.Repo.GetImage(imagepath)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return img, err
+}
 
 /*func (service *PostService) GetAllLikesForPost(postid string) error {
 	err := service.Repo.GetAllLikesForPost(postid)

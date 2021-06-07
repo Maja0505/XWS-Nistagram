@@ -4,6 +4,8 @@ import (
 	"XWS-Nistagram/PostService/Model"
 	"fmt"
 	"github.com/gocql/gocql"
+	"image"
+	"os"
 	"time"
 )
 
@@ -333,4 +335,28 @@ func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocq
 		userids = append(userids, useruuid)
 	}
 	return &userids, nil
+}
+
+func (repo *PostRepository) GetImage(imagepath string) (image.Image, error){
+	img, err := LoadImage(imagepath)
+	if err != nil{
+		return nil, err
+	}
+	fmt.Println("Image successfuly loaded")
+	return img, nil
+}
+
+func LoadImage(imagepath string) (image.Image, error){
+	f, err := os.Open(imagepath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	img, fmtName, err := image.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(fmtName)
+	return img, nil
 }

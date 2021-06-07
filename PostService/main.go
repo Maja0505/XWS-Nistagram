@@ -53,6 +53,7 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/api/get-comments-for-post/{id}", handler.GetCommentsForPost).Methods("GET")
 	router.HandleFunc("/api/get-users-who-liked-post/{id}", handler.GetUsersWhoLikedPost).Methods("GET")
 	router.HandleFunc("/api/get-users-who-disliked-post/{id}", handler.GetUsersWhoDislikedPost).Methods("GET")
+	router.HandleFunc("/api/get-image/{id}", handler.GetImage).Methods("GET")
 
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})

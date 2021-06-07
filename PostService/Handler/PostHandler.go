@@ -4,11 +4,16 @@ import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
 	"XWS-Nistagram/PostService/Service"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
+	"image"
+	"image/jpeg"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type PostHandler struct {
@@ -257,6 +262,59 @@ func (handler *PostHandler) GetUsersWhoDislikedPost(w http.ResponseWriter, r *ht
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userids)
 
+}
+
+func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Slikaaa")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "image/jpeg")
+	vars := mux.Vars(r)
+	imagepath := vars["id"]
+	if imagepath == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//img,_ := handler.Service.GetImage(imagepath)
+	img, err := LoadImage(imagepath)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if img == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, img, nil); err != nil {
+		fmt.Println("Unable to encode image!")
+	}
+
+	w.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
+	if _, err := w.Write(buffer.Bytes()); err != nil {
+		fmt.Println("Unable to write image.")
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func LoadImage(imagepath string) (image.Image, error){
+	var directory string = "Images/"
+	var imgpath string = directory + imagepath
+	f, err := os.Open(imgpath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+	return img, nil
 }
 
 /*func (handler *PostHandler) GetAllLikesForPost(w http.ResponseWriter, r *http.Request) {
