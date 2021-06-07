@@ -9,42 +9,38 @@ import {
   Radio,
 } from "@material-ui/core";
 
-import { Autocomplete } from "@material-ui/lab";
-
 import { useState } from "react";
+
+import { Redirect } from "react-router-dom";
 
 import axios from "axios";
 
 const RegistartionPage = () => {
-  const category = [
-    { name: "influencer" },
-    { name: "sports" },
-    { name: "new/media" },
-    { name: "business" },
-    { name: "brand" },
-    { name: "organization" },
-  ];
-
   const [user, setUser] = useState({ gender: 1 });
+
+  const [redirection, setRedirection] = useState(false);
 
   const handleSubmitClick = () => {
     console.log(user);
-    let verificationRequestForUser = {
+    let userForRegistration = {
       ...user,
       DateOfBirth: user.DateOfBirth + "T00:00:00+01:00",
     };
     axios
-      .post(
-        "http://localhost:8000/verificationRequest/create",
-        verificationRequestForUser
-      )
+      .post("/user/create", userForRegistration)
       .then((res) => {
-        console.log(res.data);
+        setRedirection(true);
+      })
+      .catch((error, res) => {
+        alert(error);
+        console.log(error.message);
       });
   };
 
   return (
     <div>
+      {redirection === true && <Redirect to="/login" />}
+
       <div>
         <Typography
           variant="h6"
@@ -102,24 +98,6 @@ const RegistartionPage = () => {
               }
             />
             <br></br>
-            <br></br>
-            <Autocomplete
-              id="combo-box-demo"
-              options={category}
-              getOptionLabel={(c) => c.name}
-              fullWidth
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Category"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-              onChange={(event, value) =>
-                setUser({ ...user, Category: value !== null ? value.name : "" })
-              }
-            />
             <br></br>
             <TextField
               color="primary"

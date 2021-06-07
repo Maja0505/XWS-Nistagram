@@ -36,10 +36,10 @@ func (repo *UserRepository) FindAll() (*[]model.User, error) {
 }
 
 
-func (repo *UserRepository) Create(user *model.User) error {
+func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.RegisteredUser) error {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
-	_, err := collection.InsertOne(context.TODO(), &user)
+	_, err := collection.InsertOne(context.TODO(), &userForRegistration)
 	if err != nil {
 		fmt.Println(err)
 		return err
