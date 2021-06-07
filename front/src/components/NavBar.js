@@ -1,10 +1,19 @@
-import { AppBar, Toolbar, Grid, Button, TextField } from "@material-ui/core";
+import {
+  AppBar,
+  Toolbar,
+  Grid,
+  Button,
+  TextField,
+  Typography,
+  Avatar,
+} from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { Autocomplete } from "@material-ui/lab";
 import { Redirect } from "react-router-dom";
 import { useState } from "react";
-
+import React from "react";
 import axios from "axios";
+import avatar from "../images/nistagramAvatar.jpg";
 
 const NavBar = () => {
   const username = localStorage.getItem("username");
@@ -26,7 +35,7 @@ const NavBar = () => {
           setSearchedUser(res.data);
         })
         .catch((error) => {
-          alert(error.response.data);
+          setSearchedUser([]);
         });
     } else {
       setSearchedUser([]);
@@ -40,31 +49,60 @@ const NavBar = () => {
     }
   };
 
+  const searchBar = (
+    <Grid item xs={6} style={{ textAlign: "center" }}>
+      <Autocomplete
+        freeSolo
+        renderOption={(option, { selected }) => (
+          <React.Fragment>
+            <Grid container>
+              <Grid item xs={2}>
+                <Avatar
+                  alt="N"
+                  src={avatar}
+                  style={{ border: "1px solid" }}
+                ></Avatar>
+              </Grid>
+              <Grid item xs={10} style={{ marginTop: "3%" }}>
+                {option}
+              </Grid>
+            </Grid>
+          </React.Fragment>
+        )}
+        options={
+          searchedUser.length !== 0
+            ? searchedUser.map((option) => option.Username)
+            : []
+        }
+        onChange={(event, value) => goToUserProfile(value)}
+        renderInput={(params) => (
+          <>
+            <TextField
+              {...params}
+              variant="outlined"
+              size="small"
+              style={{ width: "70%" }}
+              onChange={(e) => handleChangeInput(e.target.value)}
+            ></TextField>
+          </>
+        )}
+      />
+    </Grid>
+  );
+
   const NavBarForUnregisteredUser = (
     <Toolbar style={{ backgroundColor: "white" }}>
       <Grid container>
-        <Grid item xs={4}></Grid>
+        <Grid item xs={4}>
+          <Typography
+            variant="h5"
+            style={{ color: "gray", fontFamily: "cursive", margin: "auto" }}
+          >
+            Nistagram
+          </Typography>
+        </Grid>
         <Grid item xs={8} container style={{ textAlign: "right" }}>
-          <Grid item xs={6} style={{ textAlign: "center" }}>
-            <Autocomplete
-              freeSolo
-              options={
-                searchedUser.length !== 0
-                  ? searchedUser.map((option) => option.Username)
-                  : []
-              }
-              onChange={(event, value) => goToUserProfile(value)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  size="small"
-                  style={{ width: "70%" }}
-                  onChange={(e) => handleChangeInput(e.target.value)}
-                />
-              )}
-            />
-          </Grid>
+          {searchBar}
           <Grid item xs={2} />
           <Grid item xs={2}>
             <Button variant="contained" color="primary">
@@ -91,11 +129,17 @@ const NavBar = () => {
   const NavBarForRegistredUser = (
     <Toolbar style={{ backgroundColor: "white" }}>
       <Grid container>
-        <Grid item xs={6}></Grid>
-        <Grid item xs={6} container style={{ textAlign: "right" }}>
+        <Grid item xs={4}>
+          <Typography
+            variant="h5"
+            style={{ color: "gray", fontFamily: "cursive", margin: "auto" }}
+          >
+            Nistagram
+          </Typography>
+        </Grid>
+        <Grid item xs={8} container style={{ textAlign: "right" }}>
+          {searchBar}
           <Grid item xs={2} />
-          <Grid item xs={2} />
-          <Grid item xs={2}></Grid>
           <Grid item xs={2}></Grid>
           <Grid item xs={2}>
             <Button variant="text" onClick={clearLocalStorage}>
@@ -113,7 +157,8 @@ const NavBar = () => {
     <>
       {redirectToSearchedUser === true && <Redirect to={searchedUsername} />}
       <AppBar position="static">
-        {(username === null || username === undefined) && NavBarForUnregisteredUser}
+        {(username === null || username === undefined) &&
+          NavBarForUnregisteredUser}
         {username !== null && username !== undefined && NavBarForRegistredUser}
       </AppBar>
     </>

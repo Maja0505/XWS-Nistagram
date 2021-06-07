@@ -9,6 +9,8 @@ import NavBar from "./components/NavBar";
 import ProfileDialog from "./components/ProfileDialog";
 
 function App() {
+  const logedUsername = localStorage.getItem("username");
+
   return (
     <div>
       <Router>
@@ -28,7 +30,6 @@ function App() {
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
             ></Route>
-            <Route path="/homePage" component={UserHomePage}></Route>
             <Route path="/dialog">
               <ProfileDialog openD={true}></ProfileDialog>
             </Route>

@@ -26,76 +26,106 @@ const UserHomePage = () => {
   const [tabValue, setTabValue] = useState(0);
   const { username } = useParams();
 
+  const loggedUsername = localStorage.getItem("username");
+
   useEffect(() => {
     axios
       .get("/user/" + username)
       .then((res) => {
+        console.log(res.data);
         setUser(res.data);
       })
       .catch((error) => {
         alert(error.response.status);
       });
-  }, [username]);
+  }, [username, loggedUsername]);
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  return (
-    <div>
-      <Grid container style={{ marginTop: "3%" }}>
-        <Grid item xs={2}></Grid>
-        <Grid container item xs={8}>
-          <Grid item xs={4}>
-            <img
-              src={avatar}
-              alt="Not founded"
-              style={{
-                borderRadius: "50%",
-                border: "1px solid",
-                width: "40%",
-              }}
-            />
-          </Grid>
-          <Grid item xs={7}>
-            <Grid container>
-              {user !== undefined && (
-                <Typography variant="h6" style={{ margin: "auto" }}>
-                  {user.Username}
-                </Typography>
-              )}
+  const buttonForUnFollow = (
+    <Button variant="contained" color="default" style={{ margin: "auto" }}>
+      Unfollow
+    </Button>
+  );
 
-              <Button
-                variant="outlined"
-                color="inherit"
-                style={{ marginLeft: "auto" }}
-              >
-                <Link
-                  to="/settings"
-                  style={{ textDecoration: "none", color: "gray" }}
-                >
-                  Edit profile
-                </Link>
-              </Button>
+  const buttonForFollow = (
+    <Button variant="contained" color="primary" style={{ margin: "auto" }}>
+      Follow
+    </Button>
+  );
+
+  const buttonForEditProfile = (
+    <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
+      <Link to="/settings" style={{ textDecoration: "none", color: "gray" }}>
+        Edit profile
+      </Link>
+    </Button>
+  );
+
+  const userDetails = (
+    <Grid container style={{ marginTop: "3%" }}>
+      <Grid item xs={2}></Grid>
+      <Grid container item xs={8}>
+        <Grid item xs={4}>
+          <img
+            src={avatar}
+            alt="Not founded"
+            style={{
+              borderRadius: "50%",
+              border: "1px solid",
+              width: "40%",
+            }}
+          />
+        </Grid>
+        <Grid item xs={7}>
+          <Grid container>
+            {user !== undefined && (
+              <Typography variant="h6" style={{ margin: "auto" }}>
+                {user.Username}
+              </Typography>
+            )}
+            {loggedUsername === username && buttonForEditProfile}
+            {loggedUsername !== username && buttonForFollow}
+          </Grid>
+          <br></br>
+          <Grid container>
+            {user !== undefined && (
+              <>
+                <FormLabel>{user.NumberOfPosts} posts</FormLabel>
+                <FormLabel style={{ marginLeft: "auto" }}>
+                  {user.Followers} followers
+                </FormLabel>
+                <FormLabel style={{ marginLeft: "auto" }}>
+                  {user.Following} following
+                </FormLabel>{" "}
+              </>
+            )}
+          </Grid>
+          {user !== undefined && (
+            <Grid container style={{ marginTop: "1%" }}>
+              <Typography variant="inherit" align="left">
+                {user.FirstName} {user.LastName}
+              </Typography>
             </Grid>
-            <br></br>
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <FormLabel>{user.NumberOfPosts} posts</FormLabel>
-                  <FormLabel style={{ marginLeft: "auto" }}>
-                    {user.Followers} followers
-                  </FormLabel>
-                  <FormLabel style={{ marginLeft: "auto" }}>
-                    {user.Following} following
-                  </FormLabel>{" "}
-                </>
-              )}
-            </Grid>
+          )}
+          <Grid container>
+            {user !== undefined && (
+              <>
+                <Typography>{user.Biography}</Typography>
+              </>
+            )}
           </Grid>
         </Grid>
-        <Grid item xs={2}></Grid>
       </Grid>
+      <Grid item xs={2}></Grid>
+    </Grid>
+  );
+
+  return (
+    <div>
+      {userDetails}
       <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
@@ -122,6 +152,7 @@ const UserHomePage = () => {
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
+
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>

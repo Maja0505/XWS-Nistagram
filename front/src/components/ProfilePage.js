@@ -67,6 +67,7 @@ const ProfilePage = () => {
         PhoneNumber: user.PhoneNumber,
         Gender: user.Gender,
       });
+      console.log(res.data);
       localStorage.setItem("username", res.data.Username);
     });
   };
