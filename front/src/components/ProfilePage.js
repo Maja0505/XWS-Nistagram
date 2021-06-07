@@ -36,7 +36,7 @@ const ProfilePage = () => {
   const [userCopy, setUserCopy] = useState({});
 
   useEffect(() => {
-    axios.get("http://localhost:8080/user/peraaa").then((res) => {
+    axios.get("/user/perica").then((res) => {
       setUser(res.data);
       setUserCopy(res.data);
       res.data.Gender === 0
@@ -44,6 +44,7 @@ const ProfilePage = () => {
         : setSelectedValue("female");
     });
   }, []);
+
 
   const handleClickSubmit = () => {
       var userDto = {
@@ -57,9 +58,9 @@ const ProfilePage = () => {
         Biography:user.Biography,
         WebSite:user.WebSite
       }
-      axios.put("http://localhost:8080/update/peraaa", userDto)
+      axios.put("/update/perica", userDto)
        .then((res) => {
-           console.log('uspesno')
+           setUserCopy({...userCopy,FirstName:user.FirstName,Username:user.Username,WebSite:user.WebSite,Biography:user.Biography,Email:user.Email,PhoneNumber:user.PhoneNumber,Gender:user.Gender})
        })
   }
 
@@ -97,7 +98,7 @@ const ProfilePage = () => {
           <Grid item xs={1}></Grid>
           <Grid item xs={11}>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <p style={{ textAlign: "left", margin: 0 }}>profile_name</p>
+              <p style={{ textAlign: "left", margin: 0, fontSize:20 }}>{userCopy.Username}</p>
               <p style={{ textAlign: "left", margin: 0 }}>
                 {" "}
                 <Button style={{ fontSize: 12 }} color="primary">
@@ -188,7 +189,7 @@ const ProfilePage = () => {
               </RadioGroup>
             </Grid>
             <Grid item style={{ height: "12%", textAlign: "left" }}>
-              <Button onClick={handleClickSubmit}>Submit</Button>
+              <Button disabled={(user.FirstName !== userCopy.FirstName || user.Username !== userCopy.Username || user.WebSite !== userCopy.WebSite || user.Biography !== userCopy.Biography || user.Email != userCopy.Email || user.PhoneNumber !== userCopy.PhoneNumber || user.Gender != userCopy.Gender) && (user.Username != '') ? false : true}  onClick={handleClickSubmit} color="primary" variant="contained">Submit</Button>
             </Grid>
           </Grid>
         </Grid>
