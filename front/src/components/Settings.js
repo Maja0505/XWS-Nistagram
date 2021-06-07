@@ -1,9 +1,6 @@
-import { makeStyles, withStyles } from "@material-ui/core/styles";
 import React, { useState } from "react";
-import { AppBar, Tabs, Tab, Grid, Button, TextField } from "@material-ui/core";
-import cloneDeep from "lodash/cloneDeep";
+import { Tabs, Tab, Grid } from "@material-ui/core";
 import Box from "@material-ui/core/Box";
-import { deepOrange, deepPurple } from "@material-ui/core/colors";
 import ProfilePage from './ProfilePage.js'
 
 const tabList = [
@@ -34,32 +31,12 @@ const tabList = [
   },
 ];
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: "center",
-  },
-  orange: {
-    color: theme.palette.getContrastText(deepOrange[500]),
-    backgroundColor: deepOrange[500],
-    marginLeft: "auto",
-  },
-}));
-
 const Settings = () => {
-  const [tabs, setTabs] = useState(tabList);
+  const [tabs] = useState(tabList);
   const [value, setValue] = useState(0);
-  const [selectedValue, setSelectedValue] = React.useState("a");
-  const handleChange = (event) => {
-    setSelectedValue(event.target.value);
-  };
   const handleTabChange = (event, value) => {
     setValue(value);
   };
-  const classes = useStyles();
 
   return (
     <div>

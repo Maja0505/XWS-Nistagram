@@ -1,10 +1,8 @@
-import { makeStyles, withStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import React, { useState, useEffect } from "react";
-import { AppBar, Tabs, Tab, Grid, Button, TextField } from "@material-ui/core";
-import cloneDeep from "lodash/cloneDeep";
-import Box from "@material-ui/core/Box";
+import { Grid, Button, TextField } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
-import { deepOrange, deepPurple } from "@material-ui/core/colors";
+import { deepOrange } from "@material-ui/core/colors";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -28,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 const ProfilePage = () => {
   const classes = useStyles();
   const [selectedValue, setSelectedValue] = React.useState("a");
+  const username = localStorage.getItem("username");
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     setUser({ ...user, Gender: selectedValue });
@@ -36,33 +35,41 @@ const ProfilePage = () => {
   const [userCopy, setUserCopy] = useState({});
 
   useEffect(() => {
-    axios.get("/user/perica").then((res) => {
+    axios.get("/user/" + username).then((res) => {
       setUser(res.data);
       setUserCopy(res.data);
       res.data.Gender === 0
         ? setSelectedValue("male")
         : setSelectedValue("female");
     });
-  }, []);
-
+  }, [username]);
 
   const handleClickSubmit = () => {
-      var userDto = {
-        Username:user.Username,
-        FirstName:user.FirstName,
-        LastName:user.LastName,
-        DateOfBirth: user.DateOfBirth,
-        Email:user.Email,
-        PhoneNumber:user.PhoneNumber,
-        Gender:user.Gender,
-        Biography:user.Biography,
-        WebSite:user.WebSite
-      }
-      axios.put("/update/perica", userDto)
-       .then((res) => {
-           setUserCopy({...userCopy,FirstName:user.FirstName,Username:user.Username,WebSite:user.WebSite,Biography:user.Biography,Email:user.Email,PhoneNumber:user.PhoneNumber,Gender:user.Gender})
-       })
-  }
+    var userDto = {
+      Username: user.Username,
+      FirstName: user.FirstName,
+      LastName: user.LastName,
+      DateOfBirth: user.DateOfBirth,
+      Email: user.Email,
+      PhoneNumber: user.PhoneNumber,
+      Gender: selectedValue === "female" ? 1 : 0,
+      Biography: user.Biography,
+      WebSite: user.WebSite,
+    };
+    axios.put("/update/" + username, userDto).then((res) => {
+      setUserCopy({
+        ...userCopy,
+        FirstName: user.FirstName,
+        Username: user.Username,
+        WebSite: user.WebSite,
+        Biography: user.Biography,
+        Email: user.Email,
+        PhoneNumber: user.PhoneNumber,
+        Gender: user.Gender,
+      });
+      localStorage.setItem("username", res.data.Username);
+    });
+  };
 
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
@@ -98,7 +105,9 @@ const ProfilePage = () => {
           <Grid item xs={1}></Grid>
           <Grid item xs={11}>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <p style={{ textAlign: "left", margin: 0, fontSize:20 }}>{userCopy.Username}</p>
+              <p style={{ textAlign: "left", margin: 0, fontSize: 20 }}>
+                {userCopy.Username}
+              </p>
               <p style={{ textAlign: "left", margin: 0 }}>
                 {" "}
                 <Button style={{ fontSize: 12 }} color="primary">
@@ -189,7 +198,25 @@ const ProfilePage = () => {
               </RadioGroup>
             </Grid>
             <Grid item style={{ height: "12%", textAlign: "left" }}>
-              <Button disabled={(user.FirstName !== userCopy.FirstName || user.Username !== userCopy.Username || user.WebSite !== userCopy.WebSite || user.Biography !== userCopy.Biography || user.Email != userCopy.Email || user.PhoneNumber !== userCopy.PhoneNumber || user.Gender != userCopy.Gender) && (user.Username != '') ? false : true}  onClick={handleClickSubmit} color="primary" variant="contained">Submit</Button>
+              <Button
+                disabled={
+                  (user.FirstName !== userCopy.FirstName ||
+                    user.Username !== userCopy.Username ||
+                    user.WebSite !== userCopy.WebSite ||
+                    user.Biography !== userCopy.Biography ||
+                    user.Email !== userCopy.Email ||
+                    user.PhoneNumber !== userCopy.PhoneNumber ||
+                    user.Gender !== userCopy.Gender) &&
+                  user.Username !== ""
+                    ? false
+                    : true
+                }
+                onClick={handleClickSubmit}
+                color="primary"
+                variant="contained"
+              >
+                Submit
+              </Button>
             </Grid>
           </Grid>
         </Grid>

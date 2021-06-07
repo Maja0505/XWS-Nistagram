@@ -14,7 +14,7 @@ const LoginPage = () => {
     axios
       .get("/user/" + user.username)
       .then((res) => {
-        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("username", res.data.Username);
         window.location.href =
           "http://localhost:3000/homePage/" + res.data.Username;
       })

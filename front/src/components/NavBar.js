@@ -7,7 +7,7 @@ import { useState } from "react";
 import axios from "axios";
 
 const NavBar = () => {
-  const user = localStorage.getItem("user");
+  const username = localStorage.getItem("username");
 
   const [searchedUser, setSearchedUser] = useState([]);
   const [searchedUsername, setSearchedUsername] = useState();
@@ -113,8 +113,8 @@ const NavBar = () => {
     <>
       {redirectToSearchedUser === true && <Redirect to={searchedUsername} />}
       <AppBar position="static">
-        {(user === null || user === undefined) && NavBarForUnregisteredUser}
-        {user !== null && user !== undefined && NavBarForRegistredUser}
+        {(username === null || username === undefined) && NavBarForUnregisteredUser}
+        {username !== null && username !== undefined && NavBarForRegistredUser}
       </AppBar>
     </>
   );
