@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"userService/dto"
 	"userService/model"
 	"userService/service"
 )
@@ -27,19 +28,20 @@ func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
 	json.NewEncoder(w).Encode(users)
 }
 
-func (handler *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var userForRegistrationDTO dto.UserForRegistrationDTO
+	err := json.NewDecoder(r.Body).Decode(&userForRegistrationDTO)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
 		return
 	}
-	err = handler.Service.Create(&user)
+	err = handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
 	if err != nil{
 		fmt.Println(err)
-		w.WriteHeader(http.StatusExpectationFailed)
+		http.Error(w,err.Error(),417)
 		return
 	}
 
@@ -79,11 +81,8 @@ func (handler *UserHandler) FindUserByUsername(w http.ResponseWriter, r *http.Re
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	user,err := handler.Service.FindUserByUsername(username)
-	if err != nil{
-		w.WriteHeader(http.StatusExpectationFailed)
-		return
-	}
+	user,_ := handler.Service.FindUserByUsername(username)
+
 	if user == nil{
 		w.WriteHeader(http.StatusNotFound)
 		return

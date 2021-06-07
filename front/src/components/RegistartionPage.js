@@ -11,29 +11,36 @@ import {
 
 import { useState } from "react";
 
+import { Redirect } from "react-router-dom";
+
 import axios from "axios";
 
 const RegistartionPage = () => {
   const [user, setUser] = useState({ gender: 1 });
 
+  const [redirection, setRedirection] = useState(false);
+
   const handleSubmitClick = () => {
     console.log(user);
-    let verificationRequestForUser = {
+    let userForRegistration = {
       ...user,
       DateOfBirth: user.DateOfBirth + "T00:00:00+01:00",
     };
     axios
-      .post(
-        "http://localhost:8000/verificationRequest/create",
-        verificationRequestForUser
-      )
+      .post("/user/create", userForRegistration)
       .then((res) => {
-        console.log(res.data);
+        setRedirection(true);
+      })
+      .catch((error, res) => {
+        alert(error);
+        console.log(error.message);
       });
   };
 
   return (
     <div>
+      {redirection === true && <Redirect to="/login" />}
+
       <div>
         <Typography
           variant="h6"
