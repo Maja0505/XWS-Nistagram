@@ -18,6 +18,6 @@ type User struct {
 	Email string  `bson:"email,omitempty"`
 	PhoneNumber string  `bson:"phone_number,omitempty"`
 	DateOfBirth *primitive.DateTime `bson:"date_of_birth,omitempty"`
-	Gender *Gender `bson:"gander,omitempty"`
+	Gender *Gender `bson:"gender,omitempty"`
 }
 

@@ -1,11 +1,9 @@
 package dto
 
-import (
-	"userService/model"
-)
-
 type VerificationRequestDTO struct {
-	model.User
-	ConfirmedPassword string `bson:"confirmed_password,omitempty"`
+	Username string `bson:"username,omitempty"`
+	FirstName string `bson:"first_name,omitempty"`
+	LastName string `bson:"last_name,omitempty"`
+	Image string `bson:"image,omitempty"`
 	Category string `bson:"category,omitempty"`
 }

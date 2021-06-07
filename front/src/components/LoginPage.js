@@ -11,9 +11,16 @@ const LoginPage = () => {
   };
 
   const loginIn = () => {
-    axios.get("http://localhost:8000/user/" + user.username).then((res) => {
-      console.log(res.data);
-    });
+    axios
+      .get("/user/" + user.username)
+      .then((res) => {
+        localStorage.setItem("username", res.data.Username);
+        window.location.href =
+          "http://localhost:3000/homePage/" + res.data.Username;
+      })
+      .catch((error) => {
+        alert("Wrong username or password");
+      });
   };
 
   return (

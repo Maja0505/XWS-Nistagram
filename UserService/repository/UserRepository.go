@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"time"
@@ -37,10 +36,10 @@ func (repo *UserRepository) FindAll() (*[]model.User, error) {
 }
 
 
-func (repo *UserRepository) Create(user *model.User) error {
+func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.RegisteredUser) error {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
-	_, err := collection.InsertOne(context.TODO(), &user)
+	_, err := collection.InsertOne(context.TODO(), &userForRegistration)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -48,14 +47,15 @@ func (repo *UserRepository) Create(user *model.User) error {
 	return nil
 }
 
-func (repo *UserRepository) Update(id primitive.ObjectID, user *model.User) error {
+func (repo *UserRepository) UpdateRegisteredUserProfile(username string, registeredUser *model.RegisteredUser) error {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
+
 	_, err := collection.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": id},
+		bson.M{"username": username},
 		bson.D{
-			{"$set", &user},
+			{"$set", &registeredUser},
 		},
 	)
 	if err != nil{
@@ -66,12 +66,29 @@ func (repo *UserRepository) Update(id primitive.ObjectID, user *model.User) erro
 }
 
 func (repo *UserRepository) FindUserByUsername(username string) ( *model.RegisteredUser, error){
-	db := repo.Database.Database("user-service-database").Collection("users")
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
 	var user model.RegisteredUser
-	err := db.FindOne(context.TODO(),bson.M{"username" : username}).Decode(&user)
+	err := coll.FindOne(context.TODO(),bson.M{"username" : username}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
 	return &user,nil
 
+}
+
+func (repo *UserRepository) FindAllUsersBySearchingContent(searchContent string) (*[]model.RegisteredUser,error) {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	var users []model.RegisteredUser
+	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"}}})
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	err = cursor.All(context.TODO(),&users)
+	if err != nil{
+		return nil, err
+	}
+	return &users,nil
 }

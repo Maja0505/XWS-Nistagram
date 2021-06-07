@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -63,14 +62,12 @@ func initVerificationRequestHandler(service *service.VerificationRequestService)
 func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 	router.HandleFunc("/",handler.FindAll).Methods("GET")
-	router.HandleFunc("/create",handler.Create).Methods("POST")
-	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
+	//router.HandleFunc("/create",handler.Create).Methods("POST")
+	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
+	router.HandleFunc("/user/create",handler.CreateRegisteredUser).Methods("POST")
+	//router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
-
-	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router))
-
-
+	router.HandleFunc("/user/search/{searchContent}",handler.SearchUser).Methods("GET")
 
 }
 
@@ -100,8 +97,6 @@ func init() {
 
 
 func main() {
-	originsOk := handlers.AllowedOrigins([]string{"*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	database := initDB()
 	//fmt.Println(d.Collection("users").Find(context.TODO(),bson.M{}))
 
@@ -119,6 +114,6 @@ func main() {
 	handleVerificationRequestFunc(verificationRequestHandler,router)
 
 	fmt.Println("Server running on port " + os.Getenv("USER_SERVICE_PORT"))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_SERVICE_PORT")),handlers.CORS(originsOk, methodsOk)(router)))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_SERVICE_PORT")),router))
 }
 
