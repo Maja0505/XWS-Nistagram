@@ -2,7 +2,7 @@ import { AppBar, Toolbar, Grid, Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
 const NavBar = () => {
-  const user = localStorage.getItem("user");
+  const username = localStorage.getItem("username");
 
   const clearLocalStorage = () => {
     localStorage.clear();
@@ -62,8 +62,8 @@ const NavBar = () => {
   return (
     <>
       <AppBar position="static">
-        {(user === null || user === undefined) && NavBarForUnregisteredUser}
-        {user !== null && user !== undefined && NavBarForRegistredUser}
+        {(username === null || username === undefined) && NavBarForUnregisteredUser}
+        {username !== null && username !== undefined && NavBarForRegistredUser}
       </AppBar>
     </>
   );

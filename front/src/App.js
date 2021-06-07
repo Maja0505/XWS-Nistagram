@@ -7,6 +7,7 @@ import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import { Redirect } from "react-router-dom";
+import ProfileDialog from './components/ProfileDialog'
 
 function App() {
   const user = localStorage.getItem("user");
@@ -19,18 +20,12 @@ function App() {
           {user !== null && user !== undefined && <Redirect to="/homePage" />}
           <Switch>
             <Route exact path="/" component={StartPage}></Route>
-          </Switch>
-          <Switch>
-            <Route exact path="/" component={LoginPage}></Route>
             <Route exact path="/registration" component={RegistrationPage}></Route>
-            <Route exact path="/profile" component={Settings}></Route>
+            <Route exact path="/settings" component={Settings}></Route>
             <Route path="/login" component={LoginPage}></Route>
-          </Switch>
-          <Switch>
             <Route path="/registration" component={RegistrationPage}></Route>
-          </Switch>
-          <Switch>
             <Route path="/homePage" component={UserHomePage}></Route>
+            <Route path="/dialog"><ProfileDialog openD={true}></ProfileDialog></Route>
           </Switch>
         </div>
       </Router>

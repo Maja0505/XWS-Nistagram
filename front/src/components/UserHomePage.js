@@ -11,6 +11,9 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
+import { Link } from "react-router-dom";
+import Posts from "./Posts"
+
 
 import {
   GridOn,
@@ -21,9 +24,11 @@ import {
 const UserHomePage = () => {
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
+  const username = localStorage.getItem("username");
+
 
   useEffect(() => {
-    axios.get("/user/pera").then((res) => {
+    axios.get("/user/" + username).then((res) => {
       setUser(res.data);
     });
   }, []);
@@ -61,7 +66,7 @@ const UserHomePage = () => {
                 color="inherit"
                 style={{ marginLeft: "auto" }}
               >
-                Edit profile
+                <Link to="/settings" style={{ textDecoration: "none", color: "gray" }}>Edit profile</Link>
               </Button>
             </Grid>
             <br></br>
@@ -110,7 +115,9 @@ const UserHomePage = () => {
       </Grid>
       <Grid container>
         <Grid item xs={2}></Grid>
-        <Grid item xs={8}></Grid>
+        <Grid item xs={8}>
+          <Posts></Posts>
+        </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
     </div>
