@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -88,4 +89,27 @@ func (handler *UserHandler) FindUserByUsername(w http.ResponseWriter, r *http.Re
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
+}
+
+func (handler *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	searchContent := vars["searchContent"]
+	if searchContent == ""{
+		err := errors.New("No results found")
+		http.Error(w,err.Error(),400)
+		return
+	}
+	users,err := handler.Service.SearchUser(searchContent)
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	if   len(*users) == 0 {
+		err := errors.New("No results found")
+		http.Error(w,err.Error(),400)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
 }

@@ -15,7 +15,8 @@ const LoginPage = () => {
       .get("/user/" + user.username)
       .then((res) => {
         localStorage.setItem("username", res.data.Username);
-        window.location.href = "http://localhost:3000/homePage";
+        window.location.href =
+          "http://localhost:3000/homePage/" + res.data.Username;
       })
       .catch((error) => {
         alert("Wrong username or password");

@@ -1,13 +1,10 @@
-import React,{useState} from "react";
-import {
-    Grid,
-    Typography
-  } from "@material-ui/core";
+import React, { useState } from "react";
+import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ButtonBase from "@material-ui/core/ButtonBase";
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import ModeCommentIcon from '@material-ui/icons/ModeComment';
-import {Redirect} from "react-router-dom"
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import ModeCommentIcon from "@material-ui/icons/ModeComment";
+import { Redirect } from "react-router-dom";
 import ProfileDialog from "./ProfileDialog";
 
 const images = [
@@ -27,7 +24,6 @@ const images = [
     url: "https://besthqwallpapers.com/Uploads/5-12-2020/148667/thumb2-mount-fuji-4k-two-swans-autumn-stratovolcano.jpg",
     title: "Breakfast2",
   },
-
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -36,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     minWidth: 300,
     width: "100%",
-    marginTop:"3%"
+    marginTop: "3%",
   },
   image: {
     position: "relative",
@@ -54,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
         opacity: 0,
       },
       "& $imageTitle": {
-          display:'flex'
+        display: "flex",
       },
     },
   },
@@ -91,10 +87,9 @@ const useStyles = makeStyles((theme) => ({
   },
   imageTitle: {
     position: "relative",
-    display: "none"
-
+    display: "none",
   },
- /*imageMarked: {
+  /*imageMarked: {
     height: 3,
     width: 18,
     backgroundColor: theme.palette.common.white,
@@ -107,18 +102,17 @@ const useStyles = makeStyles((theme) => ({
 
 const Posts = () => {
   const classes = useStyles();
-  const [redirection,setRedirectiton] = useState(false)
-  const username = localStorage.getItem("username");
- 
+  const [redirection, setRedirectiton] = useState(false);
+
   const handleClickImage = () => {
-    setRedirectiton(true)
-  }
+    setRedirectiton(true);
+  };
   return (
     <div className={classes.root}>
-        {redirection === true && <Redirect to={"/dialog"}></Redirect>}
+      {redirection === true && <Redirect to={"/dialog"}></Redirect>}
       <Grid container>
         {images.map((image) => (
-          <Grid item xs={4} style={{margin: 'auto', marginTop:"2%"}}>
+          <Grid item xs={4} style={{ margin: "auto", marginTop: "2%" }}>
             <ButtonBase
               focusRipple
               key={image.title}
@@ -142,25 +136,35 @@ const Posts = () => {
                   variant="subtitle1"
                   color="inherit"
                   className={classes.imageTitle}
-                  style={{padding:0}}
-                  width='30%'
+                  style={{ padding: 0 }}
+                  width="30%"
                 >
-                    <Grid container>
-                        <Grid item xs={3}><FavoriteIcon></FavoriteIcon></Grid>
-                        <Grid item xs={2}>123</Grid>
-                        <Grid item xs={2}></Grid>
-                        <Grid item xs={3}><ModeCommentIcon></ModeCommentIcon></Grid>
-                        <Grid item xs={2}>123</Grid>
-
+                  <Grid container>
+                    <Grid item xs={3}>
+                      <FavoriteIcon></FavoriteIcon>
                     </Grid>
+                    <Grid item xs={2}>
+                      123
+                    </Grid>
+                    <Grid item xs={2}></Grid>
+                    <Grid item xs={3}>
+                      <ModeCommentIcon></ModeCommentIcon>
+                    </Grid>
+                    <Grid item xs={2}>
+                      123
+                    </Grid>
+                  </Grid>
                 </Typography>
               </span>
             </ButtonBase>
           </Grid>
         ))}
-        {images.length % 3 === 1 && <><Grid item xs={4}/>  <Grid item xs={4}/></>}
-        {images.length % 3 === 2 && <Grid item xs={4}/>}
-
+        {images.length % 3 === 1 && (
+          <>
+            <Grid item xs={4} /> <Grid item xs={4} />
+          </>
+        )}
+        {images.length % 3 === 2 && <Grid item xs={4} />}
       </Grid>
     </div>
   );

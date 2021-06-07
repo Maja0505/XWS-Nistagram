@@ -42,6 +42,7 @@ func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.Use
 	return nil
 }
 
+
 func (service *UserService) UpdateRegisteredUserProfile(username string, registeredUserDto *dto.RegisteredUserProfileInfoDTO) error {
 	if username != registeredUserDto.Username{
 		existedUser,_ := service.FindUserByUsername(registeredUserDto.Username)
@@ -64,4 +65,13 @@ func (service *UserService) FindUserByUsername(username string) (*model.Register
 		return nil, err
 	}
 	return user, nil
+}
+
+func (service *UserService) SearchUser(searchContent string) (*[]dto.UserFromSearchDTO,error){
+	users,err := service.Repo.FindAllUsersBySearchingContent(searchContent)
+	if err != nil{
+		return nil, err
+	}
+	usersListDTO := mapper.ConvertUsersListTOUserFromSearchDTOList(users)
+	return usersListDTO, err
 }

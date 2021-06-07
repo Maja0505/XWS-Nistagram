@@ -42,8 +42,7 @@ const ProfilePage = () => {
         ? setSelectedValue("male")
         : setSelectedValue("female");
     });
-  }, []);
-
+  }, [username]);
 
   const handleClickSubmit = () => {
       var userDto = {
@@ -99,7 +98,9 @@ const ProfilePage = () => {
           <Grid item xs={1}></Grid>
           <Grid item xs={11}>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <p style={{ textAlign: "left", margin: 0, fontSize:20 }}>{userCopy.Username}</p>
+              <p style={{ textAlign: "left", margin: 0, fontSize: 20 }}>
+                {userCopy.Username}
+              </p>
               <p style={{ textAlign: "left", margin: 0 }}>
                 {" "}
                 <Button style={{ fontSize: 12 }} color="primary">
@@ -190,7 +191,25 @@ const ProfilePage = () => {
               </RadioGroup>
             </Grid>
             <Grid item style={{ height: "12%", textAlign: "left" }}>
-              <Button disabled={(user.FirstName !== userCopy.FirstName || user.Username !== userCopy.Username || user.WebSite !== userCopy.WebSite || user.Biography !== userCopy.Biography || user.Email !== userCopy.Email || user.PhoneNumber !== userCopy.PhoneNumber || user.Gender !== userCopy.Gender) && (user.Username !== '') ? false : true}  onClick={handleClickSubmit} color="primary" variant="contained">Submit</Button>
+              <Button
+                disabled={
+                  (user.FirstName !== userCopy.FirstName ||
+                    user.Username !== userCopy.Username ||
+                    user.WebSite !== userCopy.WebSite ||
+                    user.Biography !== userCopy.Biography ||
+                    user.Email !== userCopy.Email ||
+                    user.PhoneNumber !== userCopy.PhoneNumber ||
+                    user.Gender !== userCopy.Gender) &&
+                  user.Username !== ""
+                    ? false
+                    : true
+                }
+                onClick={handleClickSubmit}
+                color="primary"
+                variant="contained"
+              >
+                Submit
+              </Button>
             </Grid>
           </Grid>
         </Grid>
