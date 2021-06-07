@@ -65,6 +65,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/user/create",handler.CreateRegisteredUser).Methods("POST")
 	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
+	router.HandleFunc("/user/search/{searchContent}",handler.SearchUser).Methods("GET")
 
 }
 

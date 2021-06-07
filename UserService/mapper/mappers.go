@@ -42,3 +42,11 @@ func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.Verifica
 	return &vq
 }
 
+
+func ConvertUsersListTOUserFromSearchDTOList(usersList *[]model.RegisteredUser) *[]dto.UserFromSearchDTO{
+	var userFromSearchDTO []dto.UserFromSearchDTO
+	for _,user := range *usersList {
+		userFromSearchDTO = append(userFromSearchDTO, dto.UserFromSearchDTO{Username: user.Username})
+	}
+	return &userFromSearchDTO
+}

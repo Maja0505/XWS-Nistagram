@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
-
+import { useParams } from "react-router-dom";
 import {
   GridOn,
   BookmarkBorder,
@@ -21,12 +21,18 @@ import {
 const UserHomePage = () => {
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
+  const { username } = useParams();
 
   useEffect(() => {
-    axios.get("/user/pera").then((res) => {
-      setUser(res.data);
-    });
-  }, []);
+    axios
+      .get("/user/" + username)
+      .then((res) => {
+        setUser(res.data);
+      })
+      .catch((error) => {
+        alert(error.response.status);
+      });
+  }, [username]);
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);

@@ -43,8 +43,6 @@ func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.Use
 	return nil
 }
 
-
-
 func (service *UserService) Update(stringId string, user *model.User) error {
 	id,err := primitive.ObjectIDFromHex(stringId)
 	if err != nil{
@@ -65,4 +63,13 @@ func (service *UserService) FindUserByUsername(username string) (*model.Register
 		return nil, err
 	}
 	return user, nil
+}
+
+func (service *UserService) SearchUser(searchContent string) (*[]dto.UserFromSearchDTO,error){
+	users,err := service.Repo.FindAllUsersBySearchingContent(searchContent)
+	if err != nil{
+		return nil, err
+	}
+	usersListDTO := mapper.ConvertUsersListTOUserFromSearchDTOList(users)
+	return usersListDTO, err
 }
