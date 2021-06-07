@@ -17,15 +17,16 @@ function App() {
       <Router>
         <div className="App">
           <NavBar></NavBar>
-          {user !== null && user !== undefined && <Redirect to="/homePage" />}
+          {user !== null && user !== undefined && <Redirect to="/homePage"/>}
           <Switch>
             <Route exact path="/" component={StartPage}></Route>
-            <Route exact path="/registration" component={RegistrationPage}></Route>
-            <Route exact path="/settings" component={Settings}></Route>
-            <Route path="/login" component={LoginPage}></Route>
-            <Route path="/registration" component={RegistrationPage}></Route>
-            <Route path="/homePage" component={UserHomePage}></Route>
-            <Route path="/dialog"><ProfileDialog openD={true}></ProfileDialog></Route>
+            <Route  path="/registration" component={RegistrationPage}></Route>
+            <Route  path="/settings" component={Settings}></Route>
+            <Route  path="/login" component={LoginPage}></Route>
+            <Route  path="/registration" component={RegistrationPage}></Route>
+            <Route  path="/dialog" component={ProfileDialog}></Route>
+            <Route  path="/homePage" component={UserHomePage}></Route>
+
           </Switch>
         </div>
       </Router>

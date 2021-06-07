@@ -60,7 +60,7 @@ const ProfilePage = () => {
       axios.put("/update/" + username, userDto)
        .then((res) => {
            setUserCopy({...userCopy,FirstName:user.FirstName,Username:user.Username,WebSite:user.WebSite,Biography:user.Biography,Email:user.Email,PhoneNumber:user.PhoneNumber,Gender:user.Gender})
-           localStorage.setItem("username", res.data.Username);
+           localStorage.setItem("username", user.Username);
 
        })
   }
