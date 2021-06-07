@@ -64,13 +64,8 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 	router.HandleFunc("/",handler.FindAll).Methods("GET")
 	router.HandleFunc("/create",handler.Create).Methods("POST")
-	router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
+	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
 	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
-
-	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router))
-
-
 
 }
 
