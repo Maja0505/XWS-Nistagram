@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"time"
@@ -48,14 +47,15 @@ func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.Regi
 	return nil
 }
 
-func (repo *UserRepository) Update(id primitive.ObjectID, user *model.User) error {
+func (repo *UserRepository) UpdateRegisteredUserProfile(username string, registeredUser *model.RegisteredUser) error {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
+
 	_, err := collection.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": id},
+		bson.M{"username": username},
 		bson.D{
-			{"$set", &user},
+			{"$set", &registeredUser},
 		},
 	)
 	if err != nil{

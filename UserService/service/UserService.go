@@ -3,11 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"userService/dto"
+	"userService/mapper"
 	"userService/model"
 	"userService/repository"
-	"userService/mapper"
 )
 
 type UserService struct {
@@ -43,13 +42,16 @@ func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.Use
 	return nil
 }
 
-func (service *UserService) Update(stringId string, user *model.User) error {
-	id,err := primitive.ObjectIDFromHex(stringId)
-	if err != nil{
-		fmt.Println(err)
-		return err
+
+func (service *UserService) UpdateRegisteredUserProfile(username string, registeredUserDto *dto.RegisteredUserProfileInfoDTO) error {
+	if username != registeredUserDto.Username{
+		existedUser,_ := service.FindUserByUsername(registeredUserDto.Username)
+		if existedUser != nil{
+			return errors.New("Username already exist")
+		}
 	}
-	err = service.Repo.Update(id,user)
+	registeredUser := mapper.ConvertRegisteredUserDtoToRegisteredUser(registeredUserDto)
+	err := service.Repo.UpdateRegisteredUserProfile(username, registeredUser)
 	if err != nil{
 		fmt.Println(err)
 		return err

@@ -5,6 +5,22 @@ import (
 	"userService/model"
 )
 
+func ConvertRegisteredUserDtoToRegisteredUser(registeredUserDto *dto.RegisteredUserProfileInfoDTO) *model.RegisteredUser{
+
+	var registeredUser model.RegisteredUser
+	registeredUser.Username = registeredUserDto.Username
+	registeredUser.FirstName = registeredUserDto.FirstName
+	registeredUser.LastName = registeredUserDto.LastName
+	registeredUser.DateOfBirth = registeredUserDto.DateOfBirth
+	registeredUser.Gender = registeredUserDto.Gender
+	registeredUser.Email = registeredUserDto.Email
+	registeredUser.PhoneNumber = registeredUserDto.PhoneNumber
+	registeredUser.Biography = registeredUserDto.Biography
+	registeredUser.WebSite = registeredUserDto.WebSite
+
+	return &registeredUser
+}
+
 func ConvertUserForRegistrationDTOToRegisteredUser(registrationDTO *dto.UserForRegistrationDTO) *model.RegisteredUser {
 	var userForRegistration model.RegisteredUser
 	userForRegistration.FirstName = registrationDTO.FirstName
@@ -17,7 +33,6 @@ func ConvertUserForRegistrationDTOToRegisteredUser(registrationDTO *dto.UserForR
 	userForRegistration.Gender = registrationDTO.Gender
 	return &userForRegistration
 }
-
 
 func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.VerificationRequestDTO) *model.VerificationRequest {
 	var vq model.VerificationRequest
@@ -43,6 +58,7 @@ func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.Verifica
 }
 
 
+
 func ConvertUsersListTOUserFromSearchDTOList(usersList *[]model.RegisteredUser) *[]dto.UserFromSearchDTO{
 	var userFromSearchDTO []dto.UserFromSearchDTO
 	for _,user := range *usersList {
@@ -50,3 +66,4 @@ func ConvertUsersListTOUserFromSearchDTOList(usersList *[]model.RegisteredUser) 
 	}
 	return &userFromSearchDTO
 }
+

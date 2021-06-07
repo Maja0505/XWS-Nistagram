@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"userService/dto"
-	"userService/model"
 	"userService/service"
 )
 
@@ -50,21 +49,21 @@ func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.
 
 }
 
-func (handler *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) UpdateRegisteredUserProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-	if id == "" {
+	username := vars["username"]
+	if username == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var user model.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var registeredUserDto dto.RegisteredUserProfileInfoDTO
+	err := json.NewDecoder(r.Body).Decode(&registeredUserDto)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.Update(id,&user)
+	err = handler.Service.UpdateRegisteredUserProfile(username,&registeredUserDto)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
