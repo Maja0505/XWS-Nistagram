@@ -19,6 +19,7 @@ type PostHandler struct {
 }
 
 func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("POZVAOI KREAARTE")
 	w.Header().Set("Content-Type", "application/json")
 	var postDTO DTO.PostDTO
 	err := json.NewDecoder(r.Body).Decode(&postDTO)

@@ -26,6 +26,22 @@ services:
       - mongo
     links: 
       - mongo
+
+  post-service:
+    image: post-service:compose_build
+    build:
+      context: ./PostService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      PORT: ${POST_SERVICE_PORT}
+    restart: on-failure
+    depends_on:
+      - cass
+    links: 
+      - cass
+    
       
   mongo:
     image: mongo
@@ -35,11 +51,27 @@ services:
       - "mongodata:/data/db"
     networks:
       - network1
-
-
+  
+  cass:
+    image: cassandra:3.11.8
+    container_name: cass
+    hostname: cass
+    healthcheck:
+        test: ["CMD", "cqlsh", "-e", "describe keyspaces" ]
+        interval: 5s
+        timeout: 5s
+        retries: 60
+    networks:
+      - network1
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./cass.yaml:/etc/cassandra/cass.yaml
 
 volumes:
    mongodata:
 
 networks:
    network1:
+     name: nistagram
+     driver: bridge
