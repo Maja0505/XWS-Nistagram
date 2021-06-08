@@ -30,7 +30,7 @@ const NavBar = () => {
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
       axios
-        .get("/user/search/" + text)
+        .get("/api/user/user/search/" + text)
         .then((res) => {
           setSearchedUser(res.data);
         })

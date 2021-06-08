@@ -27,7 +27,7 @@ const RegistartionPage = () => {
       DateOfBirth: user.DateOfBirth + "T00:00:00+01:00",
     };
     axios
-      .post("/user/create", userForRegistration)
+      .post("/api/user/user/create", userForRegistration)
       .then((res) => {
         setRedirection(true);
       })

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ButtonBase from "@material-ui/core/ButtonBase";
@@ -6,6 +6,8 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import ModeCommentIcon from "@material-ui/icons/ModeComment";
 import { Redirect } from "react-router-dom";
 import ProfileDialog from "./ProfileDialog";
+import axios from "axios";
+
 
 const images = [
   {
@@ -107,6 +109,10 @@ const Posts = () => {
   const handleClickImage = () => {
     setRedirectiton(true);
   };
+
+  useEffect(() => {
+  }, [])
+
   return (
     <div className={classes.root}>
       {redirection === true && <Redirect to={"/dialog"}></Redirect>}

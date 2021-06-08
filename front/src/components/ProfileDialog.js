@@ -27,6 +27,8 @@ const useStyles = makeStyles((theme) => ({
 const ProfileDialog = () => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+  const username = localStorage.getItem("username");
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,7 +67,7 @@ const ProfileDialog = () => {
               </Grid>
               <Grid item xs={7}>
                 <h4 style={{ marginTop: "10%", textAlign: "left" }}>
-                  Username
+                  {username}
                 </h4>
               </Grid>
               <Grid item xs={2}>

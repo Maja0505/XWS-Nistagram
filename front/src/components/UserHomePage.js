@@ -30,7 +30,7 @@ const UserHomePage = () => {
 
   useEffect(() => {
     axios
-      .get("/user/" + username)
+      .get("/api/user/user/" + username)
       .then((res) => {
         console.log(res.data);
         setUser(res.data);

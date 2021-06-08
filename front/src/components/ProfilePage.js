@@ -35,7 +35,7 @@ const ProfilePage = () => {
   const [userCopy, setUserCopy] = useState({});
 
   useEffect(() => {
-    axios.get("/user/" + username).then((res) => {
+    axios.get("/api/user/user/" + username).then((res) => {
       setUser(res.data);
       setUserCopy(res.data);
       res.data.Gender === 0
@@ -56,7 +56,7 @@ const ProfilePage = () => {
         Biography:user.Biography,
         WebSite:user.WebSite
       }
-      axios.put("/update/" + username, userDto)
+      axios.put("/api/user/update/" + username, userDto)
        .then((res) => {
            setUserCopy({...userCopy,FirstName:user.FirstName,Username:user.Username,WebSite:user.WebSite,Biography:user.Biography,Email:user.Email,PhoneNumber:user.PhoneNumber,Gender:user.Gender})
            localStorage.setItem("username", user.Username);
