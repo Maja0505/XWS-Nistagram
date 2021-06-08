@@ -64,9 +64,7 @@ func (service *PostService) DislikePost(dislike *Model.Dislike) error {
 func (service *PostService) CheckIfLikeExists(like *Model.Like) error {
 	err := service.Repo.CheckIfLikeExists(like)
 	if err == true{
-		fmt.Println("Postoji")
 	}else{
-		fmt.Println("Ne postoji")
 	}
 	return nil
 }

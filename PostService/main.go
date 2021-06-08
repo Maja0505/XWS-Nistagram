@@ -47,7 +47,6 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/api/delete-comment", handler.DeleteComment).Methods("POST")
 	router.HandleFunc("/api/like-post", handler.LikePost).Methods("POST")
 	router.HandleFunc("/api/dislike-post", handler.DislikePost).Methods("POST")
-	router.HandleFunc("/api/cile", handler.CheckIfLikeExists).Methods("GET")
 	router.HandleFunc("/api/get-one-post/{id}", handler.FindPostById).Methods("GET")
 	router.HandleFunc("/api/get-all-by-userid/{id}", handler.FindPostsByUserId).Methods("GET")
 	router.HandleFunc("/api/get-comments-for-post/{id}", handler.GetCommentsForPost).Methods("GET")
@@ -61,6 +60,7 @@ func handleFunc(handler *Handler.PostHandler){
 
 	fmt.Println("server running ")
 	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router)))
+	//log.Fatal(http.ListenAndServe(":8000", router))
 }
 
 func main(){
@@ -69,5 +69,6 @@ func main(){
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
 
+	//postRepo.CreateTables()
 	handleFunc(handler)
 }

@@ -13,9 +13,74 @@ type PostRepository struct {
 	Session gocql.Session
 }
 
+func (repo *PostRepository) CreateTables() error{
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.postcounters;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.comments;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.likes;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.dislikes;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.tags;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.posts(id uuid, userid uuid, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.comments(id uuid, postid uuid, userid uuid, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.likes(postid uuid, userid uuid, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.dislikes(postid uuid, userid uuid, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.tags(postid uuid, tag text, PRIMARY KEY((postid, tag)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("Successfully dropped and created tables!!")
+	return nil
+}
+
 func (repo *PostRepository) Create(post *Model.Post) error {
 	ID, _ := gocql.RandomUUID()
-	if err := repo.Session.Query("INSERT INTO postkeyspace.postsv8(id, createdat, description, image, userid) VALUES(?, ?, ?, ?, ?)",
+	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, image, userid) VALUES(?, ?, ?, ?, ?)",
 		ID, post.CreatedAt, post.Description, post.Image, post.UserID).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
@@ -26,6 +91,7 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 }
 
 func (repo *PostRepository) AddComment(comment *Model.Comment) error {
+	fmt.Println("aa")
 	ID, _ := gocql.RandomUUID()
 	if err := repo.Session.Query("INSERT INTO postkeyspace.comments(id, postid, userid, createdat, content) VALUES(?, ?, ?, ?, ?)",
 		ID, comment.PostID, comment.UserID, comment.CreatedAt, comment.Content).Exec(); err != nil {
@@ -67,7 +133,7 @@ func (repo *PostRepository) LikePost(like *Model.Like) error {
 	disliked = repo.CheckIfDislikeExists(&dislike)
 	fmt.Println("Disliked: ", disliked)
 
-	if err := repo.Session.Query("INSERT INTO postkeyspace.postlikes(postid, userid) VALUES(?, ?)",
+	if err := repo.Session.Query("INSERT INTO postkeyspace.likes(postid, userid) VALUES(?, ?)",
 		like.PostID, like.UserID).Exec(); err != nil {
 		fmt.Println("Error while creating like!")
 		fmt.Println(err)
@@ -80,14 +146,11 @@ func (repo *PostRepository) LikePost(like *Model.Like) error {
 	fmt.Println("Liked: ", liked)
 	fmt.Println("Disliked: ", disliked)
 	if liked == false && disliked == false {
-		fmt.Println("eto")
 		if err := repo.IncrementLikes(like); err != nil{
 			return err
 		}
 	}else if liked == true && disliked == false{
-		fmt.Println("zasto")
 	}else if liked == false && disliked == true{
-		fmt.Println("zato")
 		if err := repo.IncrementLikes(like); err != nil{
 			return err
 		}
@@ -113,7 +176,7 @@ func (repo *PostRepository) DislikePost(dislike *Model.Dislike) error {
 	disliked = repo.CheckIfDislikeExists(dislike)
 	fmt.Println("Disliked: ", disliked)
 
-	if err := repo.Session.Query("INSERT INTO postkeyspace.postdislikes(postid, userid) VALUES(?, ?)",
+	if err := repo.Session.Query("INSERT INTO postkeyspace.dislikes(postid, userid) VALUES(?, ?)",
 		dislike.PostID, dislike.UserID).Exec(); err != nil {
 		fmt.Println("Error while creating dislike!")
 		fmt.Println(err)
@@ -143,7 +206,7 @@ func (repo *PostRepository) DislikePost(dislike *Model.Dislike) error {
 }
 
 func (repo *PostRepository) IncrementLikes(like *Model.Like) error{
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET likes = likes + 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET likes = likes + 1 WHERE postid = ?",
 		like.PostID).Exec(); err != nil {
 		fmt.Println("Error updating like/dislike counter!")
 		fmt.Println(err)
@@ -153,7 +216,7 @@ func (repo *PostRepository) IncrementLikes(like *Model.Like) error{
 }
 
 func (repo *PostRepository) IncrementDislikes(dislike *Model.Dislike) error{
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET dislikes = dislikes + 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET dislikes = dislikes + 1 WHERE postid = ?",
 		dislike.PostID).Exec(); err != nil {
 		fmt.Println("Error updating like/dislike counter!")
 		fmt.Println(err)
@@ -163,7 +226,7 @@ func (repo *PostRepository) IncrementDislikes(dislike *Model.Dislike) error{
 }
 
 func (repo *PostRepository) DecrementLikes(like *Model.Like) error{
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET likes = likes - 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET likes = likes - 1 WHERE postid = ?",
 		like.PostID).Exec(); err != nil {
 		fmt.Println("Error updating like/dislike counter!")
 		fmt.Println(err)
@@ -173,7 +236,7 @@ func (repo *PostRepository) DecrementLikes(like *Model.Like) error{
 }
 
 func (repo *PostRepository) DecrementDislikes(dislike *Model.Dislike) error{
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET dislikes = dislikes - 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET dislikes = dislikes - 1 WHERE postid = ?",
 		dislike.PostID).Exec(); err != nil {
 		fmt.Println("Error updating like/dislike counter!")
 		fmt.Println(err)
@@ -182,7 +245,7 @@ func (repo *PostRepository) DecrementDislikes(dislike *Model.Dislike) error{
 	return nil
 }
 func (repo *PostRepository) IncrementComments(comment *Model.Comment) error {
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET comments = comments + 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET comments = comments + 1 WHERE postid = ?",
 		comment.PostID).Exec(); err != nil {
 		fmt.Println("Error updating comments counter!")
 		fmt.Println(err)
@@ -191,7 +254,7 @@ func (repo *PostRepository) IncrementComments(comment *Model.Comment) error {
 	return nil
 }
 func (repo *PostRepository) DecrementComments(comment *Model.Comment) error {
-	if err := repo.Session.Query("UPDATE postkeyspace.postsv8counters SET comments = comments - 1 WHERE postid = ?",
+	if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET comments = comments - 1 WHERE postid = ?",
 		comment.PostID).Exec(); err != nil {
 		fmt.Println("Error updating comments counter!")
 		fmt.Println(err)
@@ -201,7 +264,7 @@ func (repo *PostRepository) DecrementComments(comment *Model.Comment) error {
 }
 func (repo *PostRepository) CheckIfLikeExists(like *Model.Like) bool {
 	var likes int
-	repo.Session.Query("SELECT COUNT(*) FROM postkeyspace.postlikes WHERE postid = ? AND userid = ? LIMIT 1",
+	repo.Session.Query("SELECT COUNT(*) FROM postkeyspace.likes WHERE postid = ? AND userid = ? LIMIT 1",
 		like.PostID,like.UserID).Iter().Scan(&likes)
 	if likes == 1 {
 		return true
@@ -212,7 +275,7 @@ func (repo *PostRepository) CheckIfLikeExists(like *Model.Like) bool {
 }
 func (repo *PostRepository) CheckIfDislikeExists(dislike *Model.Dislike) bool {
 	var dislikes int
-	repo.Session.Query("SELECT COUNT(*) FROM postkeyspace.postdislikes WHERE postid = ? AND userid = ? LIMIT 1",
+	repo.Session.Query("SELECT COUNT(*) FROM postkeyspace.dislikes WHERE postid = ? AND userid = ? LIMIT 1",
 		dislike.PostID, dislike.UserID).Iter().Scan(&dislikes)
 	if dislikes == 1 {
 		return true
@@ -223,7 +286,7 @@ func (repo *PostRepository) CheckIfDislikeExists(dislike *Model.Dislike) bool {
 }
 
 func (repo *PostRepository) DeleteLike(like *Model.Like) error {
-	if err := repo.Session.Query("DELETE FROM postkeyspace.postlikes WHERE postid = ? AND userid = ? IF EXISTS;",
+	if err := repo.Session.Query("DELETE FROM postkeyspace.likes WHERE postid = ? AND userid = ? IF EXISTS;",
 		like.PostID, like.UserID).Exec(); err != nil {
 		fmt.Println("Error while deleting like!")
 		fmt.Println(err)
@@ -233,7 +296,7 @@ func (repo *PostRepository) DeleteLike(like *Model.Like) error {
 }
 
 func (repo *PostRepository) DeleteDislike(dislike *Model.Dislike) error {
-	if err := repo.Session.Query("DELETE FROM postkeyspace.postdislikes WHERE postid = ? AND userid = ? IF EXISTS;",
+	if err := repo.Session.Query("DELETE FROM postkeyspace.dislikes WHERE postid = ? AND userid = ? IF EXISTS;",
 		dislike.PostID, dislike.UserID).Exec(); err != nil {
 		fmt.Println("Error while deleting like!")
 		fmt.Println(err)
@@ -266,7 +329,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	var posts []Model.Post
 	m := map[string]interface{}{}
 
-	iter := repo.Session.Query("SELECT * FROM postkeyspace.postsv8 WHERE id=? allow filtering", postid).Iter()
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.posts WHERE id=? ALLOW FILTERING", postid).Iter()
 	for iter.MapScan(m) {
 		posts = append(posts, Model.Post{
 			ID:        m["id"].(gocql.UUID),
@@ -281,11 +344,11 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 }
 
 func (repo *PostRepository) FindPostsByUserId(userid gocql.UUID) ( *[]Model.Post, error){
-
+	fmt.Println("sss")
 	var posts []Model.Post
 	m := map[string]interface{}{}
 
-	iter := repo.Session.Query("SELECT * FROM postkeyspace.postsv8 WHERE userid=?", userid).Iter()
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.posts WHERE userid=? ALLOW FILTERING", userid).Iter()
 	for iter.MapScan(m) {
 		posts = append(posts, Model.Post{
 			ID:        m["id"].(gocql.UUID),
@@ -320,7 +383,7 @@ func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
 	var userids []gocql.UUID
 	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.postlikes WHERE postid=?", postid).Iter()
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.likes WHERE postid=?", postid).Iter()
 	for iter.Scan(&useruuid){
 		userids = append(userids, useruuid)
 	}
@@ -330,7 +393,7 @@ func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]gocql.U
 func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
 	var userids []gocql.UUID
 	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.postdislikes WHERE postid=?", postid).Iter()
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.dislikes WHERE postid=?", postid).Iter()
 	for iter.Scan(&useruuid){
 		userids = append(userids, useruuid)
 	}
@@ -338,11 +401,13 @@ func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocq
 }
 
 func (repo *PostRepository) GetImage(imagepath string) (image.Image, error){
-	img, err := LoadImage(imagepath)
+	var directory string = "Images/"
+	var imgpath string = directory + imagepath
+	img, err := LoadImage(imgpath)
 	if err != nil{
 		return nil, err
 	}
-	fmt.Println("Image successfuly loaded")
+	fmt.Println("Image successfuly loaded!")
 	return img, nil
 }
 
@@ -353,10 +418,9 @@ func LoadImage(imagepath string) (image.Image, error){
 	}
 	defer f.Close()
 
-	img, fmtName, err := image.Decode(f)
+	img, _, err := image.Decode(f)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(fmtName)
 	return img, nil
 }
