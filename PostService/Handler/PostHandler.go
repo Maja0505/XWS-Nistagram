@@ -171,12 +171,8 @@ func (handler *PostHandler) FindPostsByUserId(w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var useruuid, err = ParseUUID(userid)
-	if err != nil{
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	posts,_ := handler.Service.FindPostsByUserId(useruuid)
+
+	posts,_ := handler.Service.FindPostsByUserId(userid)
 
 	if posts == nil{
 		w.WriteHeader(http.StatusNotFound)

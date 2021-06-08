@@ -12,6 +12,6 @@ type Post struct {
 	DislikesCount 	int64 		`json:"DislikesCount"`
 	LikesCount		int64			`json:"LikesCount"`
 	Image 			string 		`json:"Image"`
-	UserID 			gocql.UUID	`json:"UserID"`
+	UserID 			string	`json:"UserID"`
 	CommentsCount 	int64			`json:"CommentsCount"`
 }

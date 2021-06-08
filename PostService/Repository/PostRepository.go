@@ -44,7 +44,7 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.posts(id uuid, userid uuid, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -54,17 +54,17 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.comments(id uuid, postid uuid, userid uuid, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.likes(postid uuid, userid uuid, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.likes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.dislikes(postid uuid, userid uuid, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE postkeyspace.dislikes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -341,7 +341,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 			ID:          m["id"].(gocql.UUID),
 			CreatedAt:   m["createdat"].(time.Time),
 			Description: m["description"].(string),
-			UserID:      m["userid"].(gocql.UUID),
+			UserID:      m["userid"].(string),
 			Image:       m["image"].(string),
 			LikesCount:  m2["likes"].(int64),
 			DislikesCount:  m2["dislikes"].(int64),
@@ -364,7 +364,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	return &posts[0],nil
 }
 
-func (repo *PostRepository) FindPostsByUserId(userid gocql.UUID) ( *[]Model.Post, error){
+func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, error){
 	var posts []Model.Post
 	m := map[string]interface{}{}
 	m2 := map[string]interface{}{}
@@ -381,7 +381,7 @@ func (repo *PostRepository) FindPostsByUserId(userid gocql.UUID) ( *[]Model.Post
 				ID:        m["id"].(gocql.UUID),
 				CreatedAt: m["createdat"].(time.Time),
 				Description:  m["description"].(string),
-				UserID:       m["userid"].(gocql.UUID),
+				UserID:       m["userid"].(string),
 				Image: m["image"].(string),
 				LikesCount: a,
 				DislikesCount: b,
@@ -395,7 +395,7 @@ func (repo *PostRepository) FindPostsByUserId(userid gocql.UUID) ( *[]Model.Post
 				ID:          m["id"].(gocql.UUID),
 				CreatedAt:   m["createdat"].(time.Time),
 				Description: m["description"].(string),
-				UserID:      m["userid"].(gocql.UUID),
+				UserID:      m["userid"].(string),
 				Image:       m["image"].(string),
 			}
 
@@ -417,7 +417,7 @@ func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 			ID:        m["id"].(gocql.UUID),
 			PostID: m["postid"].(gocql.UUID),
 			CreatedAt: m["createdat"].(time.Time),
-			UserID:       m["userid"].(gocql.UUID),
+			UserID:       m["userid"].(string),
 			Content: m["content"].(string),
 		})
 		m = map[string]interface{}{}
