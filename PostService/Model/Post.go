@@ -9,9 +9,9 @@ type Post struct {
 	ID 				gocql.UUID 	`json:"ID"`
 	CreatedAt 		time.Time 	`json:"CreatedAt"`
 	Description  	string 		`json:"Description"`
-	DislikesCount 	int 		`json:"DislikesCount"`
-	LikesCount		int			`json:"LikesCount"`
+	DislikesCount 	int64 		`json:"DislikesCount"`
+	LikesCount		int64			`json:"LikesCount"`
 	Image 			string 		`json:"Image"`
 	UserID 			gocql.UUID	`json:"UserID"`
-	Comments 		[]Comment	`json:"Comments"`
+	CommentsCount 	int64			`json:"CommentsCount"`
 }

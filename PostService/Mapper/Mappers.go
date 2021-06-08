@@ -14,7 +14,7 @@ func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	post.LikesCount = postDTO.LikesCount
 	post.Image = postDTO.Image
 	post.UserID = postDTO.UserID
-	post.Comments = postDTO.Comments
+	post.CommentsCount = postDTO.CommentsCount
 	return &post
 }
 
