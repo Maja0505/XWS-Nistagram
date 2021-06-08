@@ -105,34 +105,51 @@ const useStyles = makeStyles((theme) => ({
 const Posts = () => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [postID, setPostID] = useState({})
 
-  const handleClickImage = () => {
+  const handleClickImage = (post) => {
     setRedirectiton(true);
+    setPostID(post.ID)
   };
 
   useEffect(() => {
+    axios.get('/api/post/get-all-by-userid/60b7e243fc229b28f5280fae')
+      .then((res)=>
+      {
+        setPosts(res.data)
+      })
   }, [])
 
+
+  const getImage  = (image) => {
+    axios.get('/api/post/get-image/' + image)
+      .then((res) => {
+        return res.data
+      })
+  }
+
+  
   return (
     <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog"}></Redirect>}
+      {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
       <Grid container>
-        {images.map((image) => (
-          <Grid item xs={4} style={{ margin: "auto", marginTop: "2%" }}>
+        {posts.map((post) => (
+          <Grid item xs={4} style={{ margin: "auto", marginTop: "2%" }} key={post.ID}>
             <ButtonBase
               focusRipple
-              key={image.title}
+              key={post.ID}
               className={classes.image}
               focusVisibleClassName={classes.focusVisible}
               style={{
                 width: "95%",
               }}
-              onClick={handleClickImage}
+              onClick={() => handleClickImage(post)}
             >
               <span
                 className={classes.imageSrc}
                 style={{
-                  backgroundImage: `url(${image.url})`,
+                  backgroundImage: `url("http://localhost:8080/api/post/get-image/${post.Image}") `,
                 }}
               />
               <span className={classes.imageBackdrop} />

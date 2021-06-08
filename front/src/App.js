@@ -30,7 +30,7 @@ function App() {
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
             ></Route>
-            <Route path="/dialog">
+            <Route path="/dialog/:post"   render={(props) => <ProfileDialog {...props} />}>
               <ProfileDialog openD={true}></ProfileDialog>
             </Route>
           </Switch>

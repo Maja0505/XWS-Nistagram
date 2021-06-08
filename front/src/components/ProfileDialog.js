@@ -1,4 +1,3 @@
-import * as React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { deepOrange } from "@material-ui/core/colors";
 import Avatar from "@material-ui/core/Avatar";
@@ -11,6 +10,11 @@ import BookmarkBorderSharpIcon from '@material-ui/icons/BookmarkBorderSharp';
 import FavoriteBorderSharpIcon from '@material-ui/icons/FavoriteBorderSharp';
 import SendOutlinedIcon from '@material-ui/icons/SendOutlined';
 import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import React, { useState,useEffect } from "react";
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -24,10 +28,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+
 const ProfileDialog = () => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const username = localStorage.getItem("username");
+  const { post } = useParams();
+  const [imagePost, setImagePost] = useState()
 
 
   const handleClickOpen = () => {
@@ -42,6 +50,14 @@ const ProfileDialog = () => {
 
   }
 
+  useEffect(() => {
+    axios.get('/api/post/get-one-post/' + post)
+      .then((res)=>
+      {
+        setImagePost(res.data)
+      })
+  }, [])
+
   return (
     <div>
       <Paper
@@ -49,12 +65,13 @@ const ProfileDialog = () => {
         variant="outlined"
       >
         <Grid container style={{ width: "100%", height: "100%" }}>
-          <Grid item xs={7}>
+          {imagePost !== undefined && imagePost !== null && <Grid item xs={7}>
             <img
-              src="https://besthqwallpapers.com/Uploads/5-12-2020/148667/thumb2-mount-fuji-4k-two-swans-autumn-stratovolcano.jpg"
+              src={"http://localhost:8080/api/post/get-image/" + imagePost.Image}
               style={{ width: "100%", height: "100%" }}
             />
-          </Grid>
+          </Grid>}
+          
           <Grid item xs={5}>
             <Grid container style={{ height: "15%" }}>
               <Grid item xs={3}>
