@@ -16,7 +16,7 @@ var Session *gocql.Session
 
 func init() {
 	var err error
-	cluster := gocql.NewCluster("127.0.0.1")
+	cluster := gocql.NewCluster("cass")
 	cluster.ProtoVersion = 4
 	cluster.Keyspace = "postkeyspace"
 
@@ -43,6 +43,7 @@ func handleFunc(handler *Handler.PostHandler){
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/create", handler.Create).Methods("POST")
+
 	router.HandleFunc("/add-comment", handler.AddComment).Methods("POST")
 	router.HandleFunc("/delete-comment", handler.DeleteComment).Methods("POST")
 	router.HandleFunc("/like-post", handler.LikePost).Methods("POST")
@@ -53,13 +54,14 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/get-users-who-liked-post/{id}", handler.GetUsersWhoLikedPost).Methods("GET")
 	router.HandleFunc("/get-users-who-disliked-post/{id}", handler.GetUsersWhoDislikedPost).Methods("GET")
 	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
-
+	
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 
 	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router)))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)))
+	//log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("POST_SERVICE_PORT")),router))
 	//log.Fatal(http.ListenAndServe(":8000", router))
 }
 

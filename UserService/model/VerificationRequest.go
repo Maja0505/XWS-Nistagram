@@ -15,7 +15,9 @@ const (
 
 type VerificationRequest struct {
 	ID	primitive.ObjectID `bson:"_id,omitempty"`
-	User primitive.ObjectID `bson:"user,omitempty"`
+	Username string `bson:"username,omitempty"`
+	FirstName string `bson:"first_name,omitempty"`
+	LastName string `bson:"last_name,omitempty"`
 	Admin primitive.ObjectID `bson:"admin,omitempty"`
 	Category Category `bson:"category,omitempty"`
 	Approved bool `bson:"approved,omitempty"`

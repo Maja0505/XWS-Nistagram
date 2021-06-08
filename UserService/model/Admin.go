@@ -1,5 +1,5 @@
 package model
 
 type Admin struct {
-	User
+	User `bson:",inline"`
 }
