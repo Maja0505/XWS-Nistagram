@@ -1,7 +1,6 @@
 package DTO
 
 import (
-	"XWS-Nistagram/PostService/Model"
 	"github.com/gocql/gocql"
 	"time"
 )
@@ -10,9 +9,9 @@ type PostDTO struct{
 	ID 				gocql.UUID 		`json:"ID"`
 	CreatedAt 		time.Time 		`json:"CreatedAt"`
 	Description  	string 			`json:"Description"`
-	DislikesCount 	int 			`json:"DislikesCount"`
-	LikesCount		int				`json:"LikesCount"`
+	DislikesCount 	int64 			`json:"DislikesCount"`
+	LikesCount		int64				`json:"LikesCount"`
 	Image 			string 			`json:"Image"`
-	UserID 			gocql.UUID		`json:"UserID"`
-	Comments 		[]Model.Comment	`json:"Comments"`
+	UserID 			string		`json:"UserID"`
+	CommentsCount 	int64  			`json:"CommentsCount"`
 }

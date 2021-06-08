@@ -78,7 +78,7 @@ func (service *PostService) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	return post, err
 }
 
-func (service *PostService) FindPostsByUserId(userid gocql.UUID) ( *[]Model.Post, error) {
+func (service *PostService) FindPostsByUserId(userid string) ( *[]Model.Post, error) {
 	posts,err := service.Repo.FindPostsByUserId(userid)
 	if err != nil{
 		fmt.Println(err)
