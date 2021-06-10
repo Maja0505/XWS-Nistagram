@@ -325,7 +325,6 @@ func (repo *PostRepository) DeleteDislike(dislike *Model.Dislike) error {
 }*/
 
 func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error){
-
 	var posts []Model.Post
 	m := map[string]interface{}{}
 	m2 := map[string]interface{}{}
@@ -337,31 +336,38 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	for i:=0; i<iter.NumRows(); i++{
 		iter.MapScan(m)
 		iter2.MapScan(m2)
-		var a = Model.Post{
-			ID:          m["id"].(gocql.UUID),
-			CreatedAt:   m["createdat"].(time.Time),
-			Description: m["description"].(string),
-			UserID:      m["userid"].(string),
-			Image:       m["image"].(string),
-			LikesCount:  m2["likes"].(int64),
-			DislikesCount:  m2["dislikes"].(int64),
-			CommentsCount:  m2["comments"].(int64),
+		if iter2.NumRows() == 1{
+			var a int64 = m2["likes"].(int64)
+			var b int64 = m2["likes"].(int64)
+			var c int64 = m2["likes"].(int64)
+			var post = Model.Post{
+				ID:        m["id"].(gocql.UUID),
+				CreatedAt: m["createdat"].(time.Time),
+				Description:  m["description"].(string),
+				UserID:       m["userid"].(string),
+				Image: m["image"].(string),
+				LikesCount: a,
+				DislikesCount: b,
+				CommentsCount: c,
+			}
+			posts = append(posts, post)
+			m = map[string]interface{}{}
+			m2 = map[string]interface{}{}
+		}else {
+			var post = Model.Post{
+				ID:          m["id"].(gocql.UUID),
+				CreatedAt:   m["createdat"].(time.Time),
+				Description: m["description"].(string),
+				UserID:      m["userid"].(string),
+				Image:       m["image"].(string),
+			}
+			posts = append(posts, post)
+			m = map[string]interface{}{}
+			m2 = map[string]interface{}{}
 		}
-		posts = append(posts, a)
-		m = map[string]interface{}{}
-		//m2 = map[string]interface{}{}
 	}
-	/*for iter.MapScan(m) {
-		posts = append(posts, Model.Post{
-			ID:        m["id"].(gocql.UUID),
-			CreatedAt: m["createdat"].(time.Time),
-			Description:  m["description"].(string),
-			UserID:       m["userid"].(gocql.UUID),
-			Image: m["image"].(string),
-		})
-		m = map[string]interface{}{}
-	}*/
 	return &posts[0],nil
+
 }
 
 func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, error){

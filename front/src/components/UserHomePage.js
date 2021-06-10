@@ -156,7 +156,7 @@ const UserHomePage = () => {
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
-          <Posts></Posts>
+          {user !== undefined && user !== null && <Posts userForProfile={user}></Posts>}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
