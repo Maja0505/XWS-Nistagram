@@ -1,34 +1,26 @@
 package main
 
 import (
-	"XWS-Nistagram/UserFollowersService/controller"
-	"XWS-Nistagram/UserFollowersService/events"
 	"XWS-Nistagram/UserFollowersService/handler"
+	"XWS-Nistagram/UserFollowersService/repository"
+	"XWS-Nistagram/UserFollowersService/service"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"log"
 	"net/http"
 )
 
-func initDB(){
-	session, driver, err := ConnectToDB()
+func initDB()  neo4j.Session{
+	session, _, err := ConnectToDB()
 	if err != nil {
 		log.Fatalln("Error connecting to Database")
 		log.Fatalln(err)
 	}
-	log.Println("Connected to Neo4j")
-	// Close driver and session after func ends
-	defer driver.Close()
-	defer session.Close()
-	// pass the session to the model layer
-	events.SetDB(session)
-	// populate templates
-	controller.Startup()
-	// listen on specified port
-//	log.Println("Starting to listen..")
-	log.Fatal(http.ListenAndServe(":3000", nil))
-
-
+//	defer driver.Close()
+//	defer session.Close()
+	log.Println("Starting to listen..")
+	return session
 }
+
 func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 	// define driver, session and result vars
 	var (
@@ -47,15 +39,28 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 	return session, driver, nil
 }
 
-func handleFunc(handler *handler.UserFollowersHandler){
-	http.HandleFunc("/api/v1/event/create",handler.CreateEvent )
-	log.Fatal(http.ListenAndServe(":3000",nil))
+func initRepo(session neo4j.Session) *repository.UserFollowersRepository {
+	return &repository.UserFollowersRepository{Session: session}
 }
 
-func main() {
-	initDB()
-//	handler := handler.UserFollowersHandler{}
-//	handleFunc(&handler)
+func initService(repo *repository.UserFollowersRepository) *service.UserFollowersService {
+	return &service.UserFollowersService{Repository:repo}
+}
 
+func initHandler(service *service.UserFollowersService) *handler.UserFollowersHandler {
+	return &handler.UserFollowersHandler{Service: service}
+}
+func handleFunctions(handler *handler.UserFollowersHandler){
+	http.HandleFunc("/followUser",handler.FollowUser)
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+
+
+func main() {
+	db:= initDB()
+	repo :=initRepo(db)
+	service :=initService(repo)
+	handler :=initHandler(service)
+	handleFunctions(handler)
 }
 
