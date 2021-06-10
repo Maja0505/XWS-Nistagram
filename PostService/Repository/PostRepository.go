@@ -325,7 +325,6 @@ func (repo *PostRepository) DeleteDislike(dislike *Model.Dislike) error {
 }*/
 
 func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error){
-
 	var posts []Model.Post
 	m := map[string]interface{}{}
 	m2 := map[string]interface{}{}
@@ -368,17 +367,8 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 			m2 = map[string]interface{}{}
 		}
 	}
-	/*for iter.MapScan(m) {
-		posts = append(posts, Model.Post{
-			ID:        m["id"].(gocql.UUID),
-			CreatedAt: m["createdat"].(time.Time),
-			Description:  m["description"].(string),
-			UserID:       m["userid"].(gocql.UUID),
-			Image: m["image"].(string),
-		})
-		m = map[string]interface{}{}
-	}*/
 	return &posts[0],nil
+
 }
 
 func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, error){

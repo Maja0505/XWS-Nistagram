@@ -16,6 +16,7 @@ const LoginPage = () => {
       .then((res) => {
         console.log(res.data)
         localStorage.setItem("username", res.data.Username);
+        localStorage.setItem("id", res.data.ID);
         window.location.href =
           "http://localhost:3000/homePage/" + res.data.Username;
       })

@@ -5,7 +5,9 @@ import ButtonBase from "@material-ui/core/ButtonBase";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ModeCommentIcon from "@material-ui/icons/ModeComment";
 import { Redirect } from "react-router-dom";
-import ProfileDialog from "./ProfileDialog";
+import PostDialog from "./PostDialog";
+import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import axios from "axios";
 
 
@@ -102,37 +104,56 @@ const useStyles = makeStyles((theme) => ({
   },*/
 }));
 
-const Posts = () => {
+const Posts = ({userForProfile}) => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [postID, setPostID] = useState({})
 
-  const handleClickImage = () => {
+  const id = localStorage.getItem("id")
+
+  const handleClickImage = (post) => {
     setRedirectiton(true);
+    setPostID(post.ID)
   };
 
   useEffect(() => {
-  }, [])
+    axios.get('/api/post/get-all-by-userid/' + userForProfile.ID)
+      .then((res)=>
+      {
+        setPosts(res.data)
+      })
+  }, [userForProfile])
 
+
+  const getImage  = (image) => {
+    axios.get('/api/post/get-image/' + image)
+      .then((res) => {
+        return res.data
+      })
+  }
+
+  
   return (
     <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog"}></Redirect>}
+      {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
       <Grid container>
-        {images.map((image) => (
-          <Grid item xs={4} style={{ margin: "auto", marginTop: "2%" }}>
+        {posts !== null && posts.map((post) => (
+          <Grid item xs={4} style={{ margin: "auto", marginTop: "2%" }} key={post.ID}>
             <ButtonBase
               focusRipple
-              key={image.title}
+              key={post.ID}
               className={classes.image}
               focusVisibleClassName={classes.focusVisible}
               style={{
                 width: "95%",
               }}
-              onClick={handleClickImage}
+              onClick={() => handleClickImage(post)}
             >
               <span
                 className={classes.imageSrc}
                 style={{
-                  backgroundImage: `url(${image.url})`,
+                  backgroundImage: `url("http://localhost:8080/api/post/get-image/${post.Image}") `,
                 }}
               />
               <span className={classes.imageBackdrop} />
@@ -142,22 +163,27 @@ const Posts = () => {
                   variant="subtitle1"
                   color="inherit"
                   className={classes.imageTitle}
-                  style={{ padding: 0 }}
+                  style={{ padding: 0,  width:'50%'}}
                   width="30%"
                 >
                   <Grid container>
-                    <Grid item xs={3}>
-                      <FavoriteIcon></FavoriteIcon>
+                    <Grid item xs={1}>
+                      <ThumbUpAltIcon></ThumbUpAltIcon>
                     </Grid>
-                    <Grid item xs={2}>
-                      123
-                    </Grid>
-                    <Grid item xs={2}></Grid>
                     <Grid item xs={3}>
+                      {post.LikesCount}
+                    </Grid>
+                    <Grid item xs={1}>
+                      <ThumbDownIcon></ThumbDownIcon>
+                    </Grid>
+                    <Grid item xs={3}>
+                    {post.DislikesCount}
+                    </Grid>
+                    <Grid item xs={1}>
                       <ModeCommentIcon></ModeCommentIcon>
                     </Grid>
-                    <Grid item xs={2}>
-                      123
+                    <Grid item xs={3}>
+                    {post.CommentsCount}
                     </Grid>
                   </Grid>
                 </Typography>
