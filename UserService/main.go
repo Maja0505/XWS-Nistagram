@@ -68,6 +68,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	//router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
 	router.HandleFunc("/user/search/{searchContent}",handler.SearchUser).Methods("GET")
+	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
 
 }
 

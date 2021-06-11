@@ -75,3 +75,11 @@ func (service *UserService) SearchUser(searchContent string) (*[]dto.UserFromSea
 	usersListDTO := mapper.ConvertUsersListTOUserFromSearchDTOList(users)
 	return usersListDTO, err
 }
+
+func (service *UserService) ConvertUserIdsToUsers(userIds dto.UserIdsDTO) (*[]dto.UserByUsernameDTO, error) {
+	users,err := service.Repo.FindUsernameByUserId(userIds)
+	if err != nil{
+		return nil, err
+	}
+	return users,nil
+}

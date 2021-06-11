@@ -54,7 +54,9 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/get-users-who-liked-post/{id}", handler.GetUsersWhoLikedPost).Methods("GET")
 	router.HandleFunc("/get-users-who-disliked-post/{id}", handler.GetUsersWhoDislikedPost).Methods("GET")
 	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
-	
+	router.HandleFunc("/like-exists", handler.CheckIfLikeExists).Methods("PUT")
+	router.HandleFunc("/dislike-exists", handler.CheckIfDislikeExists).Methods("PUT")
+
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 	origins := handlers.AllowedOrigins([]string{"*"})
