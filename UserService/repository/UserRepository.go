@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"time"
+	"userService/dto"
 	"userService/model"
 )
 
@@ -90,5 +92,26 @@ func (repo *UserRepository) FindAllUsersBySearchingContent(searchContent string)
 	if err != nil{
 		return nil, err
 	}
+	return &users,nil
+}
+
+func (repo *UserRepository) FindUsernameByUserId(userIds dto.UserIdsDTO) (*[]dto.UserByUsernameDTO, error){
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	oids := make([]primitive.ObjectID, len(userIds.UserIds))	//konverotvanje stringa u ObjectID
+	var users []dto.UserByUsernameDTO
+	for i := range userIds.UserIds {
+		objID, err := primitive.ObjectIDFromHex(userIds.UserIds[i])
+		if err == nil {
+			oids = append(oids, objID)
+		}
+		}
+	query := bson.M{"_id": bson.M{"$in": oids}}
+	cursor,err := coll.Find(context.TODO(),query)
+	if err != nil{
+		return nil,err
+	}
+	err = cursor.All(context.TODO(),&users)
 	return &users,nil
 }

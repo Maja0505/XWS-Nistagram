@@ -130,6 +130,16 @@ func (repo *PostRepository) LikePost(like *Model.Like) error {
 	var disliked bool
 	liked = repo.CheckIfLikeExists(like)
 	fmt.Println("Liked: ", liked)
+	if liked {
+		err := repo.DeleteLike(like)
+		if err != nil{
+			return err
+		}
+		if err := repo.DecrementLikes(like); err != nil{
+			return err
+		}
+		return nil
+	}
 	disliked = repo.CheckIfDislikeExists(&dislike)
 	fmt.Println("Disliked: ", disliked)
 
@@ -175,6 +185,17 @@ func (repo *PostRepository) DislikePost(dislike *Model.Dislike) error {
 	fmt.Println("Liked: ", liked)
 	disliked = repo.CheckIfDislikeExists(dislike)
 	fmt.Println("Disliked: ", disliked)
+	if disliked {
+		err := repo.DeleteDislike(dislike)
+		if err != nil{
+			return err
+		}
+		if err := repo.DecrementDislikes(dislike); err != nil{
+			return err
+		}
+
+		return nil
+	}
 
 	if err := repo.Session.Query("INSERT INTO postkeyspace.dislikes(postid, userid) VALUES(?, ?)",
 		dislike.PostID, dislike.UserID).Exec(); err != nil {
@@ -432,22 +453,23 @@ func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 	return &comments,nil
 }
 
-func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
-	var userids []gocql.UUID
-	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.likes WHERE postid=?", postid).Iter()
-	for iter.Scan(&useruuid){
-		userids = append(userids, useruuid)
+func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]string, error) {
+	var userids []string
+	var userid string
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.likes WHERE postid=? ALLOW FILTERING", postid).Iter()
+	for iter.Scan(&userid){
+		fmt.Println(userid)
+		userids = append(userids, userid)
 	}
 	return &userids, nil
 }
 
-func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
-	var userids []gocql.UUID
-	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.dislikes WHERE postid=?", postid).Iter()
-	for iter.Scan(&useruuid){
-		userids = append(userids, useruuid)
+func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]string, error) {
+	var userids []string
+	var userid string
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.dislikes WHERE postid=? ALLOW FILTERING", postid).Iter()
+	for iter.Scan(&userid){
+		userids = append(userids, userid)
 	}
 	return &userids, nil
 }

@@ -113,3 +113,18 @@ func (handler *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
 }
+
+func (handler *UserHandler) ConvertUserIdsToUsers(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	var userIds dto.UserIdsDTO
+	err := json.NewDecoder(r.Body).Decode(&userIds)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	users,err := handler.Service.ConvertUserIdsToUsers(userIds)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
+}
