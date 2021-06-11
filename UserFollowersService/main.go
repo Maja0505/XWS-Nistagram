@@ -4,9 +4,13 @@ import (
 	"XWS-Nistagram/UserFollowersService/handler"
 	"XWS-Nistagram/UserFollowersService/repository"
 	"XWS-Nistagram/UserFollowersService/service"
+	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"log"
 	"net/http"
+	"os"
 )
 
 func initDB()  neo4j.Session{
@@ -50,9 +54,30 @@ func initService(repo *repository.UserFollowersRepository) *service.UserFollower
 func initHandler(service *service.UserFollowersService) *handler.UserFollowersHandler {
 	return &handler.UserFollowersHandler{Service: service}
 }
+
 func handleFunctions(handler *handler.UserFollowersHandler){
-	http.HandleFunc("/followUser",handler.FollowUser)
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	router := mux.NewRouter().StrictSlash(true)
+
+	router.HandleFunc("/followUser",handler.FollowUser).Methods("POST")
+	router.HandleFunc("/unfollowUser",handler.UnfollowUser).Methods("PUT")
+	router.HandleFunc("/acceptFollowRequest",handler.AcceptFollowRequest).Methods("PUT")
+	router.HandleFunc("/allFollows/{userId}",handler.GetAllFollowedUsers).Methods("GET")
+	router.HandleFunc("/allFollowers/{userId}",handler.GetAllFollowersByUser).Methods("GET")
+	router.HandleFunc("/allFollowRequests/{userId}",handler.GetAllFollowRequsts).Methods("GET")
+	router.HandleFunc("/checkFollowing/{userId}/{followedUserId}",handler.CheckFollowing).Methods("GET")
+
+
+	fmt.Println("Server running on port " + os.Getenv("USER_FOLLOWERS_SERVICE_PORT"))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),router))
+}
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
 
 
@@ -62,5 +87,8 @@ func main() {
 	service :=initService(repo)
 	handler :=initHandler(service)
 	handleFunctions(handler)
+
+
+
 }
 

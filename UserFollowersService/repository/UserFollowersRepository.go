@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/model"
 	"fmt"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -10,76 +11,80 @@ type UserFollowersRepository struct{
 	Session neo4j.Session
 }
 
-func (repository *UserFollowersRepository) FollowUser(fr model.FollowRelationship, ce chan error) {
-	//repository.DeleteAll()
-	if(!repository.UserExists(fr.User)){
-			fmt.Println("nije nasao prvog ")
-			go repository.CreateUser(fr.User)}
-	if(!repository.UserExists(fr.FollowedUser)){
-			fmt.Println("nije nasao drugog ")
-		go repository.CreateUser(fr.FollowedUser)
-		}
+func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationship) error{
 
-	if(!repository.RelationshipExists(fr.User,fr.FollowedUser)){
-		fmt.Println("kreirao vezu ")
-		go repository.CreateRelationship(fr.User,fr.FollowedUser)
-	}
+	err := repository.CreateUserNodeIfNotExist(fr.User)
+	err = repository.CreateUserNodeIfNotExist(fr.FollowedUser)
 
-
-	ce <- nil
-	return
-}
-
-func (repository *UserFollowersRepository) UserExists(uuid string) bool{
-	result, err := repository.Session.Run(`OPTIONAL MATCH (n:User) WHERE n.uuid = $uuid
-													RETURN n IS NOT NULL AS Predicate`,
-		map[string]interface{}{"uuid":uuid,})
-	if(err!=nil){
+	if err != nil {
 		fmt.Println(err)
-		return false
+		return err
 	}
-	if(result.Next()){
-		return result.Record().GetByIndex(0).(bool)
-	}
-	return false
-}
 
-func (repository *UserFollowersRepository) CreateUser(uuid string) {
-	_, err := repository.Session.Run(`CREATE (u:User{uuid:$uuid})`, map[string]interface{}{
-		"uuid": uuid,
+	_,err = repository.Session.Run("MATCH (u1:User),(u2:User) WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
+		"MERGE (u1)-[r:follow]->(u2)",map[string]interface{}{
+		"userId1" : fr.User ,
+		"userId2" : fr.FollowedUser,
 	})
-	if err != nil {
+
+	if err != nil{
 		fmt.Println(err)
-		return
+		return err
 	}
+
+	return nil
 }
 
-func (repository *UserFollowersRepository) RelationshipExists(uuid1 string,uuid2 string) bool{
-	result, err := repository.Session.Run(`MATCH  (u:User {uuid:$uuid}), (u1:User {uuid:$uuid2})
-		RETURN EXISTS( (u)-[:Follows]-(u1) )`, map[string]interface{}{"uuid":  uuid1, "uuid2": uuid2,})
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	if(result.Next()){
-		return result.Record().GetByIndex(0).(bool)
-	}
-	fmt.Println("izasao iz ifa")
-	return false
-}
 
-func (repository *UserFollowersRepository) CreateRelationship(uuid1 string,uuid2 string){
-	_, err := repository.Session.Run(`MATCH (u:User),(u1:User) WHERE u.uuid = $uuid and u1.uuid = $uuid2
-					CREATE (u)-[:Follows]->(u1)`, map[string]interface{}{
-		"uuid":  uuid1,
-		"uuid2": uuid2,})
+func (repository *UserFollowersRepository) UnfollowUser(fr *model.FollowRelationship) error{
 
-	if err != nil {
-		fmt.Println(err)
-		return
+	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r:follow]->( u2:User{ userId:$userId2 }) delete r" , map[string]interface{}{
+		"userId1" : fr.User,
+		"userId2" : fr.FollowedUser,
+	})
+
+	if err != nil{
+		return err
 	}
+
+	return nil
 
 }
+
+
+func (repository *UserFollowersRepository) SendFollowRequest(fr *model.FollowRelationship) error {
+
+	err := repository.CreateUserNodeIfNotExist(fr.User)
+	err = repository.CreateUserNodeIfNotExist(fr.FollowedUser)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_,err = repository.Session.Run("MATCH (u1:User),(u2:User) WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
+		"MERGE (u1)-[r:followRequest]->(u2) return r",map[string]interface{}{
+		"userId1" : fr.User ,
+		"userId2" : fr.FollowedUser,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+
+}
+
+
+func (repository *UserFollowersRepository) CreateUserNodeIfNotExist(userId string) error{
+	_,err := repository.Session.Run("MERGE (u:User {userId:$userId})",map[string]interface{}{
+		"userId" : userId,
+	})
+	return err
+}
+
 
 func (repository *UserFollowersRepository) DeleteAll(){
 	_,err :=repository.Session.Run(`MATCH (n) DETACH DELETE n`,nil)
@@ -87,4 +92,101 @@ func (repository *UserFollowersRepository) DeleteAll(){
 		fmt.Println(err)
 		return
 	}
+}
+
+
+func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId string) (*[]interface{},error){
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u1.userId = $userId RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
+
+
+func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) (*[]interface{}, error) {
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u2.userId = $userId RETURN u1.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
+
+
+func (repository *UserFollowersRepository) AcceptFollowRequest(dto *dto.AcceptFollowRequestDTO) error{
+
+	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r1:followRequest]->( u2:User{ userId:$userId2 }) " +
+		"delete r1 " +
+		"MERGE (u1)-[r2:follow]->(u2)" , map[string]interface{}{
+		"userId1" : dto.UserWitchSendRequest,
+		"userId2" : dto.User,
+	})
+
+	if err != nil{
+		return err
+	}
+
+	return nil
+
+}
+
+
+func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:followRequest]->(u2) WHERE u2.userId = $userId RETURN u1.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
+
+
+func (repository *UserFollowersRepository) CheckFollowing(userId string, followedUserId string) (*interface{}, error) {
+
+	result,err := repository.Session.Run("return exists ( (:User{userId:$userId1})-[:follow]->(:User{userId:$userId2}))", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : followedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
 }
