@@ -2,6 +2,7 @@ package dto
 
 type UserByUsernameDTO struct {
 
-	Username string  `bson:"username,omitempty"`
+	IdString string `bson:"id_string,omitempty"`
+	Username string `bson:"username,omitempty"`
 
 }

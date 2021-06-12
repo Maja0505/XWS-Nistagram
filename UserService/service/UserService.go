@@ -98,3 +98,17 @@ func (service *UserService) ChangePassword(username string,passwordDto dto.Passw
 	return true,nil
 
 }
+
+func (service *UserService) UpdatePublicProfileSetting(username string,setting string) error {
+	return service.Repo.UpdatePublicProfileSetting(username,setting  == "true")
+}
+
+func (service *UserService) UpdateMessageRequestSetting(username string, setting string) interface{} {
+	return service.Repo.UpdateMessageRequestSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateAllowTagsSetting(username string, setting string) interface{} {
+	return service.Repo.UpdateAllowTagsSetting(username,setting  == "true")
+
+}

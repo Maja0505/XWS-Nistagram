@@ -70,7 +70,9 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/search/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
 	router.HandleFunc("/change-password/{username}",handler.ChangePassword).Methods("PUT")
-
+	router.HandleFunc("/{username}/public-profile/{setting}",handler.UpdatePublicProfileSetting).Methods("PUT")
+	router.HandleFunc("/{username}/message-request/{setting}",handler.UpdateMessageRequestSetting).Methods("PUT")
+	router.HandleFunc("/{username}/allow-tags/{setting}",handler.UpdateAllowTagsSetting).Methods("PUT")
 }
 
 func init() {
