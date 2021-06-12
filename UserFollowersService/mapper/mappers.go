@@ -9,6 +9,8 @@ func ConvertFollowRelationshipDTOTOFollowRelationship(dto *dto.FollowRelationshi
 	var fr model.FollowRelationship
 	fr.User = dto.User
 	fr.FollowedUser = dto.FollowedUser
+	fr.CloseFriend = false
+	fr.Muted = false
 	return &fr
 }
 

@@ -3,6 +3,7 @@ package repository
 import (
 	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/model"
+	"errors"
 	"fmt"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -22,9 +23,11 @@ func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationsh
 	}
 
 	_,err = repository.Session.Run("MATCH (u1:User),(u2:User) WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
-		"MERGE (u1)-[r:follow]->(u2)",map[string]interface{}{
+		"MERGE (u1)-[r:follow{close_friend:$close,mute:$mute}]->(u2)",map[string]interface{}{
 		"userId1" : fr.User ,
 		"userId2" : fr.FollowedUser,
+		"mute" : fr.Muted,
+		"close" : fr.CloseFriend,
 	})
 
 	if err != nil{
@@ -86,12 +89,64 @@ func (repository *UserFollowersRepository) CreateUserNodeIfNotExist(userId strin
 }
 
 
-func (repository *UserFollowersRepository) DeleteAll(){
-	_,err :=repository.Session.Run(`MATCH (n) DETACH DELETE n`,nil)
-	if err != nil {
-		fmt.Println(err)
-		return
+func (repository *UserFollowersRepository) AcceptFollowRequest(dto *dto.AcceptFollowRequestDTO) error{
+
+	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r1:followRequest]->( u2:User{ userId:$userId2 }) " +
+		"delete r1 " +
+		"MERGE (u1)-[r2:follow{close_friend:$close,mute:$mute}]->(u2)" , map[string]interface{}{
+		"userId1" : dto.UserWitchSendRequest,
+		"userId2" : dto.User,
+		"mute" : false,
+		"close" : false,
+
+	})
+
+	if err != nil{
+		return err
 	}
+
+	return nil
+
+}
+
+
+func (repository *UserFollowersRepository) SetFriendForClose(userId string,friendId string, close bool) error{
+	result,err := repository.Session.Run("match (:User{userId:$userId})-[r:follow]->(:User{userId:$friendId}) set r.close_friend=$close return r.close_friend;", map[string]interface{}{
+		"userId" : userId,
+		"friendId" : friendId,
+		"close" : close,
+	})
+
+	if err != nil{
+		return err
+	}
+
+	if !result.Next(){
+		return errors.New("User,friend or relationship doesn't exist")
+	}
+
+	return nil
+
+}
+
+
+func (repository *UserFollowersRepository) SetFriendForMute(userId string,friendId string, mute bool) error{
+	result,err := repository.Session.Run("match (:User{userId:$userId})-[r:follow]->(:User{userId:$friendId}) set r.mute=$mute return r.mute;", map[string]interface{}{
+		"userId" : userId,
+		"friendId" : friendId,
+		"mute" : mute,
+	})
+
+	if err != nil{
+		return err
+	}
+
+	if !result.Next(){
+		return errors.New("User,friend or relationship doesn't exist")
+	}
+
+	return nil
+
 }
 
 
@@ -135,24 +190,6 @@ func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) 
 }
 
 
-func (repository *UserFollowersRepository) AcceptFollowRequest(dto *dto.AcceptFollowRequestDTO) error{
-
-	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r1:followRequest]->( u2:User{ userId:$userId2 }) " +
-		"delete r1 " +
-		"MERGE (u1)-[r2:follow]->(u2)" , map[string]interface{}{
-		"userId1" : dto.UserWitchSendRequest,
-		"userId2" : dto.User,
-	})
-
-	if err != nil{
-		return err
-	}
-
-	return nil
-
-}
-
-
 func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}
 
@@ -173,6 +210,46 @@ func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (
 }
 
 
+func (repository *UserFollowersRepository) GetAllCloseFriends(userId string) (*[]interface{}, error) {
+	var closeFriends []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow{close_friend:TRUE}]->(u2) WHERE u1.userId = $userId RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		closeFriends = append(closeFriends, user)
+	}
+
+	return &closeFriends,nil
+}
+
+
+func (repository *UserFollowersRepository) GetAllMuteFriends(userId string) (*[]interface{}, error) {
+	var muteFriends []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow{mute:TRUE}]->(u2) WHERE u1.userId = $userId RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		muteFriends = append(muteFriends, user)
+	}
+
+	return &muteFriends,nil
+}
+
+
 func (repository *UserFollowersRepository) CheckFollowing(userId string, followedUserId string) (*interface{}, error) {
 
 	result,err := repository.Session.Run("return exists ( (:User{userId:$userId1})-[:follow]->(:User{userId:$userId2}))", map[string]interface{}{
@@ -189,4 +266,13 @@ func (repository *UserFollowersRepository) CheckFollowing(userId string, followe
 	}
 
 	return nil, nil
+}
+
+
+func (repository *UserFollowersRepository) DeleteAll(){
+	_,err :=repository.Session.Run(`MATCH (n) DETACH DELETE n`,nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
