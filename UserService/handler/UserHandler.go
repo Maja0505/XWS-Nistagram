@@ -128,3 +128,67 @@ func (handler *UserHandler) ConvertUserIdsToUsers(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
 }
+
+func (handler *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type","application/json")
+	vars := mux.Vars(r)
+	username := vars["username"]
+	var passwordDto dto.PasswordDTO
+	err := json.NewDecoder(r.Body).Decode(&passwordDto)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	valid,err := handler.Service.ChangePassword(username,passwordDto)
+	if valid{
+		if err != nil{
+			http.Error(w,err.Error(),400)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+
+}
+
+
+
+func (handler *UserHandler) UpdatePublicProfileSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+
+	err := handler.Service.UpdatePublicProfileSetting(username,setting)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateMessageRequestSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateMessageRequestSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateAllowTagsSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateAllowTagsSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}

@@ -41,11 +41,17 @@ func (repo *UserRepository) FindAll() (*[]model.User, error) {
 func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.RegisteredUser) error {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
-	_, err := collection.InsertOne(context.TODO(), &userForRegistration)
+	user, err := collection.InsertOne(context.TODO(), &userForRegistration)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	_,err = collection.UpdateOne(context.TODO(),bson.M{"username":userForRegistration.Username},bson.D{{"$set",bson.D{{"id_string",user.InsertedID.(primitive.ObjectID).Hex()}}}})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
 	return nil
 }
 
@@ -98,20 +104,82 @@ func (repo *UserRepository) FindAllUsersBySearchingContent(searchContent string)
 func (repo *UserRepository) FindUsernameByUserId(userIds dto.UserIdsDTO) (*[]dto.UserByUsernameDTO, error){
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
-
-	oids := make([]primitive.ObjectID, len(userIds.UserIds))	//konverotvanje stringa u ObjectID
 	var users []dto.UserByUsernameDTO
+
+	/*oids := make([]primitive.ObjectID, len(userIds.UserIds))	//konverotvanje stringa u ObjectID
 	for i := range userIds.UserIds {
 		objID, err := primitive.ObjectIDFromHex(userIds.UserIds[i])
 		if err == nil {
 			oids = append(oids, objID)
 		}
-		}
-	query := bson.M{"_id": bson.M{"$in": oids}}
+		}*/
+	query := bson.M{"id_string": bson.M{"$in": userIds.UserIds}}
 	cursor,err := coll.Find(context.TODO(),query)
 	if err != nil{
 		return nil,err
 	}
 	err = cursor.All(context.TODO(),&users)
 	return &users,nil
+}
+
+func (repo *UserRepository) ChangePassword(username string, newPassword string) error {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{
+		{"$set", bson.D{{"password", newPassword}}},
+	})
+	if err != nil{
+		return err
+	}
+	return nil
+
+}
+
+func (repo *UserRepository) CheckOldPassword(username string, password string) bool {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	filter := bson.D{
+		{"$and", bson.A{
+			bson.M{"username": username},
+			bson.M{"password": password},
+		}},
+	}
+	result,_ := coll.Find(context.TODO(),filter)
+	if result.RemainingBatchLength() == 0{
+		return false
+	}
+	return true
+}
+
+func (repo *UserRepository) UpdatePublicProfileSetting(username string,publicProfile bool)  error{
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{{"$set",bson.D{{"profile_settings.public",publicProfile}}}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *UserRepository) UpdateMessageRequestSetting(username string, messageRequest bool) interface{} {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{{"$set",bson.D{{"profile_settings.message_request",messageRequest}}}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *UserRepository) UpdateAllowTagsSetting(username string, allowSetting bool) interface{} {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{{"$set",bson.D{{"profile_settings.allow_tags",allowSetting}}}})
+	if err != nil {
+		return err
+	}
+	return nil
 }

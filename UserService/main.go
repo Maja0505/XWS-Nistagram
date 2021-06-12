@@ -64,12 +64,15 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/",handler.FindAll).Methods("GET")
 	//router.HandleFunc("/create",handler.Create).Methods("POST")
 	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
-	router.HandleFunc("/user/create",handler.CreateRegisteredUser).Methods("POST")
+	router.HandleFunc("/create",handler.CreateRegisteredUser).Methods("POST")
 	//router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
-	router.HandleFunc("/user/{username}",handler.FindUserByUsername).Methods("GET")
-	router.HandleFunc("/user/search/{searchContent}",handler.SearchUser).Methods("GET")
+	router.HandleFunc("/{username}",handler.FindUserByUsername).Methods("GET")
+	router.HandleFunc("/search/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
-
+	router.HandleFunc("/change-password/{username}",handler.ChangePassword).Methods("PUT")
+	router.HandleFunc("/{username}/public-profile/{setting}",handler.UpdatePublicProfileSetting).Methods("PUT")
+	router.HandleFunc("/{username}/message-request/{setting}",handler.UpdateMessageRequestSetting).Methods("PUT")
+	router.HandleFunc("/{username}/allow-tags/{setting}",handler.UpdateAllowTagsSetting).Methods("PUT")
 }
 
 func init() {
