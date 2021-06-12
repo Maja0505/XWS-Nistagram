@@ -58,7 +58,7 @@ const UserHomePage = () => {
 
   const buttonForEditProfile = (
     <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
-      <Link to="/accounts" style={{ textDecoration: "none", color: "gray" }}>
+      <Link to="/accounts/edit/" style={{ textDecoration: "none", color: "gray" }}>
         Edit profile
       </Link>
     </Button>

@@ -154,3 +154,41 @@ func (handler *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Reques
 
 
 }
+
+
+
+func (handler *UserHandler) UpdatePublicProfileSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+
+	err := handler.Service.UpdatePublicProfileSetting(username,setting)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateMessageRequestSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateMessageRequestSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateAllowTagsSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateAllowTagsSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}

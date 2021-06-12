@@ -7,6 +7,7 @@ import ProfilePage from "./ProfilePage";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Snackbar from '@material-ui/core/Snackbar';
 import { Alert } from "@material-ui/lab";
+import ProfilePrivacy from "./ProfilePrivacy.js";
 
 
 const tabList = [
@@ -30,11 +31,7 @@ const tabList = [
     id: 3,
     label: "Push Notification",
   },
-  {
-    key: 4,
-    id: 4,
-    label: "Edit Profile",
-  },
+
 ];
 
 const Settings = () => {
@@ -67,6 +64,8 @@ const TabChanged = () => {
     return  <ProfilePage></ProfilePage>
   }else if(value === 1){
     return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
+  }else if(value === 2){
+    return <ProfilePrivacy setOpen={setOpen} setMessage={setMessage}></ProfilePrivacy>
   }
 }
 
@@ -76,6 +75,8 @@ const handleUrlForTab = (value) => {
     route = '/accounts/edit/'
   }else if(value === 1){
     route = '/accounts/password/change/'
+  }else if(value === 2){
+    route = '/accounts/privacy/'
   }
   history.push(route)
 }
@@ -87,13 +88,14 @@ useEffect(() => {
     setValue(0)
   }else if(urls[1] === '/password/change/'){
     setValue(1)
+  }else if(urls[1] === '/privacy/'){
+    setValue(2)
   }
 
 }, []);
 
   return (
     <div>
-    <Router>
 
       <Grid container>
         <Grid container style={{ marginTop: "2%" }}>
@@ -129,7 +131,6 @@ useEffect(() => {
           <Grid item xs={2} />
         </Grid>
       </Grid>
-    </Router>
     <Snackbar
         open={open}
         autoHideDuration={2000} 
