@@ -38,9 +38,18 @@ func (service *UserFollowersService) UnfollowUser(dto *dto.UnfollowRelationshipD
 
 }
 
-func (service *UserFollowersService) AcceptFollowRequest(dto *dto.AcceptFollowRequestDTO) error {
+func (service *UserFollowersService) AcceptFollowRequest(dto *dto.FollowRequestDTO) error {
 
-	err := service.Repository.AcceptFollowRequest(dto)
+	err := service.Repository.AcceptFollowRequest(dto.User,dto.UserWitchSendRequest)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *UserFollowersService) CancelFollowRequest(dto *dto.FollowRequestDTO) error {
+
+	err := service.Repository.CancelFollowRequest(dto.User,dto.UserWitchSendRequest)
 	if err != nil {
 		return err
 	}

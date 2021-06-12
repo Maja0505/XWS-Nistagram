@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/model"
 	"errors"
 	"fmt"
@@ -41,13 +40,17 @@ func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationsh
 
 func (repository *UserFollowersRepository) UnfollowUser(fr *model.FollowRelationship) error{
 
-	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r:follow]->( u2:User{ userId:$userId2 }) delete r" , map[string]interface{}{
+	result,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r:follow]->( u2:User{ userId:$userId2 }) delete r return r" , map[string]interface{}{
 		"userId1" : fr.User,
 		"userId2" : fr.FollowedUser,
 	})
 
 	if err != nil{
 		return err
+	}
+
+	if !result.Next(){
+		return errors.New("User are already unfollowed, or user1,user2 or relationship doesn't exist")
 	}
 
 	return nil
@@ -89,13 +92,13 @@ func (repository *UserFollowersRepository) CreateUserNodeIfNotExist(userId strin
 }
 
 
-func (repository *UserFollowersRepository) AcceptFollowRequest(dto *dto.AcceptFollowRequestDTO) error{
+func (repository *UserFollowersRepository) AcceptFollowRequest(user string,userWitchSendRequest string) error{
 
-	_,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r1:followRequest]->( u2:User{ userId:$userId2 }) " +
+	result,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r1:followRequest]->( u2:User{ userId:$userId2 }) " +
 		"delete r1 " +
-		"MERGE (u1)-[r2:follow{close_friend:$close,mute:$mute}]->(u2)" , map[string]interface{}{
-		"userId1" : dto.UserWitchSendRequest,
-		"userId2" : dto.User,
+		"MERGE (u1)-[r2:follow{close_friend:$close,mute:$mute}]->(u2) return r1" , map[string]interface{}{
+		"userId1" : userWitchSendRequest,
+		"userId2" : user,
 		"mute" : false,
 		"close" : false,
 
@@ -103,6 +106,30 @@ func (repository *UserFollowersRepository) AcceptFollowRequest(dto *dto.AcceptFo
 
 	if err != nil{
 		return err
+	}
+
+	if !result.Next(){
+		return errors.New("Already accepted follow request, or user1,user2 or relationship does't exist")
+	}
+
+	return nil
+
+}
+
+
+func (repository *UserFollowersRepository) CancelFollowRequest(user string,userWitchSendRequest string) error{
+	result,err := repository.Session.Run("match (u1:User{ userId:$userWitchSendRequest } )-[r1:followRequest]->( u2:User{ userId:$user }) " +
+		"delete r1 return r1", map[string]interface{}{
+		"userWitchSendRequest" : userWitchSendRequest,
+		"user" : user,
+	})
+
+	if err != nil{
+		return err
+	}
+
+	if !result.Next(){
+		return errors.New("Already cancel follow request, or user1,user2 or relationship does't exits!")
 	}
 
 	return nil
