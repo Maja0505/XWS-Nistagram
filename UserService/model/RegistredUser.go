@@ -1,5 +1,7 @@
 package model
 
+
+
 type RegisteredUser struct  {
 	User `bson:",inline"`
 	Following int64 `bson:"following,omitempty"`
@@ -9,11 +11,22 @@ type RegisteredUser struct  {
 	Biography string `bson:"biography,omitempty"`
 	ProfilePicture string `bson:"profile_picture,omitempty"`
 	ProfileSettings ProfileSettings `bson:"profile_settings,omitempty"`
+	NotificationSettings NotificationSettings `bson:"notification_settings,omitempty"`
 }
+
 
 type ProfileSettings struct {
 	Public bool `bson:"public,omitempty"`
 	MessageRequest bool `bson:"message_request,omitempty"`
 	AllowTags bool `bson:"allow_tags,omitempty"`
 	ActiveProfile bool `bson:"active_profile,omitempty"`
+}
+
+type NotificationSettings struct {
+	LikeNotification bool `bson:"like_notification,omitempty"`
+	CommentNotification bool `bson:"comment_notification,omitempty"`
+	MessageRequestNotification bool `bson:"message_request_notification,omitempty"`
+	MessageNotification bool `bson:"message_notification,omitempty"`
+	FollowRequestNotification bool `bson:"follow_request_notification,omitempty"`
+	FollowNotification bool `bson:"follow_notification,omitempty"`
 }
