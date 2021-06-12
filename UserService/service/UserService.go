@@ -83,3 +83,18 @@ func (service *UserService) ConvertUserIdsToUsers(userIds dto.UserIdsDTO) (*[]dt
 	}
 	return users,nil
 }
+
+func (service *UserService) ChangePassword(username string,passwordDto dto.PasswordDTO) (bool,error) {
+	if passwordDto.NewPassword != passwordDto.ConfirmNewPassword{
+		return true,errors.New("Please make sure both passwords match.")
+	}
+	if service.Repo.CheckOldPassword(username,passwordDto.OldPassword) == false{
+		return true,errors.New("Your old password was entered incorrectly. Please enter it again.")
+	}
+	err := service.Repo.ChangePassword(username,passwordDto.NewPassword)
+	if err != nil{
+		return false,err
+	}
+	return true,nil
+
+}

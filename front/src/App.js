@@ -8,6 +8,7 @@ import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
 
+
 function App() {
   const logedUsername = localStorage.getItem("username");
 
@@ -23,7 +24,7 @@ function App() {
               path="/registration"
               component={RegistrationPage}
             ></Route>
-            <Route exact path="/settings" component={Settings}></Route>
+            <Route exact path="/accounts/*" component={Settings}></Route>
             <Route path="/login" component={LoginPage}></Route>
             <Route path="/registration" component={RegistrationPage}></Route>
             <Route
@@ -33,6 +34,8 @@ function App() {
             <Route path="/dialog/:post"   render={(props) => <PostDialog {...props} />}>
               <PostDialog></PostDialog>
             </Route>
+           
+
           </Switch>
         </div>
       </Router>

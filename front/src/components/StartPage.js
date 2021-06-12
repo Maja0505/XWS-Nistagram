@@ -7,7 +7,7 @@ const StartPage = () => {
   return <div>
       <Router>
           <Switch>
-            <Route  path="/settings" component={Settings}></Route>
+            <Route  path="/accounts" component={Settings}></Route>
             <Route  path="/dialog" component={PostDialog}></Route>
             <Route  path="/homePage" component={UserHomePage}></Route>
 
