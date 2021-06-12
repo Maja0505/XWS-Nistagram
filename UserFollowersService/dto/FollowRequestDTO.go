@@ -1,6 +1,6 @@
 package dto
 
-type AcceptFollowRequestDTO struct {
+type FollowRequestDTO struct {
 	User				 string
 	UserWitchSendRequest string
 }

@@ -45,13 +45,89 @@ func (handler *UserFollowersHandler) UnfollowUser(w http.ResponseWriter, r *http
 
 	err = handler.Service.UnfollowUser(&data)
 	if err != nil{
-		w.WriteHeader(http.StatusExpectationFailed)
+		http.Error(w,err.Error(),417)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 
 
+}
+
+func (handler *UserFollowersHandler) AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var data dto.FollowRequestDTO
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.Service.AcceptFollowRequest(&data)
+	if err != nil{
+		http.Error(w,err.Error(),417)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var data dto.FollowRequestDTO
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.Service.CancelFollowRequest(&data)
+	if err != nil{
+		http.Error(w,err.Error(),417)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) SetCloseFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var data dto.CloseFriendDTO
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.Service.SetCloseFriend(&data)
+	if err != nil{
+		http.Error(w,err.Error(),417)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) SetMuteFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var data dto.MuteFriendDTO
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.Service.SetMuteFriend(&data)
+	if err != nil{
+		http.Error(w,err.Error(),417)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (handler *UserFollowersHandler) GetAllFollowedUsers(w http.ResponseWriter, r *http.Request) {
@@ -99,26 +175,7 @@ func (handler *UserFollowersHandler) GetAllFollowersByUser(w http.ResponseWriter
 	w.WriteHeader(http.StatusOK)
 }
 
-func (handler *UserFollowersHandler) AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var data dto.AcceptFollowRequestDTO
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		w.WriteHeader(http.StatusExpectationFailed)
-		return
-	}
-
-	err = handler.Service.AcceptFollowRequest(&data)
-	if err != nil{
-		w.WriteHeader(http.StatusExpectationFailed)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (handler *UserFollowersHandler) GetAllFollowRequsts(w http.ResponseWriter, r *http.Request) {
+func (handler *UserFollowersHandler) GetAllFollowRequests(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -137,6 +194,50 @@ func (handler *UserFollowersHandler) GetAllFollowRequsts(w http.ResponseWriter, 
 	}
 
 	json.NewEncoder(w).Encode(followRequests)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) GetAllCloseFriends(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//potrebno je pozvati http metodu iz userService
+	closeFriends,err := handler.Service.GetAllCloseFriends(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(closeFriends)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) GetAllMuteFriends(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//potrebno je pozvati http metodu iz userService
+	muteFriends,err := handler.Service.GetAllMuteFriends(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(muteFriends)
 	w.WriteHeader(http.StatusOK)
 }
 
