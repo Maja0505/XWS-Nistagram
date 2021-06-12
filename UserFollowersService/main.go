@@ -43,20 +43,31 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 	return session, driver, nil
 }
 
-func initRepo(session neo4j.Session) *repository.UserFollowersRepository {
+func initUserFollowRepo(session neo4j.Session) *repository.UserFollowersRepository {
 	return &repository.UserFollowersRepository{Session: session}
 }
 
-func initService(repo *repository.UserFollowersRepository) *service.UserFollowersService {
+func initUserFollowService(repo *repository.UserFollowersRepository) *service.UserFollowersService {
 	return &service.UserFollowersService{Repository:repo}
 }
 
-func initHandler(service *service.UserFollowersService) *handler.UserFollowersHandler {
+func initUserFollowHandler(service *service.UserFollowersService) *handler.UserFollowersHandler {
 	return &handler.UserFollowersHandler{Service: service}
 }
 
-func handleFunctions(handler *handler.UserFollowersHandler){
-	router := mux.NewRouter().StrictSlash(true)
+func initUserBlockRepo(session neo4j.Session) *repository.BlockedUserRepository {
+	return &repository.BlockedUserRepository{Session: session}
+}
+
+func initUserBlockService(repo *repository.BlockedUserRepository) *service.BlockedUserService {
+	return &service.BlockedUserService{Repository:repo}
+}
+
+func initUserBlockHandler(service *service.BlockedUserService) *handler.BlockedUserHandler {
+	return &handler.BlockedUserHandler{Service: service}
+}
+
+func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux.Router){
 
 	router.HandleFunc("/followUser",handler.FollowUser).Methods("POST")
 	router.HandleFunc("/unfollowUser",handler.UnfollowUser).Methods("PUT")
@@ -74,8 +85,15 @@ func handleFunctions(handler *handler.UserFollowersHandler){
 	router.HandleFunc("/checkFollowing/{userId}/{followedUserId}",handler.CheckFollowing).Methods("GET")
 
 
-	fmt.Println("Server running on port " + os.Getenv("USER_FOLLOWERS_SERVICE_PORT"))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),router))
+
+}
+
+func handleUserBlockFunctions(handler *handler.BlockedUserHandler,router *mux.Router){
+
+	router.HandleFunc("/blockUser",handler.BlockUser).Methods("POST")
+	router.HandleFunc("/getAllBlockUsers/{userId}",handler.GetAllBlockedUsers).Methods("GET")
+	router.HandleFunc("/checkBlock/{userId}/{blockedUserId}",handler.CheckBlock).Methods("GET")
+
 }
 
 func init() {
@@ -90,12 +108,26 @@ func init() {
 
 func main() {
 	db:= initDB()
-	repo :=initRepo(db)
-	service :=initService(repo)
-	handler :=initHandler(service)
-	handleFunctions(handler)
+
+	userFollowRepo :=initUserFollowRepo(db)
+	userFollowService :=initUserFollowService(userFollowRepo)
+	userFollowHandler :=initUserFollowHandler(userFollowService)
+
+	userBlockRepo :=initUserBlockRepo(db)
+	userBlockService :=initUserBlockService(userBlockRepo)
+	userBlockHandler :=initUserBlockHandler(userBlockService)
 
 
+	router := mux.NewRouter().StrictSlash(true)
+
+	handleUserFollowFunctions(userFollowHandler,router)
+	handleUserBlockFunctions(userBlockHandler,router)
+
+
+	fmt.Println("Server running on port " + os.Getenv("USER_FOLLOWERS_SERVICE_PORT"))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),router))
 
 }
+
+
 
