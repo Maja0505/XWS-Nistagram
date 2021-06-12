@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Snackbar from '@material-ui/core/Snackbar';
 import { Alert } from "@material-ui/lab";
 import ProfilePrivacy from "./ProfilePrivacy.js";
+import PushNotificationPage from "./PushNotificationPage.js";
 
 
 const tabList = [
@@ -65,7 +66,9 @@ const TabChanged = () => {
   }else if(value === 1){
     return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
   }else if(value === 2){
-    return <ProfilePrivacy setOpen={setOpen} setMessage={setMessage}></ProfilePrivacy>
+    return <ProfilePrivacy></ProfilePrivacy>
+  }else if(value === 3){
+    return <PushNotificationPage></PushNotificationPage>
   }
 }
 
@@ -77,6 +80,8 @@ const handleUrlForTab = (value) => {
     route = '/accounts/password/change/'
   }else if(value === 2){
     route = '/accounts/privacy/'
+  }else if(value === 3){
+    route = '/accounts/notification/'
   }
   history.push(route)
 }
@@ -90,6 +95,8 @@ useEffect(() => {
     setValue(1)
   }else if(urls[1] === '/privacy/'){
     setValue(2)
+  }else if(urls[1] === '/notification/'){
+    setValue(3)
   }
 
 }, []);

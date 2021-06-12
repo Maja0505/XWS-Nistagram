@@ -103,12 +103,44 @@ func (service *UserService) UpdatePublicProfileSetting(username string,setting s
 	return service.Repo.UpdatePublicProfileSetting(username,setting  == "true")
 }
 
-func (service *UserService) UpdateMessageRequestSetting(username string, setting string) interface{} {
+func (service *UserService) UpdateMessageRequestSetting(username string, setting string) error {
 	return service.Repo.UpdateMessageRequestSetting(username,setting  == "true")
 
 }
 
-func (service *UserService) UpdateAllowTagsSetting(username string, setting string) interface{} {
+func (service *UserService) UpdateAllowTagsSetting(username string, setting string) error {
 	return service.Repo.UpdateAllowTagsSetting(username,setting  == "true")
 
 }
+
+func (service *UserService) UpdateLikeNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateLikeNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateCommentNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateCommentNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateMessageRequestNotificationSetting(username string, setting string) error{
+	return service.Repo.UpdateMessageRequestNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateMessageNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateMessageNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateFollowRequestNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateFollowRequestNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateFollowNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateFollowNotificationSetting(username,setting  == "true")
+
+}
+
+
