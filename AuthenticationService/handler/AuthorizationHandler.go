@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"os"
 )
 
 type AuthorizationHandler struct{
@@ -44,7 +45,9 @@ func (handler *AuthorizationHandler) Authorize(obj string, act string, adapter p
 }
 
 func enforce(sub string, obj string, act string, adapter persist.Adapter) (bool, error) {
-	enforcer := casbin.NewEnforcer("C:\\Users\\danic\\GOprojects\\src\\XWS-Nistagram\\AuthenticationService\\model\\authorization\\auth_model.conf", adapter)
+	pwd, _ := os.Getwd()
+	fmt.Println(pwd)
+	enforcer := casbin.NewEnforcer(pwd+"\\model\\authorization\\auth_model.conf", adapter)
 	err := enforcer.LoadPolicy()
 	if err != nil {
 		return false, fmt.Errorf("failed to load policy from DB: %w", err)

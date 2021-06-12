@@ -3,6 +3,7 @@ package service
 import (
 	"XWS-Nistagram/AuthenticationService/model/authentication"
 	"XWS-Nistagram/AuthenticationService/repository"
+	"encoding/base64"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/twinj/uuid"
@@ -26,8 +27,8 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 	td.RefreshUuid = uuid.NewV4().String()
 
 	var err error
-	//Creating Access Token
-	os.Setenv("ACCESS_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
+
+	os.Setenv("ACCESS_SECRET", "") //this should be in an env file
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.AccessUuid
@@ -35,13 +36,14 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 	atClaims["exp"] = td.AtExpires
 	atClaims["role"] = role
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	td.AccessToken, err = at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
+	secret,_:=base64.URLEncoding.DecodeString(os.Getenv("ACCESS_SECRET"))
+	td.AccessToken, err = at.SignedString(secret)
 	if err != nil {
 		return nil, err
 	}
 	fmt.Println("Uspesno kreiran access token!")
 	//Creating Refresh Token
-	os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
+	os.Setenv("REFRESH_SECRET", "") //this should be in an env file
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUuid
 	rtClaims["user_id"] = userid
@@ -60,6 +62,7 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 func (service *AuthenticationService)  ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	//normally Authorization the_token_xxx
+	fmt.Println(bearToken)
 	strArr := strings.Split(bearToken, " ")
 	if len(strArr) == 2 {
 		return strArr[1]
@@ -74,9 +77,11 @@ func (service *AuthenticationService) VerifyToken(r *http.Request) (*jwt.Token, 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
+		secret,_:=base64.URLEncoding.DecodeString(os.Getenv("ACCESS_SECRET"))
+		return secret, nil
 	})
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	return token, nil
@@ -122,8 +127,8 @@ func (service *AuthenticationService) ExtractTokenMetadata(r *http.Request) (*au
 	return nil, err
 }
 
-func (service *AuthenticationService) CreateAuth(id uint64, ts *authentication.TokenDetails) error {
-	return service.Repository.CreateAuth(id,ts)
+func (service *AuthenticationService) CreateAuth(id uint64, tokenDetails *authentication.TokenDetails) error {
+	return service.Repository.CreateAuth(id,tokenDetails)
 }
 
 func (service *AuthenticationService) DeleteAuth(accessUuid string) (int64,error) {

@@ -42,18 +42,18 @@ func (handler *AuthenticationHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
 		return
 	}
-	ts, err := handler.Service.CreateToken(user.ID,user.Role)
+	tokenDetails, err := handler.Service.CreateToken(user.ID,user.Role)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	saveErr := handler.Service.CreateAuth(user.ID, ts)
+	saveErr := handler.Service.CreateAuth(user.ID, tokenDetails)
 	if saveErr != nil {
 		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}
 	tokens := map[string]string{
-		"access_token":  ts.AccessToken,
-		"refresh_token": ts.RefreshToken,
+		"access_token":  tokenDetails.AccessToken,
+		"refresh_token": tokenDetails.RefreshToken,
 	}
 	c.JSON(http.StatusOK, tokens)
 }

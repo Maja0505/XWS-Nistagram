@@ -4,7 +4,7 @@ import (
 	"XWS-Nistagram/AuthenticationService/handler"
 	"XWS-Nistagram/AuthenticationService/repository"
 	"XWS-Nistagram/AuthenticationService/service"
-	fileadapter "github.com/casbin/casbin/persist/file-adapter"
+	"github.com/casbin/casbin/persist/file-adapter"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"log"
@@ -44,7 +44,8 @@ func initAuthorizationHandler(authenticatonService *service.AuthenticationServic
 
 func handleFunc(authenticationHandler *handler.AuthenticationHandler,authorizationHandler *handler.AuthorizationHandler) {
 	router := gin.Default()
-	fileAdapter := fileadapter.NewAdapter("C:\\Users\\danic\\GOprojects\\src\\XWS-Nistagram\\AuthenticationService\\model\\authorization\\policy.csv")
+	pwd, _ := os.Getwd()
+	fileAdapter := fileadapter.NewAdapter(pwd+"\\model\\authorization\\policy.csv")
 	router.POST("/login", authenticationHandler.Login)
 	authorized := router.Group("/")
 	authorized.Use(gin.Logger())
