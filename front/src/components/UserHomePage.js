@@ -30,7 +30,7 @@ const UserHomePage = () => {
 
   useEffect(() => {
     axios
-      .get("/api/user/user/" + username)
+      .get("/api/user/" + username)
       .then((res) => {
         console.log(res.data);
         setUser(res.data);
@@ -58,7 +58,7 @@ const UserHomePage = () => {
 
   const buttonForEditProfile = (
     <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
-      <Link to="/settings" style={{ textDecoration: "none", color: "gray" }}>
+      <Link to="/accounts" style={{ textDecoration: "none", color: "gray" }}>
         Edit profile
       </Link>
     </Button>

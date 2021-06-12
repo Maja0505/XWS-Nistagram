@@ -115,3 +115,32 @@ func (repo *UserRepository) FindUsernameByUserId(userIds dto.UserIdsDTO) (*[]dto
 	err = cursor.All(context.TODO(),&users)
 	return &users,nil
 }
+
+func (repo *UserRepository) ChangePassword(username string, newPassword string) error {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{
+		{"$set", bson.D{{"password", newPassword}}},
+	})
+	if err != nil{
+		return err
+	}
+	return nil
+
+}
+
+func (repo *UserRepository) CheckOldPassword(username string, password string) bool {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	filter := bson.D{
+		{"$and", bson.A{
+			bson.M{"username": username},
+			bson.M{"password": password},
+		}},
+	}
+	result,_ := coll.Find(context.TODO(),filter)
+	if result.RemainingBatchLength() == 0{
+		return false
+	}
+	return true
+}

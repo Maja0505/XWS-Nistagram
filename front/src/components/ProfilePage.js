@@ -35,7 +35,7 @@ const ProfilePage = () => {
   const [userCopy, setUserCopy] = useState({});
 
   useEffect(() => {
-    axios.get("/api/user/user/" + username).then((res) => {
+    axios.get("/api/user/" + username).then((res) => {
       setUser(res.data);
       setUserCopy(res.data);
       res.data.Gender === 0
