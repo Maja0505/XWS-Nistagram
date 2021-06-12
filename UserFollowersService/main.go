@@ -61,9 +61,15 @@ func handleFunctions(handler *handler.UserFollowersHandler){
 	router.HandleFunc("/followUser",handler.FollowUser).Methods("POST")
 	router.HandleFunc("/unfollowUser",handler.UnfollowUser).Methods("PUT")
 	router.HandleFunc("/acceptFollowRequest",handler.AcceptFollowRequest).Methods("PUT")
+	router.HandleFunc("/setCloseFriend",handler.SetCloseFriend).Methods("PUT")
+	router.HandleFunc("/setMuteFriend",handler.SetMuteFriend).Methods("PUT")
+
 	router.HandleFunc("/allFollows/{userId}",handler.GetAllFollowedUsers).Methods("GET")
 	router.HandleFunc("/allFollowers/{userId}",handler.GetAllFollowersByUser).Methods("GET")
-	router.HandleFunc("/allFollowRequests/{userId}",handler.GetAllFollowRequsts).Methods("GET")
+	router.HandleFunc("/allFollowRequests/{userId}",handler.GetAllFollowRequests).Methods("GET")
+	router.HandleFunc("/allCloseFriends/{userId}",handler.GetAllCloseFriends).Methods("GET")
+	router.HandleFunc("/allMuteFriends/{userId}",handler.GetAllMuteFriends).Methods("GET")
+
 	router.HandleFunc("/checkFollowing/{userId}/{followedUserId}",handler.CheckFollowing).Methods("GET")
 
 
