@@ -61,6 +61,7 @@ func handleFunctions(handler *handler.UserFollowersHandler){
 	router.HandleFunc("/followUser",handler.FollowUser).Methods("POST")
 	router.HandleFunc("/unfollowUser",handler.UnfollowUser).Methods("PUT")
 	router.HandleFunc("/acceptFollowRequest",handler.AcceptFollowRequest).Methods("PUT")
+	router.HandleFunc("/cancelFollowRequest",handler.CancelFollowRequest).Methods("PUT")
 	router.HandleFunc("/setCloseFriend",handler.SetCloseFriend).Methods("PUT")
 	router.HandleFunc("/setMuteFriend",handler.SetMuteFriend).Methods("PUT")
 
