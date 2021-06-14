@@ -18,7 +18,7 @@ import (
 
 func initDB() *mongo.Client {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://" + os.Getenv("HOST") + ":27017"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://" + os.Getenv("USER_SERVICE_HOST") + ":27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,10 +62,8 @@ func initVerificationRequestHandler(service *service.VerificationRequestService)
 func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 	router.HandleFunc("/",handler.FindAll).Methods("GET")
-	//router.HandleFunc("/create",handler.Create).Methods("POST")
 	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
 	router.HandleFunc("/create",handler.CreateRegisteredUser).Methods("POST")
-	//router.HandleFunc("/update/{id}",handler.Update).Methods("PUT")
 	router.HandleFunc("/{username}",handler.FindUserByUsername).Methods("GET")
 	router.HandleFunc("/search/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")

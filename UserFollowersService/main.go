@@ -16,30 +16,43 @@ import (
 func initDB()  neo4j.Session{
 	session, _, err := ConnectToDB()
 	if err != nil {
+		log.Println(err)
 		log.Fatalln("Error connecting to Database")
-		log.Fatalln(err)
 	}
-//	defer driver.Close()
-//	defer session.Close()
+
 	log.Println("Starting to listen..")
 	return session
 }
 
 func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
-	// define driver, session and result vars
 	var (
 		driver  neo4j.Driver
 		session neo4j.Session
 		err     error
 	)
-	// initialize driver to connect to localhost with ID and password
-	if driver, err = neo4j.NewDriver("neo4j://localhost:7687", neo4j.BasicAuth("neo4j", "danica", "")); err != nil {
+	if driver, err = neo4j.NewDriver("neo4j://neo4j:7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
 	}
-	// Open a new session with write access
-	if session, err = driver.Session(neo4j.AccessModeWrite); err != nil {
+	if session = driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite}); err != nil {
 		return nil, nil, err
 	}
+
+	_,err  = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result,err := tx.Run("match (n) return n;", map[string]interface{}{})
+		if err != nil{
+			return nil, err
+		}
+		if result.Next(){
+			return result.Record().Values[0], err
+		}
+
+		return nil, result.Err()
+	})
+
+	if err != nil{
+		return nil, nil, err
+	}
+
 	return session, driver, nil
 }
 

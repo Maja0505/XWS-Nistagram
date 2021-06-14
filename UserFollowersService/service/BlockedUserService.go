@@ -1,6 +1,7 @@
 package service
 
 import (
+	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/model"
 	"XWS-Nistagram/UserFollowersService/repository"
 )
@@ -17,12 +18,20 @@ func (service *BlockedUserService) BlockUser(br *model.BlockRelationship) error{
 	return nil
 }
 
-func (service *BlockedUserService) GetAllBlockedUser(userId string) (*[]interface{},error){
+func (service *BlockedUserService) GetAllBlockedUser(userId string) (*[]dto.UserByUsernameDTO,error){
 	blockedUsers,err := service.Repository.GetAllBlockedUsers(userId)
 	if err != nil{
 		return nil,err
 	}
-	return blockedUsers,nil
+
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(blockedUsers)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
+
 }
 
 func (service *BlockedUserService) CheckBlock(userId string, blockedUserId string) (interface{},error){
@@ -33,3 +42,4 @@ func (service *BlockedUserService) CheckBlock(userId string, blockedUserId strin
 
 	return block, nil
 }
+
