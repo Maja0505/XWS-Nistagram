@@ -22,7 +22,7 @@ func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationsh
 	}
 
 	_,err = repository.Session.Run("MATCH (u1:User),(u2:User) WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
-		"MERGE (u1)-[r:follow{close_friend:$close,mute:$mute}]->(u2)",map[string]interface{}{
+		"MERGE (u1)-[r:follow]->(u2) set r.close_friend=$close set r.mute=$mute",map[string]interface{}{
 		"userId1" : fr.User ,
 		"userId2" : fr.FollowedUser,
 		"mute" : fr.Muted,
@@ -175,6 +175,7 @@ func (repository *UserFollowersRepository) SetFriendForMute(userId string,friend
 	return nil
 
 }
+
 
 
 func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId string) (*[]interface{},error){

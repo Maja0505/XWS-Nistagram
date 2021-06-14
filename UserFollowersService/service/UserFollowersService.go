@@ -4,6 +4,12 @@ import (
 	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/mapper"
 	"XWS-Nistagram/UserFollowersService/repository"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 type UserFollowersService struct{
@@ -72,7 +78,7 @@ func (service *UserFollowersService) SetMuteFriend(dto *dto.MuteFriendDTO) error
 	return nil
 }
 
-func (service *UserFollowersService) GetAllFollowedUsers(userId string) ( *[]interface{},error) {
+func (service *UserFollowersService) GetAllFollowedUsers(userId string) ( *[]dto.UserByUsernameDTO,error) {
 
 	users,err := service.Repository.GetAllFollowedUsersByUser(userId)
 
@@ -80,10 +86,17 @@ func (service *UserFollowersService) GetAllFollowedUsers(userId string) ( *[]int
 		return nil, err
 	}
 
-	return users,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(users)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
+
 }
 
-func (service *UserFollowersService) GetAllFollowersByUser(userId string) (*[]interface{}, error) {
+func (service *UserFollowersService) GetAllFollowersByUser(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	users,err := service.Repository.GetAllFollowersByUser(userId)
 
@@ -91,10 +104,16 @@ func (service *UserFollowersService) GetAllFollowersByUser(userId string) (*[]in
 		return nil, err
 	}
 
-	return users,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(users)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
 }
 
-func (service *UserFollowersService) GetAllFollowRequests(userId string) (*[]interface{}, error) {
+func (service *UserFollowersService) GetAllFollowRequests(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	users,err := service.Repository.GetAllFollowRequests(userId)
 
@@ -102,10 +121,16 @@ func (service *UserFollowersService) GetAllFollowRequests(userId string) (*[]int
 		return nil, err
 	}
 
-	return users,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(users)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
 }
 
-func (service *UserFollowersService) GetAllCloseFriends(userId string) (*[]interface{}, error) {
+func (service *UserFollowersService) GetAllCloseFriends(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	closeFriends,err := service.Repository.GetAllCloseFriends(userId)
 
@@ -113,10 +138,16 @@ func (service *UserFollowersService) GetAllCloseFriends(userId string) (*[]inter
 		return nil, err
 	}
 
-	return closeFriends,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(closeFriends)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
 }
 
-func (service *UserFollowersService) GetAllMuteFriends(userId string) (*[]interface{}, error) {
+func (service *UserFollowersService) GetAllMuteFriends(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	muteFriends,err := service.Repository.GetAllMuteFriends(userId)
 
@@ -124,7 +155,13 @@ func (service *UserFollowersService) GetAllMuteFriends(userId string) (*[]interf
 		return nil, err
 	}
 
-	return muteFriends,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(muteFriends)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
 }
 
 
@@ -135,4 +172,30 @@ func (service *UserFollowersService) CheckFollowing(userId string, followedUserI
 	}
 
 	return following,err
+}
+
+
+func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByUsernameDTO,error){
+
+	reqUrl := fmt.Sprintf("http://" +os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT")+ "/convert-user-ids")
+
+	type UserIdsDTO struct {
+		UserIds []interface{}
+	}
+
+	userIdsDto := UserIdsDTO{}
+	userIdsDto.UserIds = *users
+	jsonUserids,_ := json.Marshal(userIdsDto)
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []dto.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
 }
