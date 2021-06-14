@@ -36,8 +36,10 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 	atClaims["exp"] = td.AtExpires
 	atClaims["role"] = role
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	secret,_:=base64.URLEncoding.DecodeString(os.Getenv("ACCESS_SECRET"))
-	td.AccessToken, err = at.SignedString(secret)
+	fmt.Println(os.Getenv("ACCESS_SECRET"))
+	accessSecret,_:=base64.URLEncoding.DecodeString(os.Getenv("ACCESS_SECRET"))
+
+	td.AccessToken, err = at.SignedString(accessSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +52,8 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 	rtClaims["exp"] = td.RtExpires
 	atClaims["role"] = role
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
-	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("REFRESH_SECRET")))
+	refreshSecret,_:=base64.URLEncoding.DecodeString(os.Getenv("REFRESH_SECRET"))
+	td.RefreshToken, err = rt.SignedString(refreshSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +65,6 @@ func (service *AuthenticationService)  CreateToken(userid uint64,role string) (*
 func (service *AuthenticationService)  ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	//normally Authorization the_token_xxx
-	fmt.Println(bearToken)
 	strArr := strings.Split(bearToken, " ")
 	if len(strArr) == 2 {
 		return strArr[1]
