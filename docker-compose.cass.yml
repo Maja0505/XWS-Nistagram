@@ -10,12 +10,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 60
-    networks:
-      - cassandra
     ports:
       - "9042:9042"
     volumes:
       - ./cass.yaml:/etc/cassandra/cass.yaml
-
-networks:
-  cassandra:

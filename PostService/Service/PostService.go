@@ -12,6 +12,7 @@ import (
 	"image"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type PostService struct {
@@ -108,7 +109,7 @@ func (service *PostService) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]DTO.Use
 		fmt.Println(err)
 		return  nil, err
 	}
-	reqUrl := fmt.Sprintf("http://user-service:8080/convert-user-ids") //namestiti da moze i lokalno
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-user-ids") //namestiti da moze i lokalno
 
 	type UserIdsDTO struct {
 		UserIds []string

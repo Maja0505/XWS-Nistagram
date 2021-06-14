@@ -8,24 +8,35 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 var Session *gocql.Session
 
 func init() {
-	var err error
-	cluster := gocql.NewCluster("cass")
-	cluster.ProtoVersion = 4
-	cluster.Keyspace = "postkeyspace"
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	cluster := gocql.NewCluster(os.Getenv("POST_SERVICE_HOST"))
+	//cluster.ProtoVersion = 4
+	//cluster.Keyspace = "postkeyspace"
 
 	Session, err = cluster.CreateSession()
 	if err != nil {
 		panic(err)
 	}
+	if err := Session.Query("create keyspace  if not exists postkeyspace with replication = {'class':'SimpleStrategy','replication_factor':1};").Exec(); err != nil {
+		fmt.Println("Error while inserting postkeyspace")
+		fmt.Println(err)
+	}
 	fmt.Println("Cassandra well initialized!")
 }
+
 
 func initPostRepo(session *gocql.Session) *Repository.PostRepository{
 	return &Repository.PostRepository{Session: *session}
@@ -62,7 +73,7 @@ func handleFunc(handler *Handler.PostHandler){
 	origins := handlers.AllowedOrigins([]string{"*"})
 
 	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)))
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("POST_SERVICE_PORT"), handlers.CORS(headers, methods, origins)(router)))
 	//log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("POST_SERVICE_PORT")),router))
 	//log.Fatal(http.ListenAndServe(":8000", router))
 }
@@ -73,6 +84,6 @@ func main(){
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
 
-	//postRepo.CreateTables()
+	postRepo.CreateTables()
 	handleFunc(handler)
 }
