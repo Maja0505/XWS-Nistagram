@@ -192,3 +192,77 @@ func (handler *UserHandler) UpdateAllowTagsSetting(w http.ResponseWriter, r *htt
 	}
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *UserHandler) UpdateLikeNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateLikeNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateCommentNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateCommentNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateMessageRequestNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateMessageRequestNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateMessageNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateMessageNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *UserHandler) UpdateFollowRequestNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateFollowRequestNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	setting := vars["setting"]
+	username := vars["username"]
+	err := handler.Service.UpdateFollowNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+

@@ -11,6 +11,7 @@ const ProfilePrivacy = () => {
     const [accountPrivacy,setAccountPrivacy] = useState(false)
     const [messageRequest,setMessageRequest] = useState(false)
     const [allowTags,setAllowTags] = useState(false)
+    const [load, setLoad] = useState(false)
 
 
     useEffect(() => {
@@ -18,6 +19,7 @@ const ProfilePrivacy = () => {
           setAccountPrivacy(res.data.ProfileSettings.Public)
           setMessageRequest(res.data.ProfileSettings.MessageRequest)
           setAllowTags(res.data.ProfileSettings.AllowTags)
+          setLoad(true)
 
         });
         
@@ -67,7 +69,7 @@ const ProfilePrivacy = () => {
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
       <Grid item xs={1}></Grid>
-      <Grid container item xs={10}>
+     {load && <Grid container item xs={10}>
         <Grid style={{ height: "30%", width: "100%" }}>
           <Grid style={{ height: "30%", width: "100%" }}>
             <p style={{ fontSize: 25, textAlign: "left" }}>Account Privacy</p>
@@ -130,7 +132,7 @@ const ProfilePrivacy = () => {
           </Grid>
           <Divider />
         </Grid>
-      </Grid>
+      </Grid>}
       <Grid item xs={1}></Grid>
     </Grid>
   );

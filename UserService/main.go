@@ -71,6 +71,13 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/{username}/public-profile/{setting}",handler.UpdatePublicProfileSetting).Methods("PUT")
 	router.HandleFunc("/{username}/message-request/{setting}",handler.UpdateMessageRequestSetting).Methods("PUT")
 	router.HandleFunc("/{username}/allow-tags/{setting}",handler.UpdateAllowTagsSetting).Methods("PUT")
+	router.HandleFunc("/{username}/like-notification/{setting}",handler.UpdateLikeNotificationSetting).Methods("PUT")
+	router.HandleFunc("/{username}/comment-notification/{setting}",handler.UpdateCommentNotificationSetting).Methods("PUT")
+	router.HandleFunc("/{username}/message-request-notification/{setting}",handler.UpdateMessageRequestNotificationSetting).Methods("PUT")
+	router.HandleFunc("/{username}/message-notification/{setting}",handler.UpdateMessageNotificationSetting).Methods("PUT")
+	router.HandleFunc("/{username}/follow-request-notification/{setting}",handler.UpdateFollowRequestNotificationSetting).Methods("PUT")
+	router.HandleFunc("/{username}/follow-notification/{setting}",handler.UpdateFollowNotificationSetting).Methods("PUT")
+
 }
 
 func init() {
