@@ -9,6 +9,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { Alert } from "@material-ui/lab";
 import ProfilePrivacy from "./ProfilePrivacy.js";
 import PushNotificationPage from "./PushNotificationPage.js";
+import VerificationRequest from "./VerificationRequest";
+
 
 
 const tabList = [
@@ -31,6 +33,10 @@ const tabList = [
     key: 3,
     id: 3,
     label: "Push Notification",
+  },{
+    key: 4,
+    id: 4,
+    label: "Request verification",
   },
 
 ];
@@ -69,6 +75,8 @@ const TabChanged = () => {
     return <ProfilePrivacy></ProfilePrivacy>
   }else if(value === 3){
     return <PushNotificationPage></PushNotificationPage>
+  }else if(value === 4){
+    return <VerificationRequest></VerificationRequest>
   }
 }
 
@@ -82,6 +90,8 @@ const handleUrlForTab = (value) => {
     route = '/accounts/privacy/'
   }else if(value === 3){
     route = '/accounts/notification/'
+  }else if(value === 4){
+    route = '/accounts/verification/'
   }
   history.push(route)
 }
@@ -97,6 +107,8 @@ useEffect(() => {
     setValue(2)
   }else if(urls[1] === '/notification/'){
     setValue(3)
+  }else if(urls[1] === '/verification/'){
+    setValue(4)
   }
 
 }, []);
