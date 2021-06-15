@@ -20,6 +20,7 @@ const VerificationRequest = ({setOpen,setMessage}) => {
   const [knownAs,setKnownAs] = useState('');
   const [category,setCategory] = useState();
   const [image,setImage] = useState();
+  const [updateMode,setUpdateMode] = useState(false)
 
   const HandleUploadClick = (event) => {
     
@@ -36,6 +37,11 @@ const VerificationRequest = ({setOpen,setMessage}) => {
     setImage(formData)
 
   };
+
+  const HandleClickOnUpdate = () => {
+    setUpdateMode(false)
+  }
+
 
   const HandleClickOnSend = () => {
     
@@ -57,6 +63,8 @@ const VerificationRequest = ({setOpen,setMessage}) => {
         }).then((res)=> {
           setOpen(true)
           setMessage('Successfully sent verification request')
+          setUpdateMode(true)
+          
         })
       
       })  
@@ -112,13 +120,13 @@ const VerificationRequest = ({setOpen,setMessage}) => {
               />
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <TextField fullWidth variant="outlined" size="small" onChange={(event) => setFullName(event.target.value)} />
+              <TextField disabled={updateMode} fullWidth variant="outlined" size="small" onChange={(event) => setFullName(event.target.value)} />
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }} >
-              <TextField fullWidth variant="outlined" size="small"  onChange={(event) => setKnownAs(event.target.value)}/>
+              <TextField disabled={updateMode} fullWidth variant="outlined" size="small"  onChange={(event) => setKnownAs(event.target.value)}/>
             </Grid>
             <Grid item xs={12} style={{ height: "20%", textAlign: "right" }}>
-              <Select native fullWidth variant="outlined" onChange={(event) => setCategory(event.target.value)}>
+              <Select disabled={updateMode} native fullWidth variant="outlined" onChange={(event) => setCategory(event.target.value)}>
                 <option aria-label="None" value="">
                   Select a category for your account
                 </option>
@@ -135,13 +143,13 @@ const VerificationRequest = ({setOpen,setMessage}) => {
                 <option value="Other">Other</option>
               </Select>
             </Grid>
-            <Grid container item xs={12} style={{ height: "auto" }}>
+            <Grid  container item xs={12} style={{ height: "auto" }}>
               <Grid item xs={6}>
                 {!selectedFile && <p style={{textAlign: "left" }}>Please attach a photo of your ID</p>}
                 <img width="100%" src={selectedFile} />
               </Grid>
               <Grid item xs={6} style={{ textAlign: "right"}}>
-                    <Button variant="contained" component="label">
+                    <Button disabled={updateMode} variant="contained" component="label">
                     Choose file
                     <input
                         hidden
@@ -162,9 +170,15 @@ const VerificationRequest = ({setOpen,setMessage}) => {
               </p>
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "left" }}>
+              {updateMode ?
+             <Button color="primary" variant="contained" onClick={HandleClickOnUpdate}>
+              Update request
+             </Button>
+              :
               <Button disabled={fullName === '' || knownAs === '' || category === undefined || image === undefined} color="primary" variant="contained" onClick={HandleClickOnSend}>
                 Send
               </Button>
+              }
             </Grid>
           </Grid>
         </Grid>
