@@ -69,5 +69,3 @@ func (service *VerificationRequestService) Update(userString string ,verificatio
 	return nil
 }
 
-
-

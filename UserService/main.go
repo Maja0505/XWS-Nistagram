@@ -7,6 +7,9 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"log"
 	"net/http"
 	"os"
@@ -85,7 +88,7 @@ func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,r
 	router.HandleFunc("/verification-request/create",handler.Create).Methods("POST")
 	router.HandleFunc("/verification-request/update/{user}",handler.Update).Methods("PUT")
 	router.HandleFunc("/verification-request/upload-verification-doc",handler.UploadImage).Methods("POST")
-
+	router.HandleFunc("/verification-request/get-image/{id}", handler.GetImage).Methods("GET")
 
 }
 
@@ -97,8 +100,11 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-}
 
+	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
+	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+
+}
 
 func main() {
 	database := initDB()
