@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"userService/dto"
@@ -89,6 +90,27 @@ func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *
 	}
 
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
+
+
+}
+
+func (handler *VerificationRequestHandler) GetImage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "image/jpeg")
+	vars := mux.Vars(r)
+	imagepath := vars["id"]
+	if imagepath == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	file,err := ioutil.ReadFile("verification-docs/" + imagepath)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+	w.Write(file)
 
 
 }
