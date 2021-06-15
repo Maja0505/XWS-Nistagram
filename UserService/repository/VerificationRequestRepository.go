@@ -47,3 +47,23 @@ func (repo *VerificationRequestRepository) GetVerificationRequestByUser(user pri
 	}
 	return &verificationRequest,nil
 }
+
+func (repo *VerificationRequestRepository) GetAllVerificationRequests() ( *[]model.VerificationRequest,error) {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("requests")
+	var verificationRequests []model.VerificationRequest
+	cur,err := coll.Find(context.TODO(),bson.M{})
+	if err != nil{
+		return nil,err
+	}
+
+	err = cur.All(context.TODO(),&verificationRequests)
+	if err != nil{
+		return nil, err
+	}
+
+
+	return &verificationRequests,nil
+}
+
+
