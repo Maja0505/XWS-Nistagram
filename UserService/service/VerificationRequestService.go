@@ -98,13 +98,17 @@ func (service *VerificationRequestService) ApproveVerificationRequest(userString
 		return err
 	}
 
-	err = service.Repo.ApproveVerificationRequest(user)
+	vr,err := service.Repo.ApproveVerificationRequest(user)
+	if err != nil{
+		return err
+	}
+
+	err = service.UserService.UpdateVerificationSettings(userString,vr.Category)
 	if err != nil{
 		return err
 	}
 
 	return nil
-
 }
 
 func (service *VerificationRequestService) GetVerificationRequestByUser(userString string) (*dto.VerificationRequestDTO,error){
@@ -125,3 +129,16 @@ func (service *VerificationRequestService) GetVerificationRequestByUser(userStri
 
 }
 
+func (service *VerificationRequestService) DeleteVerificationRequest(userString string) error{
+	user,err := primitive.ObjectIDFromHex(userString)
+	if err != nil{
+		return err
+	}
+
+	err = service.Repo.DeleteVerificationRequestByUser(user)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}

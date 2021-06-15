@@ -252,3 +252,15 @@ func (repo *UserRepository) UpdateFollowNotificationSetting(username string, fol
 
 }
 
+func (repo *UserRepository) UpdateVerificationSettings(userId string,category model.Category) error {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"id_string":userId},bson.D{{"$set",bson.D{{"verification_settings.verified",true},{"verification_settings.category", category}}}})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
