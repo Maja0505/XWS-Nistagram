@@ -1,7 +1,5 @@
 package model
 
-
-
 type RegisteredUser struct  {
 	User `bson:",inline"`
 	Following int64 `bson:"following,omitempty"`
@@ -12,6 +10,7 @@ type RegisteredUser struct  {
 	ProfilePicture string `bson:"profile_picture,omitempty"`
 	ProfileSettings ProfileSettings `bson:"profile_settings,omitempty"`
 	NotificationSettings NotificationSettings `bson:"notification_settings,omitempty"`
+	VerificationSettings VerificationSettings `bson:"verification_settings,omitempty"`
 }
 
 
@@ -29,4 +28,9 @@ type NotificationSettings struct {
 	MessageNotification bool `bson:"message_notification,omitempty"`
 	FollowRequestNotification bool `bson:"follow_request_notification,omitempty"`
 	FollowNotification bool `bson:"follow_notification,omitempty"`
+}
+
+type VerificationSettings struct {
+	Verified bool `bson:"verified,omitempty"`
+	Category *Category `bson:"category,omitempty"`
 }
