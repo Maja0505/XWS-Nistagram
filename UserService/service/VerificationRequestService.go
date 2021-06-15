@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"userService/dto"
 	"userService/mapper"
@@ -14,8 +15,19 @@ type VerificationRequestService struct {
 
 
 func (service *VerificationRequestService) Create(verificationRequestDTO *dto.VerificationRequestDTO) error{
+	userId,err := primitive.ObjectIDFromHex(verificationRequestDTO.User)
+	if err != nil {
+		return err
+	}
+
+	existVerificationRequest,_ := service.Repo.GetVerificationRequestByUser(userId)
+
+	if existVerificationRequest != nil {
+		return errors.New("Aleready exists verification request for user")
+	}
+
 	vq := mapper.ConvertVerificationRequestDTOToVerificationRequest(verificationRequestDTO)
-	err := service.Repo.Create(vq)
+	err = service.Repo.Create(vq)
 	if err != nil{
 		return err
 	}
@@ -67,5 +79,16 @@ func (service *VerificationRequestService) Update(userString string ,verificatio
 		return err
 	}
 	return nil
+}
+
+func (service *VerificationRequestService) GetAllVerificationRequests() (*[]dto.VerificationRequestDTO,error){
+
+	verificationRequests,err := service.Repo.GetAllVerificationRequests()
+	if err != nil {
+		return nil, err
+	}
+
+	verificationRequestsDTOList := mapper.ConvertVerificationRequestsListToVerificationRequestDTOList(verificationRequests)
+	return verificationRequestsDTOList, nil
 }
 

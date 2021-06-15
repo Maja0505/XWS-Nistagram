@@ -28,7 +28,7 @@ func (handler *VerificationRequestHandler) Create(w http.ResponseWriter,r *http.
 
 	err = handler.Service.Create(&vrDTO)
 	if err != nil{
-		w.WriteHeader(http.StatusExpectationFailed)
+		http.Error(w,err.Error(),417)
 		return
 	}
 
@@ -61,10 +61,24 @@ func (handler *VerificationRequestHandler) Update(w http.ResponseWriter,r *http.
 	w.WriteHeader(http.StatusOK)
 }
 
-func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *http.Request){
-	r.ParseMultipartForm(10 << 20)
+func (handler *VerificationRequestHandler) GetAllVerificationRequest(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
 
-	file, h, err := r.FormFile("myFile")
+	vrDto,err := handler.Service.GetAllVerificationRequests()
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(vrDto)
+}
+
+func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *http.Request){
+	vars := mux.Vars(r)
+	imagePath := vars["id"]
+	r.ParseMultipartForm(10 << 20)
+	file, _, err := r.FormFile("myFile")
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
 		fmt.Println(err)
@@ -72,18 +86,14 @@ func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *
 	}
 
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", h.Filename)
-	fmt.Printf("File Size: %+v\n", h.Size)
-	fmt.Printf("MIME Header: %+v\n", h.Header)
 
-	dst, err := os.Create("verification-docs/" + h.Filename)
+	dst, err := os.Create("verification-docs/" + imagePath +".jpg")
 	defer dst.Close()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Copy the uploaded file to the created file on the filesystem
 	if _, err := io.Copy(dst, file); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

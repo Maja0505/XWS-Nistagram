@@ -70,6 +70,46 @@ func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.Verifica
 	return &vq
 }
 
+func ConvertVerificationRequestsListToVerificationRequestDTOList(verificationRequests *[]model.VerificationRequest) *[]dto.VerificationRequestDTO{
+	var verificationRequestDTOList []dto.VerificationRequestDTO
+	for _,vr := range *verificationRequests{
+		verificationRequestDTOList = append(verificationRequestDTOList, dto.VerificationRequestDTO{
+			Username: vr.Username,
+			User: vr.User.Hex(),
+			FullName: vr.FullName,
+			KnowAs: vr.KnownAs,
+			Category: pickCategory(vr.Category),
+			Image: vr.Image,
+		})
+	}
+	return &verificationRequestDTOList
+}
+
+func pickCategory(category model.Category) string{
+	switch int(category) {
+	case 0:
+		return "Blogger/Influencer"
+	case 1:
+		return "Sports"
+	case 2:
+		return "News/Media"
+	case 3:
+		return "Business/Brand/Organization"
+	case 4:
+		return "Government/Politics"
+	case 5:
+		return "Music"
+	case 6:
+		return "Fashion"
+	case 7:
+		return "Entertainment"
+	case 8:
+		return "Other"
+
+	}
+	return "Other"
+}
+
 func ConvertUsersListTOUserFromSearchDTOList(usersList *[]model.RegisteredUser) *[]dto.UserFromSearchDTO{
 	var userFromSearchDTO []dto.UserFromSearchDTO
 	for _,user := range *usersList {
