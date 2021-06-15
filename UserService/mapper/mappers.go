@@ -70,17 +70,20 @@ func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.Verifica
 	return &vq
 }
 
+func ConvertVerificationRequestsToVerificationRequestDTO(vr *model.VerificationRequest) *dto.VerificationRequestDTO{
+	return &dto.VerificationRequestDTO{Username: vr.Username,
+		User: vr.User.Hex(),
+		FullName: vr.FullName,
+		KnowAs: vr.KnownAs,
+		Category: pickCategory(vr.Category),
+		Image: vr.Image,
+	}
+}
+
 func ConvertVerificationRequestsListToVerificationRequestDTOList(verificationRequests *[]model.VerificationRequest) *[]dto.VerificationRequestDTO{
 	var verificationRequestDTOList []dto.VerificationRequestDTO
 	for _,vr := range *verificationRequests{
-		verificationRequestDTOList = append(verificationRequestDTOList, dto.VerificationRequestDTO{
-			Username: vr.Username,
-			User: vr.User.Hex(),
-			FullName: vr.FullName,
-			KnowAs: vr.KnownAs,
-			Category: pickCategory(vr.Category),
-			Image: vr.Image,
-		})
+		verificationRequestDTOList = append(verificationRequestDTOList, *ConvertVerificationRequestsToVerificationRequestDTO(&vr))
 	}
 	return &verificationRequestDTOList
 }

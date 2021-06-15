@@ -24,6 +24,6 @@ type VerificationRequest struct {
 	KnownAs string `bson:"known_as,omitempty"`
 	Admin string `bson:"admin,omitempty"`
 	Category Category `bson:"category,omitempty"`
-	Approved bool `bson:"approved,omitempty"`
+	Approved bool `bson:"approved"`
 	Image string `bson:"image,omitempty"`
 }
