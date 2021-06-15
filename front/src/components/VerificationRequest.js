@@ -2,6 +2,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import React, { useState, useEffect } from "react";
 import { Grid, Button, TextField } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -13,9 +14,15 @@ const VerificationRequest = () => {
   const username = localStorage.getItem("username");
   const classes = useStyles();
   const [selectedFile, setSelectedFile] = useState();
+  const [fullName,setFullName] = useState('');
+  const [knownAs,setKnownAs] = useState('');
+  const [category,setCategory] = useState();
+  const [fileName,setFileName] = useState();
 
   const HandleUploadClick = (event) => {
+    var formData = new FormData();
     var file = event.target.files[0];
+    formData.append('myFile', file)
     const reader = new FileReader();
     var url = reader.readAsDataURL(file);
 
@@ -23,7 +30,15 @@ const VerificationRequest = () => {
       setSelectedFile(reader.result);
     }.bind(this);
 
-    console.log(url);
+    //console.log(file);
+    setFileName(file.name)
+
+    const header = ""
+    axios.post('/api/user/verification-request/upload-verification-doc',formData,{
+      headers: {'Content-Type': 'multipart/form-data'},
+    }).then((res)=> {
+      console.log('uspesno')
+    })
 
     /*reader.onloadend = function(e) {
       this.setState({
@@ -38,6 +53,12 @@ const VerificationRequest = () => {
       imageUploaded: 1
     });*/
   };
+
+  const HandleClickOnSend = () => {
+    console.log(fullName)
+    console.log(knownAs)
+    console.log(category)
+  }
 
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
@@ -89,13 +110,13 @@ const VerificationRequest = () => {
               />
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <TextField fullWidth variant="outlined" size="small" />
+              <TextField fullWidth variant="outlined" size="small" onChange={(event) => setFullName(event.target.value)} />
             </Grid>
-            <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <TextField fullWidth variant="outlined" size="small" />
+            <Grid item xs={12} style={{ height: "12%", textAlign: "right" }} >
+              <TextField fullWidth variant="outlined" size="small"  onChange={(event) => setKnownAs(event.target.value)}/>
             </Grid>
             <Grid item xs={12} style={{ height: "20%", textAlign: "right" }}>
-              <Select native fullWidth variant="outlined">
+              <Select native fullWidth variant="outlined" onChange={(event) => setCategory(event.target.value)}>
                 <option aria-label="None" value="">
                   Select a category for your account
                 </option>
@@ -121,13 +142,12 @@ const VerificationRequest = () => {
                     <Button variant="contained" component="label">
                     Choose file
                     <input
-                        type="file"
                         hidden
                         accept="image/*"
                         className={classes.input}
-                        id="contained-button-file"
                         multiple
                         type="file"
+                        name="myFile"
                         onChange={(event) => HandleUploadClick(event)}
                     />
                     </Button>
@@ -140,7 +160,7 @@ const VerificationRequest = () => {
               </p>
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "left" }}>
-              <Button color="primary" variant="contained">
+              <Button color="primary" variant="contained" onClick={HandleClickOnSend}>
                 Send
               </Button>
             </Grid>

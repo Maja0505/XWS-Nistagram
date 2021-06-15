@@ -60,6 +60,7 @@ func (handler *VerificationRequestHandler) Update(w http.ResponseWriter,r *http.
 	w.WriteHeader(http.StatusOK)
 }
 
+
 func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *http.Request){
 	r.ParseMultipartForm(10 << 20)
 
@@ -88,7 +89,9 @@ func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *
 		return
 	}
 
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
+	fmt.Println("Successfully Uploaded File\n" + dst.Name())
+
+	w.WriteHeader(http.StatusOK)
 
 
 }
