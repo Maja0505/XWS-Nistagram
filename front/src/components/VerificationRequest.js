@@ -21,11 +21,31 @@ const VerificationRequest = ({setOpen,setMessage}) => {
   const [category,setCategory] = useState();
   const [image,setImage] = useState();
   const [updateMode,setUpdateMode] = useState(false)
+  const [userHasRequest, setUserHasRequest] = useState(false)
+
+  useEffect(() => {
+    axios.get("/api/user/verification-request/" + loggedUserId).then((res) => {
+      console.log(res.data)
+      if(res.data !== null){
+        setFullName(res.data.FullName)
+        setKnownAs(res.data.KnowAs)
+        setCategory(res.data.Category)
+        setImage(res.data.Image)
+        setUpdateMode(true)
+        setUserHasRequest(true)
+       
+      }
+    }).catch((err)=> {
+      console.log('null')
+    });
+
+  }, []);
 
   const HandleUploadClick = (event) => {
     
 
     var formData = new FormData();
+    console.log(event.target.files[0])
     var file = event.target.files[0];
     formData.append('myFile', file)
     const reader = new FileReader();
@@ -37,6 +57,8 @@ const VerificationRequest = ({setOpen,setMessage}) => {
     setImage(formData)
 
   };
+
+
 
   const HandleClickOnUpdate = () => {
     setUpdateMode(false)
@@ -55,8 +77,21 @@ const VerificationRequest = ({setOpen,setMessage}) => {
       Category: category,
 
     }
-
-    axios.post('/api/user/verification-request/create', verification_request)
+    if(userHasRequest){
+      axios.put('/api/user/verification-request/update/' + loggedUserId, verification_request)
+      .then((res) => {
+        axios.post('/api/user/verification-request/upload-verification-doc/' + loggedUserId,image,{
+          headers: {'Content-Type': 'multipart/form-data'},
+        }).then((res)=> {
+          setOpen(true)
+          setMessage('Successfully update verification request')
+          setUpdateMode(true)
+          
+        })
+      
+      })  
+    }else{
+      axios.post('/api/user/verification-request/create', verification_request)
       .then((res) => {
         axios.post('/api/user/verification-request/upload-verification-doc/' + loggedUserId,image,{
           headers: {'Content-Type': 'multipart/form-data'},
@@ -68,6 +103,9 @@ const VerificationRequest = ({setOpen,setMessage}) => {
         })
       
       })  
+    }
+
+    
   }
 
   return (
@@ -120,13 +158,13 @@ const VerificationRequest = ({setOpen,setMessage}) => {
               />
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
-              <TextField disabled={updateMode} fullWidth variant="outlined" size="small" onChange={(event) => setFullName(event.target.value)} />
+              <TextField disabled={updateMode} fullWidth variant="outlined" size="small" value={fullName} onChange={(event) => setFullName(event.target.value)} />
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "right" }} >
-              <TextField disabled={updateMode} fullWidth variant="outlined" size="small"  onChange={(event) => setKnownAs(event.target.value)}/>
+              <TextField disabled={updateMode} fullWidth variant="outlined" size="small" value={knownAs} onChange={(event) => setKnownAs(event.target.value)}/>
             </Grid>
             <Grid item xs={12} style={{ height: "20%", textAlign: "right" }}>
-              <Select disabled={updateMode} native fullWidth variant="outlined" onChange={(event) => setCategory(event.target.value)}>
+              <Select disabled={updateMode} native fullWidth variant="outlined" value={category} onChange={(event) => setCategory(event.target.value)}>
                 <option aria-label="None" value="">
                   Select a category for your account
                 </option>
@@ -145,8 +183,12 @@ const VerificationRequest = ({setOpen,setMessage}) => {
             </Grid>
             <Grid  container item xs={12} style={{ height: "auto" }}>
               <Grid item xs={6}>
-                {!selectedFile && <p style={{textAlign: "left" }}>Please attach a photo of your ID</p>}
-                <img width="100%" src={selectedFile} />
+                {!userHasRequest && !selectedFile && <p style={{textAlign: "left" }}>Please attach a photo of your ID</p>}
+                {!selectedFile && userHasRequest ?
+                <img width="100%" src={"http://localhost:8080/api/user/verification-request/get-image/" + loggedUserId + ".jpg"} />
+                : <img width="100%" src={selectedFile} />
+
+                }
               </Grid>
               <Grid item xs={6} style={{ textAlign: "right"}}>
                     <Button disabled={updateMode} variant="contained" component="label">

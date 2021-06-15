@@ -122,6 +122,8 @@ const Posts = ({userForProfile}) => {
       .then((res)=>
       {
         setPosts(res.data)
+      }).catch((error) => {
+
       })
   }, [userForProfile])
 
