@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
@@ -21,7 +20,7 @@ const AdminVerificationRequestCard = () => {
   const [allRequests, setAllRequests] = useState([]);
 
     const HandleOnClickApprove = (request) => {
-        axios.put("/api/user//verification-request/approve/" + request.User,{}).then((res) => {
+        axios.put("/api/user/verification-request/approve/" + request.User,{}).then((res) => {
                 console.log('uspesno') 
                 var array = [...allRequests]; // make a separate copy of the array
                 var index = array.indexOf(request)
@@ -32,8 +31,16 @@ const AdminVerificationRequestCard = () => {
           });
     }
 
-    const HandleOnClickDelete = () => {
-
+    const HandleOnClickDelete = (request) => {
+        axios.put("/api/user/verification-request/delete/" + request.User,{}).then((res) => {
+            console.log('uspesno') 
+            var array = [...allRequests]; // make a separate copy of the array
+            var index = array.indexOf(request)
+            if (index !== -1) {
+              array.splice(index, 1);
+              setAllRequests(array)
+            }         
+      });
     }
 
   useEffect(() => {
@@ -115,7 +122,7 @@ const AdminVerificationRequestCard = () => {
                   <Button size="small" color="primary" onClick={() => HandleOnClickApprove(request)}>
                     Approve
                   </Button>
-                  <Button size="small" color="primary" onClick={HandleOnClickDelete}>
+                  <Button size="small" color="primary" onClick={() => HandleOnClickDelete(request)}>
                     Delete
                   </Button>
                 </CardActions>
