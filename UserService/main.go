@@ -80,17 +80,12 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 }
 
-func init() {
-
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
 func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,router *mux.Router){
 
-	router.HandleFunc("/verificationRequest/create",handler.Create).Methods("POST")
+	router.HandleFunc("/verification-request/create",handler.Create).Methods("POST")
+	router.HandleFunc("/verification-request/update/{user}",handler.Update).Methods("PUT")
+	router.HandleFunc("/verification-request/upload-verification-doc",handler.UploadImage).Methods("POST")
+
 
 }
 

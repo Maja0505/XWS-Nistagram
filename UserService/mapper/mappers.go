@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"userService/dto"
 	"userService/model"
 )
@@ -36,28 +37,38 @@ func ConvertUserForRegistrationDTOToRegisteredUser(registrationDTO *dto.UserForR
 
 func ConvertVerificationRequestDTOToVerificationRequest(requestDTO *dto.VerificationRequestDTO) *model.VerificationRequest {
 	var vq model.VerificationRequest
+	vq.User,_ = primitive.ObjectIDFromHex(requestDTO.User)
+	vq.Approved = false
+	vq.Admin = "admin"
 	vq.Username = requestDTO.Username
-	vq.FirstName = requestDTO.FirstName
-	vq.LastName = requestDTO.LastName
+	vq.FullName = requestDTO.FullName
+	vq.KnownAs = requestDTO.KnowAs
+	vq.Image = requestDTO.Image
 	switch requestDTO.Category {
-	case "influencer":
+	case "Blogger/Influencer":
 		vq.Category = 0
-	case "sports":
+	case "Sports":
 		vq.Category = 1
-	case "new/media":
+	case "News/Media":
 		vq.Category = 2
-	case "business":
+	case "Business/Brand/Organization":
 		vq.Category = 3
-	case "brand":
+	case "Government/Politics":
 		vq.Category = 4
-	case "organization":
+	case "Music":
 		vq.Category = 5
-
+	case "Fashion":
+		vq.Category = 6
+	case "Entertainment":
+		vq.Category = 7
+	case "Other":
+		vq.Category = 8
+	default:
+		vq.Category = 8
 	}
+
 	return &vq
 }
-
-
 
 func ConvertUsersListTOUserFromSearchDTOList(usersList *[]model.RegisteredUser) *[]dto.UserFromSearchDTO{
 	var userFromSearchDTO []dto.UserFromSearchDTO
