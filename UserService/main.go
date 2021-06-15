@@ -88,6 +88,8 @@ func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,r
 	router.HandleFunc("/verification-request/create",handler.Create).Methods("POST")
 	router.HandleFunc("/verification-request/update/{user}",handler.Update).Methods("PUT")
 	router.HandleFunc("/verification-request/all",handler.GetAllVerificationRequest).Methods("GET")
+	router.HandleFunc("/verification-request/{user}",handler.GetVerificationRequestByUser).Methods("GET")
+	router.HandleFunc("/verification-request/approve/{user}",handler.ApproveVerificationRequest).Methods("PUT")
 	router.HandleFunc("/verification-request/upload-verification-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/verification-request/get-image/{id}", handler.GetImage).Methods("GET")
 

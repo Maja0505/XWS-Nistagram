@@ -92,3 +92,36 @@ func (service *VerificationRequestService) GetAllVerificationRequests() (*[]dto.
 	return verificationRequestsDTOList, nil
 }
 
+func (service *VerificationRequestService) ApproveVerificationRequest(userString string) error{
+	user,err := primitive.ObjectIDFromHex(userString)
+	if err != nil{
+		return err
+	}
+
+	err = service.Repo.ApproveVerificationRequest(user)
+	if err != nil{
+		return err
+	}
+
+	return nil
+
+}
+
+func (service *VerificationRequestService) GetVerificationRequestByUser(userString string) (*dto.VerificationRequestDTO,error){
+	user,err := primitive.ObjectIDFromHex(userString)
+	if err != nil {
+		return nil, err
+	}
+
+	vr,err := service.Repo.GetVerificationRequestByUser(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	verificationRequestDTO := mapper.ConvertVerificationRequestsToVerificationRequestDTO(vr)
+
+	return verificationRequestDTO,nil
+
+}
+

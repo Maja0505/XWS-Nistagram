@@ -74,6 +74,40 @@ func (handler *VerificationRequestHandler) GetAllVerificationRequest(w http.Resp
 	json.NewEncoder(w).Encode(vrDto)
 }
 
+func (handler *VerificationRequestHandler) GetVerificationRequestByUser(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	user := vars["user"]
+
+	vrDto,err := handler.Service.GetVerificationRequestByUser(user)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(vrDto)
+}
+
+func (handler *VerificationRequestHandler) ApproveVerificationRequest(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	user := vars["user"]
+	if user == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.ApproveVerificationRequest(user)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (handler *VerificationRequestHandler) UploadImage(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	imagePath := vars["id"]
