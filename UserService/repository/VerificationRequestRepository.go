@@ -66,13 +66,17 @@ func (repo *VerificationRequestRepository) GetAllVerificationRequests() ( *[]mod
 	return &verificationRequests,nil
 }
 
-func (repo *VerificationRequestRepository) ApproveVerificationRequest(user primitive.ObjectID) error{
+func (repo *VerificationRequestRepository) ApproveVerificationRequest(user primitive.ObjectID) (*model.VerificationRequest,error) {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("requests")
 	var verificationRequest model.VerificationRequest
 
 	err := coll.FindOne(context.TODO(),
 		bson.M{"user": user}).Decode(&verificationRequest)
+
+	if err != nil {
+		return nil,err
+	}
 
 	verificationRequest.Approved = true
 
@@ -82,8 +86,19 @@ func (repo *VerificationRequestRepository) ApproveVerificationRequest(user primi
 			{"$set", &verificationRequest},
 		})
 	if err != nil{
+		return nil,err
+	}
+	return &verificationRequest,nil
+
+}
+
+func (repo *VerificationRequestRepository) DeleteVerificationRequestByUser(user primitive.ObjectID) error{
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("requests")
+	_,err := coll.DeleteOne(context.TODO(),
+		bson.M{"user": user})
+	if err != nil{
 		return err
 	}
 	return nil
-
 }

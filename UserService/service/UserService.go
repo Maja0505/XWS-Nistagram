@@ -42,7 +42,6 @@ func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.Use
 	return nil
 }
 
-
 func (service *UserService) UpdateRegisteredUserProfile(username string, registeredUserDto *dto.RegisteredUserProfileInfoDTO) error {
 	if username != registeredUserDto.Username{
 		existedUser,_ := service.FindUserByUsername(registeredUserDto.Username)
@@ -143,4 +142,7 @@ func (service *UserService) UpdateFollowNotificationSetting(username string, set
 
 }
 
+func (service *UserService) UpdateVerificationSettings(userId string,category model.Category) error {
+	return service.Repo.UpdateVerificationSettings(userId,category)
+}
 

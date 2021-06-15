@@ -80,6 +80,12 @@ func (handler *VerificationRequestHandler) GetVerificationRequestByUser(w http.R
 	user := vars["user"]
 
 	vrDto,err := handler.Service.GetVerificationRequestByUser(user)
+	if vrDto == nil {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(vrDto)
+		return
+	}
+
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -99,6 +105,25 @@ func (handler *VerificationRequestHandler) ApproveVerificationRequest(w http.Res
 	}
 
 	err := handler.Service.ApproveVerificationRequest(user)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *VerificationRequestHandler) DeleteVerificationRequest(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	user := vars["user"]
+	if user == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.DeleteVerificationRequest(user)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
