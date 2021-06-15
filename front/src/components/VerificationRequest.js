@@ -10,54 +10,56 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const VerificationRequest = () => {
+const VerificationRequest = ({setOpen,setMessage}) => {
   const username = localStorage.getItem("username");
+  const loggedUserId = localStorage.getItem("id");
+
   const classes = useStyles();
   const [selectedFile, setSelectedFile] = useState();
   const [fullName,setFullName] = useState('');
   const [knownAs,setKnownAs] = useState('');
   const [category,setCategory] = useState();
-  const [fileName,setFileName] = useState();
+  const [image,setImage] = useState();
 
   const HandleUploadClick = (event) => {
+    
+
     var formData = new FormData();
     var file = event.target.files[0];
     formData.append('myFile', file)
     const reader = new FileReader();
     var url = reader.readAsDataURL(file);
-
     reader.onloadend = function (e) {
       setSelectedFile(reader.result);
     }.bind(this);
 
-    //console.log(file);
-    setFileName(file.name)
+    setImage(formData)
 
-    const header = ""
-    axios.post('/api/user/verification-request/upload-verification-doc',formData,{
-      headers: {'Content-Type': 'multipart/form-data'},
-    }).then((res)=> {
-      console.log('uspesno')
-    })
-
-    /*reader.onloadend = function(e) {
-      this.setState({
-        selectedFile: [reader.result]
-      });
-    }.bind(this);
-    console.log(url); // Would see a path?*/
-
-    /*this.setState({
-      mainState: "uploaded",
-      selectedFile: event.target.files[0],
-      imageUploaded: 1
-    });*/
   };
 
   const HandleClickOnSend = () => {
-    console.log(fullName)
-    console.log(knownAs)
-    console.log(category)
+    
+
+    var verification_request ={
+      User: loggedUserId,
+      Username: username,
+      FullName: fullName,
+      KnowAs: knownAs,
+      Image: "" + loggedUserId + ".jpg",
+      Category: category,
+
+    }
+
+    axios.post('/api/user/verification-request/create', verification_request)
+      .then((res) => {
+        axios.post('/api/user/verification-request/upload-verification-doc/' + loggedUserId,image,{
+          headers: {'Content-Type': 'multipart/form-data'},
+        }).then((res)=> {
+          setOpen(true)
+          setMessage('Successfully sent verification request')
+        })
+      
+      })  
   }
 
   return (
@@ -133,7 +135,7 @@ const VerificationRequest = () => {
                 <option value="Other">Other</option>
               </Select>
             </Grid>
-            <Grid container item xs={12} style={{ height: "40%" }}>
+            <Grid container item xs={12} style={{ height: "auto" }}>
               <Grid item xs={6}>
                 {!selectedFile && <p style={{textAlign: "left" }}>Please attach a photo of your ID</p>}
                 <img width="100%" src={selectedFile} />
@@ -160,7 +162,7 @@ const VerificationRequest = () => {
               </p>
             </Grid>
             <Grid item xs={12} style={{ height: "12%", textAlign: "left" }}>
-              <Button color="primary" variant="contained" onClick={HandleClickOnSend}>
+              <Button disabled={fullName === '' || knownAs === '' || category === undefined || image === undefined} color="primary" variant="contained" onClick={HandleClickOnSend}>
                 Send
               </Button>
             </Grid>

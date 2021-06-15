@@ -76,7 +76,7 @@ const TabChanged = () => {
   }else if(value === 3){
     return <PushNotificationPage></PushNotificationPage>
   }else if(value === 4){
-    return <VerificationRequest></VerificationRequest>
+    return <VerificationRequest setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
   }
 }
 
@@ -158,7 +158,7 @@ useEffect(() => {
         message={message}
         
       >
-        {message === 'Successful changed password' && <Alert onClose={handleClose} severity="success">
+        {message === 'Successful changed password' || message === 'Successfully sent verification request' && <Alert onClose={handleClose} severity="success">
           {message}
         </Alert>}
      </Snackbar>
