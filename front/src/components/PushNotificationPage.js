@@ -7,7 +7,7 @@ import axios from "axios";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 
-const PushNotificationPage = () => {
+const PushNotificationPage = ({user}) => {
   const username = localStorage.getItem("username");
   const [accountPrivacy, setAccountPrivacy] = useState(false);
   const [messageRequest, setMessageRequest] = useState(false);
@@ -22,17 +22,16 @@ const PushNotificationPage = () => {
 
 
   useEffect(() => {
-    axios.get("/api/user/" + username).then((res) => {
-        setLikesNotification(res.data.NotificationSettings.LikeNotification);
-        setCommentNotification(res.data.NotificationSettings.CommentNotification);
-        setMessageRequestNotification(res.data.NotificationSettings.MessageRequestNotification)
-        setMessageNotification(res.data.NotificationSettings.MessageNotification)
-        setFollowRequestNotification(res.data.NotificationSettings.FollowRequestNotification)
-        setFollowNotification(res.data.NotificationSettings.FollowNotification)
+    if(user.NotificationSettings !== undefined) {
+        setLikesNotification(user.NotificationSettings.LikeNotification);
+        setCommentNotification(user.NotificationSettings.CommentNotification);
+        setMessageRequestNotification(user.NotificationSettings.MessageRequestNotification)
+        setMessageNotification(user.NotificationSettings.MessageNotification)
+        setFollowRequestNotification(user.NotificationSettings.FollowRequestNotification)
+        setFollowNotification(user.NotificationSettings.FollowNotification)
         setLoad(true)
-
-    });
-  }, []);
+    }
+  }, [user]);
 
 
   const HandleOnChangeLikesNotification = (value) => {

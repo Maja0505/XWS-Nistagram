@@ -10,6 +10,7 @@ import { Alert } from "@material-ui/lab";
 import ProfilePrivacy from "./ProfilePrivacy.js";
 import PushNotificationPage from "./PushNotificationPage.js";
 import VerificationRequest from "./VerificationRequest";
+import axios from "axios";
 
 
 
@@ -42,6 +43,16 @@ const tabList = [
 ];
 
 const Settings = () => {
+
+  const [user, setUser] = useState({});
+  const username = localStorage.getItem("username");
+
+  useEffect(() => {
+    axios.get("/api/user/" + username).then((res) => {
+      setUser(res.data);
+    });
+  }, [username]);
+
   const [tabs] = useState(tabList);
   const [value, setValue] = useState(0);
 
@@ -68,15 +79,15 @@ const Settings = () => {
 
 const TabChanged = () => {
   if (value === 0) {
-    return  <ProfilePage></ProfilePage>
+    return <ProfilePage user={user} setUser={setUser}></ProfilePage>
   }else if(value === 1){
     return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
   }else if(value === 2){
-    return <ProfilePrivacy></ProfilePrivacy>
+    return <ProfilePrivacy user={user}></ProfilePrivacy>
   }else if(value === 3){
-    return <PushNotificationPage></PushNotificationPage>
+    return <PushNotificationPage user={user}></PushNotificationPage>
   }else if(value === 4){
-    return <VerificationRequest setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
+    return <VerificationRequest user={user} setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
   }
 }
 

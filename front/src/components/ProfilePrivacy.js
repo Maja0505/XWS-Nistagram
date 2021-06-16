@@ -6,24 +6,22 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 
-const ProfilePrivacy = () => {
+const ProfilePrivacy = ({user}) => {
     const username = localStorage.getItem("username");
     const [accountPrivacy,setAccountPrivacy] = useState(false)
     const [messageRequest,setMessageRequest] = useState(false)
     const [allowTags,setAllowTags] = useState(false)
     const [load, setLoad] = useState(false)
 
-
     useEffect(() => {
-        axios.get("/api/user/" + username).then((res) => {
-          setAccountPrivacy(res.data.ProfileSettings.Public)
-          setMessageRequest(res.data.ProfileSettings.MessageRequest)
-          setAllowTags(res.data.ProfileSettings.AllowTags)
-          setLoad(true)
-
-        });
-        
-      }, []);
+      console.log(user)
+      if(user.ProfileSettings !== undefined) {
+        setAccountPrivacy(user.ProfileSettings.Public)
+        setMessageRequest(user.ProfileSettings.MessageRequest)
+        setAllowTags(user.ProfileSettings.AllowTags)
+        setLoad(true)
+      }
+      }, [user]);
 
       const HandleOnChangeAccountPrivacy = () => {
           if(accountPrivacy){
