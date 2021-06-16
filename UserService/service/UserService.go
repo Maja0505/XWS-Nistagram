@@ -66,8 +66,8 @@ func (service *UserService) FindUserByUsername(username string) (*model.Register
 	return user, nil
 }
 
-func (service *UserService) SearchUser(searchContent string) (*[]dto.UserFromSearchDTO,error){
-	users,err := service.Repo.FindAllUsersBySearchingContent(searchContent)
+func (service *UserService) SearchUser(username string,searchContent string) (*[]dto.UserFromSearchDTO,error){
+	users,err := service.Repo.FindAllUsersBySearchingContent(username,searchContent)
 	if err != nil{
 		return nil, err
 	}

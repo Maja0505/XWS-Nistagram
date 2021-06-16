@@ -85,11 +85,11 @@ func (repo *UserRepository) FindUserByUsername(username string) ( *model.Registe
 
 }
 
-func (repo *UserRepository) FindAllUsersBySearchingContent(searchContent string) (*[]model.RegisteredUser,error) {
+func (repo *UserRepository) FindAllUsersBySearchingContent(username string,searchContent string) (*[]model.RegisteredUser,error) {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
 	var users []model.RegisteredUser
-	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"}}})
+	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username}}})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err

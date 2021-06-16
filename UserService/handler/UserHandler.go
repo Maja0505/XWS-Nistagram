@@ -95,12 +95,13 @@ func (handler *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	searchContent := vars["searchContent"]
+	username := vars["username"]
 	if searchContent == ""{
 		err := errors.New("No results found")
 		http.Error(w,err.Error(),400)
 		return
 	}
-	users,err := handler.Service.SearchUser(searchContent)
+	users,err := handler.Service.SearchUser(username,searchContent)
 	if err != nil{
 		w.WriteHeader(http.StatusExpectationFailed)
 		return
