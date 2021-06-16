@@ -66,22 +66,22 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.likes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.likes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.dislikes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.dislikes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -108,6 +108,7 @@ func (repo *PostRepository) CreateTables() error{
 	}
 	 */
 	fmt.Println("Successfully dropped and created tables!!")
+
 	return nil
 }
 
@@ -223,6 +224,16 @@ func (repo *PostRepository) LikePost(like *Model.Like) error {
 	var disliked bool
 
 	liked = repo.CheckIfLikeExists(like)
+	if liked {
+		err := repo.DeleteLike(like)
+		if err != nil{
+			return err
+		}
+		if err := repo.DecrementLikes(like); err != nil{
+			return err
+		}
+		return nil
+	}
 	disliked = repo.CheckIfDislikeExists(&dislike)
 	if err := repo.Session.Query("INSERT INTO postkeyspace.likes(postid, userid) VALUES(?, ?)",
 		like.PostID, like.UserID).Exec(); err != nil {
@@ -260,6 +271,17 @@ func (repo *PostRepository) DislikePost(dislike *Model.Dislike) error {
 
 	liked = repo.CheckIfLikeExists(&like)
 	disliked = repo.CheckIfDislikeExists(dislike)
+	if disliked {
+		err := repo.DeleteDislike(dislike)
+		if err != nil{
+			return err
+		}
+		if err := repo.DecrementDislikes(dislike); err != nil{
+			return err
+		}
+
+		return nil
+	}
 
 	if err := repo.Session.Query("INSERT INTO postkeyspace.dislikes(postid, userid) VALUES(?, ?)",
 		dislike.PostID, dislike.UserID).Exec(); err != nil {
@@ -445,6 +467,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 		}
 	}
 	return &posts[0],nil
+
 }
 
 func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, error){
@@ -601,22 +624,23 @@ func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 	return &comments,nil
 }
 
-func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
-	var userids []gocql.UUID
-	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.likes WHERE postid=?", postid).Iter()
-	for iter.Scan(&useruuid){
-		userids = append(userids, useruuid)
+func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]string, error) {
+	var userids []string
+	var userid string
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.likes WHERE postid=? ALLOW FILTERING", postid).Iter()
+	for iter.Scan(&userid){
+		fmt.Println(userid)
+		userids = append(userids, userid)
 	}
 	return &userids, nil
 }
 
-func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
-	var userids []gocql.UUID
-	var useruuid gocql.UUID
-	iter := repo.Session.Query("SELECT userid FROM postkeyspace.dislikes WHERE postid=?", postid).Iter()
-	for iter.Scan(&useruuid){
-		userids = append(userids, useruuid)
+func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]string, error) {
+	var userids []string
+	var userid string
+	iter := repo.Session.Query("SELECT userid FROM postkeyspace.dislikes WHERE postid=? ALLOW FILTERING", postid).Iter()
+	for iter.Scan(&userid){
+		userids = append(userids, userid)
 	}
 	return &userids, nil
 }

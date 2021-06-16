@@ -30,7 +30,7 @@ const UserHomePage = () => {
 
   useEffect(() => {
     axios
-      .get("/api/user/user/" + username)
+      .get("/api/user/" + username)
       .then((res) => {
         console.log(res.data);
         setUser(res.data);
@@ -58,7 +58,7 @@ const UserHomePage = () => {
 
   const buttonForEditProfile = (
     <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
-      <Link to="/settings" style={{ textDecoration: "none", color: "gray" }}>
+      <Link to="/accounts/edit/" style={{ textDecoration: "none", color: "gray" }}>
         Edit profile
       </Link>
     </Button>
@@ -156,7 +156,7 @@ const UserHomePage = () => {
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
-          <Posts></Posts>
+          {user !== undefined && user !== null && <Posts userForProfile={user}></Posts>}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>

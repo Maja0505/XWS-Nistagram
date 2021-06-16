@@ -27,6 +27,7 @@ const ProfilePage = () => {
   const classes = useStyles();
   const [selectedValue, setSelectedValue] = React.useState("a");
   const username = localStorage.getItem("username");
+  const [load,setLoad] = useState(false)
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     setUser({ ...user, Gender: selectedValue });
@@ -35,12 +36,13 @@ const ProfilePage = () => {
   const [userCopy, setUserCopy] = useState({});
 
   useEffect(() => {
-    axios.get("/api/user/user/" + username).then((res) => {
+    axios.get("/api/user/" + username).then((res) => {
       setUser(res.data);
       setUserCopy(res.data);
       res.data.Gender === 0
         ? setSelectedValue("male")
         : setSelectedValue("female");
+      setLoad(true)
     });
   }, [username]);
 
@@ -66,7 +68,7 @@ const ProfilePage = () => {
 
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
-      <Grid container item xs={12}>
+      {load && <Grid container item xs={12}>
         <Grid item xs={2}>
           <Grid item style={{ height: "12%", textAlign: "right" }}>
             <Avatar className={classes.orange}>N</Avatar>
@@ -174,7 +176,6 @@ const ProfilePage = () => {
                 row
                 aria-label="position"
                 name="position"
-                defaultValue="top"
                 value={selectedValue}
                 onClick={handleChange}
               >
@@ -213,7 +214,7 @@ const ProfilePage = () => {
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
+      </Grid>}
     </Grid>
   );
 };

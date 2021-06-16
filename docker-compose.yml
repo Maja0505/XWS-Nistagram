@@ -19,8 +19,8 @@ services:
     networks:
       - network1
     environment:
-      PORT: ${USER_SERVICE_PORT}
-      HOST: mongo
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_HOST: mongo
     restart: on-failure
     depends_on:
       - mongo
@@ -35,23 +35,58 @@ services:
     networks:
       - network1
     environment:
-      PORT: ${POST_SERVICE_PORT}
+      POST_SERVICE_PORT: 8080
+      POST_SERVICE_HOST: cass
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
     restart: on-failure
     depends_on:
       - cass
     links: 
       - cass
-    
-      
+
+  user-followers-service:
+    image: user-followers-service:compose_build
+    build:
+      context: ./UserFollowersService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      USER_FOLLOWERS_SERVICE_PORT: 8080
+      USER_FOLLOWERS_SERVICE_HOST: neo4j
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
+    restart: on-failure
+    depends_on:
+      - neo4j
+    links: 
+      - neo4j
+
   mongo:
     image: mongo
     ports:
       - "27017:27017"
     volumes:
-      - "mongodata:/data/db"
+      - /data/db:/data/db
     networks:
       - network1
-  
+
+  neo4j:
+    image: neo4j:4.0.3
+    restart: unless-stopped
+    hostname: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    networks:
+      - network1
+    volumes:
+      - ./neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/nistagram
+      - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687
+
   cass:
     image: cassandra:3.11.8
     container_name: cass
@@ -67,9 +102,6 @@ services:
       - "9042:9042"
     volumes:
       - ./cass.yaml:/etc/cassandra/cass.yaml
-
-volumes:
-   mongodata:
 
 networks:
    network1:

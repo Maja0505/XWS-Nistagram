@@ -6,7 +6,8 @@ import Settings from "./components/Settings.js";
 import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
-import ProfileDialog from "./components/ProfileDialog";
+import PostDialog from "./components/PostDialog";
+
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -23,16 +24,18 @@ function App() {
               path="/registration"
               component={RegistrationPage}
             ></Route>
-            <Route exact path="/settings" component={Settings}></Route>
+            <Route exact path="/accounts/*" component={Settings}></Route>
             <Route path="/login" component={LoginPage}></Route>
             <Route path="/registration" component={RegistrationPage}></Route>
             <Route
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
             ></Route>
-            <Route path="/dialog">
-              <ProfileDialog openD={true}></ProfileDialog>
+            <Route path="/dialog/:post"   render={(props) => <PostDialog {...props} />}>
+              <PostDialog></PostDialog>
             </Route>
+           
+
           </Switch>
         </div>
       </Router>

@@ -218,7 +218,7 @@ func (handler *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func (handler *PostHandler) CheckIfLikeExists(w http.ResponseWriter, r *http.Request) {
+func (handler *PostHandler) CheckIfLikeExists(w http.ResponseWriter, r *http.Request)  {
 	w.Header().Set("Content-Type", "application/json")
 	var like Model.Like
 	err := json.NewDecoder(r.Body).Decode(&like)
@@ -227,14 +227,24 @@ func (handler *PostHandler) CheckIfLikeExists(w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.CheckIfLikeExists(&like)
+	exist := handler.Service.CheckIfLikeExists(&like)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(exist)
+}
+
+func (handler *PostHandler) CheckIfDislikeExists(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	var dislike Model.Dislike
+	err := json.NewDecoder(r.Body).Decode(&dislike)
 	if err != nil {
 		fmt.Println(err)
-		w.WriteHeader(http.StatusExpectationFailed)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	exist := handler.Service.CheckIfDislikeExists(&dislike)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(exist)
 }
 
 func (handler *PostHandler) FindPostById(w http.ResponseWriter, r *http.Request) {

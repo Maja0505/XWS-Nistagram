@@ -75,3 +75,72 @@ func (service *UserService) SearchUser(searchContent string) (*[]dto.UserFromSea
 	usersListDTO := mapper.ConvertUsersListTOUserFromSearchDTOList(users)
 	return usersListDTO, err
 }
+
+func (service *UserService) ConvertUserIdsToUsers(userIds dto.UserIdsDTO) (*[]dto.UserByUsernameDTO, error) {
+	users,err := service.Repo.FindUsernameByUserId(userIds)
+	if err != nil{
+		return nil, err
+	}
+	return users,nil
+}
+
+func (service *UserService) ChangePassword(username string,passwordDto dto.PasswordDTO) (bool,error) {
+	if passwordDto.NewPassword != passwordDto.ConfirmNewPassword{
+		return true,errors.New("Please make sure both passwords match.")
+	}
+	if service.Repo.CheckOldPassword(username,passwordDto.OldPassword) == false{
+		return true,errors.New("Your old password was entered incorrectly. Please enter it again.")
+	}
+	err := service.Repo.ChangePassword(username,passwordDto.NewPassword)
+	if err != nil{
+		return false,err
+	}
+	return true,nil
+
+}
+
+func (service *UserService) UpdatePublicProfileSetting(username string,setting string) error {
+	return service.Repo.UpdatePublicProfileSetting(username,setting  == "true")
+}
+
+func (service *UserService) UpdateMessageRequestSetting(username string, setting string) error {
+	return service.Repo.UpdateMessageRequestSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateAllowTagsSetting(username string, setting string) error {
+	return service.Repo.UpdateAllowTagsSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateLikeNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateLikeNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateCommentNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateCommentNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateMessageRequestNotificationSetting(username string, setting string) error{
+	return service.Repo.UpdateMessageRequestNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateMessageNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateMessageNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateFollowRequestNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateFollowRequestNotificationSetting(username,setting  == "true")
+
+}
+
+func (service *UserService) UpdateFollowNotificationSetting(username string, setting string) error {
+	return service.Repo.UpdateFollowNotificationSetting(username,setting  == "true")
+
+}
+
+

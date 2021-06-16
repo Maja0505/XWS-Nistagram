@@ -8,24 +8,35 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 var Session *gocql.Session
 
 func init() {
-	var err error
-	cluster := gocql.NewCluster("127.0.0.1")
-	cluster.ProtoVersion = 4
-	cluster.Keyspace = "postkeyspace"
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	cluster := gocql.NewCluster(os.Getenv("POST_SERVICE_HOST"))
+	//cluster.ProtoVersion = 4
+	//cluster.Keyspace = "postkeyspace"
 
 	Session, err = cluster.CreateSession()
 	if err != nil {
 		panic(err)
 	}
+	if err := Session.Query("create keyspace  if not exists postkeyspace with replication = {'class':'SimpleStrategy','replication_factor':1};").Exec(); err != nil {
+		fmt.Println("Error while inserting postkeyspace")
+		fmt.Println(err)
+	}
 	fmt.Println("Cassandra well initialized!")
 }
+
 
 func initPostRepo(session *gocql.Session) *Repository.PostRepository{
 	return &Repository.PostRepository{Session: *session}
@@ -43,6 +54,7 @@ func handleFunc(handler *Handler.PostHandler){
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/create", handler.Create).Methods("POST")
+
 	router.HandleFunc("/add-comment", handler.AddComment).Methods("POST")
 	router.HandleFunc("/delete-comment", handler.DeleteComment).Methods("POST")
 	router.HandleFunc("/like-post", handler.LikePost).Methods("POST")
@@ -63,12 +75,15 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/get-favourite-posts/{id}", handler.GetFavouritePosts).Methods("GET")
 	router.HandleFunc("/get-posts-from-collection/{id}/{collection}", handler.GetPostsFromCollection).Methods("GET")
 	router.HandleFunc("/upload-image/{id}",handler.UploadImage).Methods("POST")
+	router.HandleFunc("/like-exists", handler.CheckIfLikeExists).Methods("PUT")
+	router.HandleFunc("/dislike-exists", handler.CheckIfDislikeExists).Methods("PUT")
+
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 
 	fmt.Println("server running ")
-	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router)))
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("POST_SERVICE_PORT"), handlers.CORS(headers, methods, origins)(router)))
 	//log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("POST_SERVICE_PORT")),router))
 	//log.Fatal(http.ListenAndServe(":8000", router))
 }

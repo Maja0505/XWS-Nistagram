@@ -5,9 +5,14 @@ import (
 	"XWS-Nistagram/PostService/Mapper"
 	"XWS-Nistagram/PostService/Model"
 	"XWS-Nistagram/PostService/Repository"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gocql/gocql"
 	"image"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 type PostService struct {
@@ -106,12 +111,14 @@ func (service *PostService) DislikePost(dislike *Model.Dislike) error {
 	return nil
 }
 
-func (service *PostService) CheckIfLikeExists(like *Model.Like) error {
-	err := service.Repo.CheckIfLikeExists(like)
-	if err == true{
-	}else{
-	}
-	return nil
+func (service *PostService) CheckIfLikeExists(like *Model.Like) bool {
+	exist := service.Repo.CheckIfLikeExists(like)
+	return exist
+}
+
+func (service *PostService) CheckIfDislikeExists(dislike *Model.Dislike) bool {
+	exist := service.Repo.CheckIfDislikeExists(dislike)
+	return exist
 }
 
 func (service *PostService) FindPostById(postid gocql.UUID) ( *Model.Post, error) {
@@ -175,21 +182,63 @@ func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 	}
 	return comments, err
 }
-func (service *PostService) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
+func (service *PostService) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
 	userids, err := service.Repo.GetUsersWhoLikedPost(postid)
+
 	if err != nil{
 		fmt.Println(err)
 		return  nil, err
 	}
-	return userids, err
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-user-ids") //namestiti da moze i lokalno
+
+	type UserIdsDTO struct {
+		UserIds []string
+	}
+
+	userIdsDto := UserIdsDTO{}
+	userIdsDto.UserIds = *userids
+	jsonUserids,_ := json.Marshal(userIdsDto)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
 }
-func (service *PostService) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]gocql.UUID, error) {
+func (service *PostService) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
 	userids, err := service.Repo.GetUsersWhoDislikedPost(postid)
+
 	if err != nil{
 		fmt.Println(err)
 		return  nil, err
 	}
-	return userids, err
+	reqUrl := fmt.Sprintf("http://user-service:8080/convert-user-ids") //namestiti da moze i lokalno
+
+	type UserIdsDTO struct {
+		UserIds []string
+	}
+
+	userIdsDto := UserIdsDTO{}
+	userIdsDto.UserIds = *userids
+	jsonUserids,_ := json.Marshal(userIdsDto)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
 }
 
 func (service *PostService) GetImage(imagepath string) ( image.Image, error) {
