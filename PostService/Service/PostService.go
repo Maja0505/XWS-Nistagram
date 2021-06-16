@@ -34,8 +34,53 @@ func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
 	return nil
 }
 
-func (service *PostService) DeleteComment(comment *Model.Comment) error {
+func (service *PostService) AddTag(tag *Model.Tag) error {
+	err := service.Repo.AddTag(tag)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+func (service *PostService) AddPostToFavourites(favouriteDTO *DTO.FavouriteDTO) error {
+	err := service.Repo.AddPostToFavourites(favouriteDTO.PostID, favouriteDTO.UserID)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
+func (service *PostService) AddPostToCollection(favouriteDTO *DTO.FavouriteDTO) error {
+	err := service.Repo.AddPostToCollection(favouriteDTO.PostID, favouriteDTO.UserID, favouriteDTO.Collection)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
+func (service *PostService) DeleteComment(commentDTO *DTO.CommentDTO) error {
+	comment := Mapper.ConvertCommentDTOToComment(commentDTO)
 	err := service.Repo.DeleteComment(comment)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
+func (service *PostService) RemovePostFromFavourites(favourite *DTO.FavouriteDTO) error {
+	err := service.Repo.RemovePostFromFavourites(favourite)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
+func (service *PostService) RemovePostFromCollection(favourite *DTO.FavouriteDTO) error {
+	err := service.Repo.RemovePostFromFavourites(favourite)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -78,8 +123,43 @@ func (service *PostService) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	return post, err
 }
 
+func (service *PostService) GetTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
+	tags,err := service.Repo.GetTagsForPost(postid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return tags, err
+}
+
+func (service *PostService) GetFavouritePosts(userid string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.GetFavouritePosts(userid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+func (service *PostService) GetPostsFromCollection(userid string, collection string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.GetPostsFromCollection(userid, collection)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+
 func (service *PostService) FindPostsByUserId(userid string) ( *[]Model.Post, error) {
 	posts,err := service.Repo.FindPostsByUserId(userid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+
+func (service *PostService) FindPostsByTag(tag string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.FindPostsByTag(tag)
 	if err != nil{
 		fmt.Println(err)
 		return  nil, err
