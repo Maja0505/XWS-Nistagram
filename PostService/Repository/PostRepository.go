@@ -651,7 +651,7 @@ func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]stri
 }
 
 func (repo *PostRepository) GetImage(imagepath string) (image.Image, error){
-	var directory string = "Images/"
+	var directory string = "post-documents/"
 	var imgpath string = directory + imagepath
 	img, err := LoadImage(imgpath)
 	if err != nil{
