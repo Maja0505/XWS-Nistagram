@@ -58,7 +58,10 @@ const UserHomePage = () => {
 
   const buttonForEditProfile = (
     <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
-      <Link to="/accounts/edit/" style={{ textDecoration: "none", color: "gray" }}>
+      <Link
+        to="/accounts/edit/"
+        style={{ textDecoration: "none", color: "gray" }}
+      >
         Edit profile
       </Link>
     </Button>
@@ -113,7 +116,9 @@ const UserHomePage = () => {
           <Grid container>
             {user !== undefined && (
               <>
-                <Typography>{user.Biography}</Typography>
+                <Typography style={{ textAlign: "left" }}>
+                  {user.Biography}
+                </Typography>
               </>
             )}
           </Grid>
@@ -156,7 +161,9 @@ const UserHomePage = () => {
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
-          {user !== undefined && user !== null && <Posts userForProfile={user}></Posts>}
+          {user !== undefined && user !== null && (
+            <Posts userForProfile={user}></Posts>
+          )}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
