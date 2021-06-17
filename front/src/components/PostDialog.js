@@ -131,6 +131,9 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/like-post",like).then((res) => {
+      if(postIsDisliked){
+        setPostIsDisliked(false)
+      }
       if(postIsLiked){
         setPostIsLiked(false)
 
@@ -146,6 +149,9 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/dislike-post", dislike).then((res) => {
+      if(postIsLiked){
+        setPostIsLiked(false)
+      }
       if(postIsDisliked){
         setPostIsDisliked(false)
 

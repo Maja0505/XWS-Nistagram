@@ -82,13 +82,17 @@ const LikedPost = () => {
 
   useEffect(() => {
     axios
-      .get("/get-liked-posts-for-user/" + loggedUserId)
+      .get("/api/post/get-liked-posts-for-user/" + loggedUserId)
       .then((res) => {
         console.log(res.data);
-        setImages(res.data);
+        if(res.data){
+          setImages(res.data);
+        }else{
+          setImages([])
+        }
       })
       .catch((error) => {
-        alert(error.response.status);
+        //alert(error.response.status);
       });
   }, [loggedUserId]);
 
@@ -101,7 +105,7 @@ const LikedPost = () => {
     <div className={classes.root}>
       {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
       <Grid container>
-        {images.length === 0 && (
+        {images !== null && images.length === 0 && (
           <Grid item style={{ margin: "auto" }}>
             <Typography variant="h5" color="textSecondary">
               No liked posts
@@ -124,7 +128,7 @@ const LikedPost = () => {
                 <span
                   className={classes.imageSrc}
                   style={{
-                    backgroundImage: `url(${image.url}) `,
+                    backgroundImage: `url("http://localhost:8080/api/post/get-image/${image.Image}") `,
                   }}
                 />
                 <span className={classes.imageBackdrop} />
@@ -142,19 +146,21 @@ const LikedPost = () => {
                         <ThumbUpAlt></ThumbUpAlt>
                       </Grid>
                       <Grid item xs={3}>
-                        10
+                      {image.LikesCount}
+
                       </Grid>
                       <Grid item xs={1}>
                         <ThumbDown></ThumbDown>
                       </Grid>
                       <Grid item xs={3}>
-                        20
+                      {image.DislikesCount}
+
                       </Grid>
                       <Grid item xs={1}>
                         <ModeComment></ModeComment>
                       </Grid>
                       <Grid item xs={3}>
-                        45
+                      {image.CommentsCount}
                       </Grid>
                     </Grid>
                   </Typography>
