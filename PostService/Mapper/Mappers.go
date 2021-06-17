@@ -27,3 +27,13 @@ func ConvertCommentDTOToComment(commentDTO *DTO.CommentDTO) *Model.Comment {
 	comment.Content = commentDTO.Content
 	return &comment
 }
+
+func ConvertReportedContentDTOToReportedContent(reportedContentDTO *DTO.ReportedContentDTO) *Model.ReportedContent{
+	var reportedContent Model.ReportedContent
+	reportedContent.ID = reportedContentDTO.ID
+	reportedContent.Description = reportedContentDTO.Description
+	reportedContent.UserID = reportedContentDTO.UserID
+	reportedContent.AdminID = reportedContentDTO.AdminID
+	reportedContent.ContentID = reportedContentDTO.ContentID
+	return &reportedContent
+}
