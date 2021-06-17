@@ -77,6 +77,10 @@ func handleFunc(handler *Handler.PostHandler){
 	router.HandleFunc("/upload-image/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/like-exists", handler.CheckIfLikeExists).Methods("PUT")
 	router.HandleFunc("/dislike-exists", handler.CheckIfDislikeExists).Methods("PUT")
+	router.HandleFunc("/get-liked-posts-for-user/{id}", handler.GetLikedPostsForUser).Methods("GET")
+	router.HandleFunc("/get-disliked-posts-for-user/{id}", handler.GetDislikedPostsForUser).Methods("GET")
+	router.HandleFunc("/report-content", handler.ReportContent).Methods("POST")
+
 
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
@@ -94,6 +98,6 @@ func main(){
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
 
-	//postRepo.CreateTables()
+	postRepo.CreateTables()
 	handleFunc(handler)
 }
