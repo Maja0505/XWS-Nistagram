@@ -297,6 +297,25 @@ func (repository *UserFollowersRepository) CheckFollowing(userId string, followe
 }
 
 
+func (repository *UserFollowersRepository) CheckRequested(userId string, followedUserId string) (*interface{}, error) {
+
+	result,err := repository.Session.Run("return exists ( (:User{userId:$userId1})-[:followRequest]->(:User{userId:$userId2}))", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : followedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
+}
+
+
 func (repository *UserFollowersRepository) DeleteAll(){
 	_,err :=repository.Session.Run(`MATCH (n) DETACH DELETE n`,nil)
 	if err != nil {

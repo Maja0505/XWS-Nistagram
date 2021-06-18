@@ -10,8 +10,8 @@ const LoginPage = () => {
     window.location.href = "http://localhost:3000/registration";
   };
 
-  const loginIn = () => {
-    axios
+  const login = () => {
+  /*  axios
       .get("/api/user/" + user.username)
       .then((res) => {
         console.log(res.data)
@@ -22,7 +22,10 @@ const LoginPage = () => {
       })
       .catch((error) => {
         alert("Wrong username or password");
-      });
+      });*/
+      localStorage.setItem("username", user.username);
+      window.location.href =
+          "http://localhost:3000/homePage/" + user.username;
   };
 
   return (
@@ -61,7 +64,7 @@ const LoginPage = () => {
           variant="contained"
           color="primary"
           style={{ marginRight: "2%" }}
-          onClick={loginIn}
+          onClick={login}
         >
           LOG IN
         </Button>
