@@ -34,6 +34,48 @@ func init() {
 		fmt.Println("Error while inserting postkeyspace")
 		fmt.Println(err)
 	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.likes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.dislikes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.tags(postid uuid, tag text, PRIMARY KEY((postid), tag));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.tagsDK(postid uuid, tag text, PRIMARY KEY((tag), postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.favourites(userid text, postid uuid, PRIMARY KEY((userid), postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.collections(userid text, postid uuid, collection text, PRIMARY KEY((userid), collection, postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.reported_contents(id uuid, description text, contentid text, userid text, adminid text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+
 	fmt.Println("Cassandra well initialized!")
 }
 
@@ -98,6 +140,6 @@ func main(){
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
 
-	postRepo.CreateTables()
+	//postRepo.CreateTables()
 	handleFunc(handler)
 }

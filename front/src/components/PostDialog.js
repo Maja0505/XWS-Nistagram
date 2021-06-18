@@ -398,7 +398,7 @@ const PostDialog = () => {
       </Paper></Grid>
         <Grid item xs={2}></Grid>
       </Grid>
-      <DialogForReport open={openDialogForReport} setOpen={setOpenDialogForReport}></DialogForReport>
+      <DialogForReport loggedUserId={loggedUserId} post={post} open={openDialogForReport} setOpen={setOpenDialogForReport}></DialogForReport>
     </div>
   );
 };
