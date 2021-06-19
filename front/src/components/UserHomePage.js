@@ -56,17 +56,17 @@ const UserHomePage = () => {
   useEffect(() => {
     console.log(username)
     console.log(loggedUsername)
-    setUser(users.filter(user => user.Username === username)[0])
+    //setUser(users.filter(user => user.Username === username)[0])
     setRequested(true)
     setFollowing(false)
     setPrivateProfile(true)
-   /* axios
+    axios
     .get("/api/user/" + username)
     .then((res) => {
       console.log(res.data);
       setUser(res.data);
 
-      if(res.data.IdString !== loggedInId ){
+     /* if(res.data.IdString !== loggedInId ){
       axios
       .get("/api/user-follow/checkBlock/" + loggedInId + "/" + res.data.IdString)
       .then((res) => {
@@ -96,12 +96,12 @@ const UserHomePage = () => {
       .catch((error) => {
         alert(error.response.status);
       });
-    }
+    }*/
     })
     .catch((error) => {
       alert(error.response.status);
     });
-    */
+    
   }, [username, loggedUsername]);
 
   

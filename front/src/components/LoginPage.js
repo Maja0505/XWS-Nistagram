@@ -11,7 +11,7 @@ const LoginPage = () => {
   };
 
   const login = () => {
-  /*  axios
+    axios
       .get("/api/user/" + user.username)
       .then((res) => {
         console.log(res.data)
@@ -22,10 +22,10 @@ const LoginPage = () => {
       })
       .catch((error) => {
         alert("Wrong username or password");
-      });*/
-      localStorage.setItem("username", user.username);
-      window.location.href =
-          "http://localhost:3000/homePage/" + user.username;
+      });
+      //localStorage.setItem("username", user.username);
+      /*window.location.href =
+          "http://localhost:3000/homePage/" + user.username;*/
   };
 
   return (
