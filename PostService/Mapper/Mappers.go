@@ -37,3 +37,12 @@ func ConvertReportedContentDTOToReportedContent(reportedContentDTO *DTO.Reported
 	reportedContent.ContentID = reportedContentDTO.ContentID
 	return &reportedContent
 }
+
+func ConvertCreateStoryDTOToPost(storyDTO *DTO.CreateStoryDTO) *Model.Story {
+	var story Model.Story
+	story.Image = storyDTO.Image
+	story.UserID = storyDTO.UserID
+	story.ForCloseFriends = storyDTO.ForCloseFriends
+	story.Highlights = storyDTO.Highlights
+	return &story
+}
