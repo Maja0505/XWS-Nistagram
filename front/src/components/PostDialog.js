@@ -4,7 +4,10 @@ import Avatar from "@material-ui/core/Avatar";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SentimentSatisfiedRoundedIcon from "@material-ui/icons/SentimentSatisfiedRounded";
 import InputBase from "@material-ui/core/InputBase";
-import { Grid, Paper, Divider, List } from "@material-ui/core";
+import { Grid, Paper, Divider, List,  Grow,
+  Popper,
+  MenuItem,
+  MenuList,} from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import BookmarkBorderSharpIcon from "@material-ui/icons/BookmarkBorderSharp";
 import FavoriteBorderSharpIcon from "@material-ui/icons/FavoriteBorderSharp";
@@ -16,8 +19,11 @@ import ThumbDownAltOutlinedIcon from "@material-ui/icons/ThumbDownAltOutlined";
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import CommentsForPost from "./CommentsForPost";
+import { Link } from "react-router-dom";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import DialogForReport from "./DialogForReport"
 
 const useStyles = makeStyles((theme) => ({
   orange: {
@@ -41,6 +47,30 @@ const PostDialog = () => {
   const [commentsForPost, setCommentsForPost] = useState([]);
   const [postIsLiked, setPostIsLiked] = useState(false)
   const [postIsDisliked, setPostIsDisliked] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [openDialogForReport,setOpenDialogForReport] = useState(false)
+  const anchorRef = useRef(null);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
+
+  const prevOpen = useRef(open);
 
   const handleClickPostComment = () => {
     var comment = {
@@ -60,6 +90,12 @@ const PostDialog = () => {
   };
 
   useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpen.current = open;
+
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
       console.log(res.data);
@@ -87,7 +123,7 @@ const PostDialog = () => {
         }
       })
     
-  }, []);
+  }, [open]);
 
   const HandleClickLike = () => {
     var like = {
@@ -95,6 +131,9 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/like-post",like).then((res) => {
+      if(postIsDisliked){
+        setPostIsDisliked(false)
+      }
       if(postIsLiked){
         setPostIsLiked(false)
 
@@ -110,6 +149,9 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/dislike-post", dislike).then((res) => {
+      if(postIsLiked){
+        setPostIsLiked(false)
+      }
       if(postIsDisliked){
         setPostIsDisliked(false)
 
@@ -130,6 +172,56 @@ const PostDialog = () => {
       console.log(res.data);
     });
   };
+
+  const handleOpenDialogForReport = () => {
+    setOpenDialogForReport(true)
+    setOpen((prevOpen) => !prevOpen);
+  }
+
+
+
+  const dropDowMenuForPost = (
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      role={undefined}
+      transition
+      disablePortal
+      style={{ width: "15%", zIndex: "1" }}
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          {...TransitionProps}
+          style={{
+            transformOrigin:
+              placement === "bottom" ? "center top" : "center bottom",
+          }}
+        >
+          <Paper>
+            <ClickAwayListener onClickAway={handleClose}>
+              <MenuList
+                autoFocusItem={open}
+                id="menu-list-grow"
+                onKeyDown={handleListKeyDown}
+              >
+                <MenuItem onClick={handleOpenDialogForReport}>
+                  <Grid container>
+                    <Grid item xs={3}>
+
+                    </Grid>
+                    <Grid item xs={9}>
+                     
+                        <div style={{ width: "100%" }} style={{color:"red"}}>Report</div>
+                    </Grid>
+                  </Grid>
+                </MenuItem>
+              </MenuList>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  );
 
   return (
     <div>
@@ -178,7 +270,12 @@ const PostDialog = () => {
                     textAlign: "right",
                     cursor: "pointer",
                   }}
+                  aria-controls={open ? "menu-list-grow" : undefined}
+                  aria-haspopup="true"
+                  ref={anchorRef}
+                  onClick={handleToggle}
                 ></MoreHorizIcon>
+                {dropDowMenuForPost}
               </Grid>
             </Grid>
             <Grid container style={{ height: "60%", overflow: "auto" }}>
@@ -301,7 +398,7 @@ const PostDialog = () => {
       </Paper></Grid>
         <Grid item xs={2}></Grid>
       </Grid>
-
+      <DialogForReport loggedUserId={loggedUserId} post={post} open={openDialogForReport} setOpen={setOpenDialogForReport}></DialogForReport>
     </div>
   );
 };
