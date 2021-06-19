@@ -66,7 +66,7 @@ const UserHomePage = () => {
       console.log(res.data);
       setUser(res.data);
 
-     /* if(res.data.IdString !== loggedInId ){
+      if(res.data.IdString !== loggedInId ){
       axios
       .get("/api/user-follow/checkBlock/" + loggedInId + "/" + res.data.IdString)
       .then((res) => {
@@ -96,7 +96,7 @@ const UserHomePage = () => {
       .catch((error) => {
         alert(error.response.status);
       });
-    }*/
+    }
     })
     .catch((error) => {
       alert(error.response.status);

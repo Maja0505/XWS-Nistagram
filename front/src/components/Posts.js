@@ -118,7 +118,7 @@ const Posts = ({userForProfile}) => {
   };
 
   useEffect(() => {
-    axios.get('/api/post/get-all-by-userid/ ' + userForProfile.ID)
+    axios.get('/api/post/get-all-by-userid/' + userForProfile.ID)
       .then((res)=>
       {
         setPosts(res.data)
