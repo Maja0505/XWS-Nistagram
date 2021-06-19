@@ -10,7 +10,10 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
 	"image/jpeg"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -19,7 +22,6 @@ type PostHandler struct {
 }
 
 func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POZVAOI KREAARTE")
 	w.Header().Set("Content-Type", "application/json")
 	var postDTO DTO.PostDTO
 	err := json.NewDecoder(r.Body).Decode(&postDTO)
@@ -29,6 +31,46 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = handler.Service.Create(&postDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
+
+func (handler *PostHandler) AddPostToFavourites(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var favouriteDTO DTO.FavouriteDTO
+	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.AddPostToFavourites(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
+
+func (handler *PostHandler) AddPostToCollection(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var favouriteDTO DTO.FavouriteDTO
+	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.AddPostToCollection(&favouriteDTO)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
@@ -59,9 +101,29 @@ func (handler *PostHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (handler *PostHandler) AddTag(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var tag Model.Tag
+	err := json.NewDecoder(r.Body).Decode(&tag)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.AddTag(&tag)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
+
 func (handler *PostHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var comment Model.Comment
+	var comment DTO.CommentDTO
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil{
 		fmt.Println(err)
@@ -76,7 +138,44 @@ func (handler *PostHandler) DeleteComment(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
 
+func (handler *PostHandler) RemovePostFromFavourites(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var favouriteDTO DTO.FavouriteDTO
+	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.RemovePostFromFavourites(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (handler *PostHandler) RemovePostFromCollection(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var favouriteDTO DTO.FavouriteDTO
+	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.RemovePostFromCollection(&favouriteDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (handler *PostHandler) LikePost(w http.ResponseWriter, r *http.Request) {
@@ -173,6 +272,47 @@ func (handler *PostHandler) FindPostById(w http.ResponseWriter, r *http.Request)
 
 }
 
+func (handler *PostHandler) GetFavouritePosts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	posts,_ := handler.Service.GetFavouritePosts(userid)
+
+	if posts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(posts)
+
+}
+
+func (handler *PostHandler) GetPostsFromCollection(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	collection := vars["collection"]
+	if userid == ""  || collection == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	posts,_ := handler.Service.GetPostsFromCollection(userid, collection)
+
+	if posts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(posts)
+
+}
+
 func (handler *PostHandler) FindPostsByUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -191,6 +331,50 @@ func (handler *PostHandler) FindPostsByUserId(w http.ResponseWriter, r *http.Req
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(posts)
+
+}
+
+func (handler *PostHandler) FindPostsByTag(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	tag := vars["tag"]
+	if tag == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	posts,_ := handler.Service.FindPostsByTag(tag)
+
+	if posts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(posts)
+
+}
+
+func (handler *PostHandler) GetTagsForPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	postid := vars["id"]
+	postuuid, err := ParseUUID(postid)
+
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tags,_ := handler.Service.GetTagsForPost(postuuid)
+
+	if tags == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tags)
 
 }
 
@@ -269,7 +453,7 @@ func (handler *PostHandler) GetUsersWhoDislikedPost(w http.ResponseWriter, r *ht
 
 }
 
-func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
+func (handler *PostHandler) GetImageOld(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "image/jpeg")
 	vars := mux.Vars(r)
@@ -301,7 +485,117 @@ func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (handler *PostHandler) UploadImage(w http.ResponseWriter,r *http.Request){
+	vars := mux.Vars(r)
+	imagePath := vars["id"]
+	r.ParseMultipartForm(10 << 20)
+	file, _, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
 
+	defer file.Close()
+
+	dst, err := os.Create("post-documents/" + imagePath +".jpg")
+	defer dst.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "Successfully Uploaded File\n")
+
+
+}
+
+func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "image/jpeg")
+	vars := mux.Vars(r)
+	imagepath := vars["id"]
+	if imagepath == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	file,err := ioutil.ReadFile("post-documents/" + imagepath)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+	w.Write(file)
+
+
+}
+
+func (handler *PostHandler) GetLikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	likedPosts,_ := handler.Service.GetLikedPostsForUser(userid)
+
+	if likedPosts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(likedPosts)
+
+}
+
+func (handler *PostHandler) GetDislikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	likedPosts,_ := handler.Service.GetDislikedPostsForUser(userid)
+
+	if likedPosts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(likedPosts)
+}
+
+func (handler *PostHandler) ReportContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var reportedConted DTO.ReportedContentDTO
+	err := json.NewDecoder(r.Body).Decode(&reportedConted)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.ReportContent(&reportedConted)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
 
 /*func (handler *PostHandler) GetAllLikesForPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Ulaziii")

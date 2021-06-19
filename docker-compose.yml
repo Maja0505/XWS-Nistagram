@@ -28,7 +28,7 @@ services:
       - mongo
     tmpfs:
       - /var/run
-      - /var/cache/verification-docs
+      - /var/cache/verification-docs/*
 
   post-service:
     image: post-service:compose_build
@@ -43,6 +43,9 @@ services:
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
     restart: on-failure
+    tmpfs:
+      - /var/run
+      - /var/cache/post-documents/*
     depends_on:
       - cass
     links: 
