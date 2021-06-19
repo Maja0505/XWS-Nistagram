@@ -262,3 +262,25 @@ func (handler *UserFollowersHandler) CheckFollowing(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(following)
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *UserFollowersHandler) CheckRequested(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	requestedUserId := vars["requestedUserId"]
+
+	if userId == "" || requestedUserId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	requested,err := handler.Service.CheckRequested(userId,requestedUserId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(requested)
+	w.WriteHeader(http.StatusOK)
+}

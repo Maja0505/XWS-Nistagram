@@ -44,7 +44,7 @@ const RegistartionPage = () => {
       <div>
         <Typography
           variant="h6"
-          style={{ fontFamily: "inherit", marginTop: "2%", color: "blue" }}
+          style={{ fontFamily: "inherit", marginTop: "2%", color: "darkslateblue" }}
         >
           REGISTRATION
         </Typography>
@@ -157,7 +157,10 @@ const RegistartionPage = () => {
                   label="Male"
                 />
               </RadioGroup>
-              <FormLabel style={{ marginTop: "2%", marginLeft: "18.9%" }}>
+              <br></br>
+              <br></br>
+              <Grid container>
+              <FormLabel style={{ marginTop: "3%" }}>
                 Date of birth
               </FormLabel>
               <TextField
@@ -174,6 +177,7 @@ const RegistartionPage = () => {
                 }}
                 style={{ marginTop: "0.5%", marginLeft: "3.8%" }}
               />
+              </Grid>
             </Grid>
             <br></br>
             <br></br>

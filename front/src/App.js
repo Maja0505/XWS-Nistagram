@@ -7,17 +7,40 @@ import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
+import StoryBar from "./components/StoryBar";
+import ContentDetails from "./components/ContentDetails";
 import AdminHomePage from "./components/AdminHomePage"
 import LikedDislikedPost from "./components/LikedDislikedPost";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
 
+  const users=[{ 	Username :"Perica",
+  FirstName :"Perica",
+  LastName:"Peric",
+  DateOfBirth :"krdlkjf",
+  Email :"Peric.peric@gmail.com",
+  PhoneNumber :"0490843",
+  Gender :"Female",
+  Biography :"Jedna vrlo uspesan gospodin",
+  WebSite :"Pericaperic.com"},
+
+{ 	Username :"marko",
+    FirstName :"Marko",
+    LastName:"Markovic",
+    DateOfBirth :"krdlkjf",
+    Email :"marko.markovic@gmail.com",
+    PhoneNumber :"0490843",
+    Gender :"Male",
+    Biography :"Jedna vrlo uspesan gospodin",
+    WebSite :"Pericaperic.com"},]
+
   return (
     <div>
       <Router>
         <div className="App">
           <NavBar></NavBar>
+          <ContentDetails></ContentDetails>
           <Switch>
             <Route exact path="/" component={StartPage}></Route>
             <Route
