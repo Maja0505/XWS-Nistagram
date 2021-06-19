@@ -89,7 +89,7 @@ func (repo *UserRepository) FindAllUsersBySearchingContent(username string,searc
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
 	var users []model.RegisteredUser
-	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username}}})
+	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username},{"$ne","admin"}}})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
