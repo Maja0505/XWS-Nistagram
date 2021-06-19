@@ -9,7 +9,7 @@ import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
 import StoryBar from "./components/StoryBar";
 import ContentDetails from "./components/ContentDetails";
-
+import AdminHomePage from "./components/AdminHomePage"
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -54,6 +54,8 @@ function App() {
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
             ></Route>
+            <Route path="/admin" component={AdminHomePage}></Route>
+
             <Route path="/dialog/:post"   render={(props) => <PostDialog {...props} />}>
               <PostDialog></PostDialog>
             </Route>

@@ -9,6 +9,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { Alert } from "@material-ui/lab";
 import ProfilePrivacy from "./ProfilePrivacy.js";
 import PushNotificationPage from "./PushNotificationPage.js";
+import VerificationRequest from "./VerificationRequest";
+import axios from "axios";
+
 
 
 const tabList = [
@@ -31,11 +34,25 @@ const tabList = [
     key: 3,
     id: 3,
     label: "Push Notification",
+  },{
+    key: 4,
+    id: 4,
+    label: "Request verification",
   },
 
 ];
 
 const Settings = () => {
+
+  const [user, setUser] = useState({});
+  const username = localStorage.getItem("username");
+
+  useEffect(() => {
+    axios.get("/api/user/" + username).then((res) => {
+      setUser(res.data);
+    });
+  }, [username]);
+
   const [tabs] = useState(tabList);
   const [value, setValue] = useState(0);
 
@@ -62,13 +79,15 @@ const Settings = () => {
 
 const TabChanged = () => {
   if (value === 0) {
-    return  <ProfilePage></ProfilePage>
+    return <ProfilePage user={user} setUser={setUser}></ProfilePage>
   }else if(value === 1){
     return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
   }else if(value === 2){
-    return <ProfilePrivacy></ProfilePrivacy>
+    return <ProfilePrivacy user={user}></ProfilePrivacy>
   }else if(value === 3){
-    return <PushNotificationPage></PushNotificationPage>
+    return <PushNotificationPage user={user}></PushNotificationPage>
+  }else if(value === 4){
+    return <VerificationRequest user={user} setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
   }
 }
 
@@ -82,6 +101,8 @@ const handleUrlForTab = (value) => {
     route = '/accounts/privacy/'
   }else if(value === 3){
     route = '/accounts/notification/'
+  }else if(value === 4){
+    route = '/accounts/verification/'
   }
   history.push(route)
 }
@@ -97,6 +118,8 @@ useEffect(() => {
     setValue(2)
   }else if(urls[1] === '/notification/'){
     setValue(3)
+  }else if(urls[1] === '/verification/'){
+    setValue(4)
   }
 
 }, []);
@@ -146,7 +169,7 @@ useEffect(() => {
         message={message}
         
       >
-        {message === 'Successful changed password' && <Alert onClose={handleClose} severity="success">
+        {message === 'Successful changed password' || message === 'Successfully sent verification request' && <Alert onClose={handleClose} severity="success">
           {message}
         </Alert>}
      </Snackbar>

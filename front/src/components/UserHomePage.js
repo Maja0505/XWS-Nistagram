@@ -14,6 +14,7 @@ import avatar from "../images/nistagramAvatar.jpg";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
+import verification from "../images/verification.png"
 
 import {
   GridOn,
@@ -175,10 +176,19 @@ const UserHomePage = () => {
         <Grid item xs={7}>
           <Grid container>
             {user !== undefined && (
+              <>
+              <Grid item xs={8}>
               <Typography variant="h6" style={{ margin: "auto" }}>
-                {user.Username}
+                {user.Username} {"  "}
+                {user.VerificationSettings.Verified && <img src={verification} style={{height:"20px", width:"20px", marginTop:"2%"}}></img>}
               </Typography>
+              </Grid>
+              <Grid item xs={3}>
+               
+                </Grid>
+                </>
             )}
+
             {loggedUsername === username && buttonForEditProfile}
             {requested && loggedUsername !== username && buttonForRequested}
             {following && loggedUsername !== username && !requested && buttonForUnfollow}
