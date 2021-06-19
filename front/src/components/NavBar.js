@@ -14,9 +14,6 @@ import { useState } from "react";
 import React from "react";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
-import IconButton from "@material-ui/core/IconButton";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import SearchIcon from "@material-ui/icons/Search";
 
 const NavBar = () => {
   const username = localStorage.getItem("username");
@@ -32,14 +29,14 @@ const NavBar = () => {
 
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
-     axios
+      axios
         .get("/api/user/search/" + text)
         .then((res) => {
           setSearchedUser(res.data);
         })
         .catch((error) => {
           setSearchedUser([]);
-        }); 
+        });
     } else {
       setSearchedUser([]);
     }
@@ -53,7 +50,7 @@ const NavBar = () => {
   };
 
   const searchBar = (
-    <Grid item xs={6} style={{ textAlign: "center" }} >
+    <Grid item xs={6} style={{ textAlign: "center" }}>
       <Autocomplete
         freeSolo
         renderOption={(option, { selected }) => (
@@ -84,19 +81,9 @@ const NavBar = () => {
               {...params}
               variant="outlined"
               size="small"
-              
               style={{ width: "70%" }}
               onChange={(e) => handleChangeInput(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment>
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+            ></TextField>
           </>
         )}
       />
