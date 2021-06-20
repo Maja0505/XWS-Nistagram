@@ -23,27 +23,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ProfilePage = ({ user, setUser }) => {
+const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setUserCopy,load}) => {
   const classes = useStyles();
-  const [selectedValue, setSelectedValue] = useState("male");
   const username = localStorage.getItem("username");
-  const [load, setLoad] = useState(false);
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     setUser({ ...user, Gender: selectedValue });
   };
-  const [userCopy, setUserCopy] = useState({});
 
-  useEffect(
-    () => {
-      console.log(user);
-      setUserCopy(user);
-      user.Gender === 0 ? setSelectedValue("male") : setSelectedValue("female");
-      setLoad(true);
-    },
-    [username],
-    [user]
-  );
 
   const handleClickSubmit = () => {
     var userDto = {
@@ -57,7 +44,7 @@ const ProfilePage = ({ user, setUser }) => {
       Biography: user.Biography,
       WebSite: user.WebSite,
     };
-    axios.put("/api/user/update/" + username, userDto).then((res) => {
+    axios.put("/api/user/update/" + user.Username, userDto).then((res) => {
       setUserCopy({
         ...userCopy,
         FirstName: user.FirstName,
