@@ -14,6 +14,7 @@ import avatar from "../images/nistagramAvatar.jpg";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
+import verification from "../images/verification.png"
 
 import {
   GridOn,
@@ -28,10 +29,14 @@ const UserHomePage = () => {
   const [following,setFollowing] = useState(false);
   const [redirection,setRedirection] = useState(false); 
   const [requested,setRequested] = useState(false); 
-  const [privateProfile,setPrivateProfile] =useState();
+  const [privateProfile,setPrivateProfile] =useState(false);
 
   const loggedUsername = localStorage.getItem("username");
   const loggedInId = localStorage.getItem("id");
+  const [load1,setLoad1] = useState(false)
+  const [load2,setLoad2] = useState(false)
+  const [load3,setLoad3] = useState(false)
+
   
   const users=[{ 	Username :"Perica",
                   FirstName :"Perica",
@@ -56,22 +61,24 @@ const UserHomePage = () => {
   useEffect(() => {
     console.log(username)
     console.log(loggedUsername)
-    setUser(users.filter(user => user.Username === username)[0])
-    setRequested(true)
-    setFollowing(false)
-    setPrivateProfile(true)
-   /* axios
+    //setUser(users.filter(user => user.Username === username)[0])
+    
+    //setFollowing(false)
+    //setPrivateProfile(true)
+    axios
     .get("/api/user/" + username)
     .then((res) => {
       console.log(res.data);
       setUser(res.data);
-
+      setPrivateProfile(res.data.ProfileSettings.Public)
       if(res.data.IdString !== loggedInId ){
       axios
       .get("/api/user-follow/checkBlock/" + loggedInId + "/" + res.data.IdString)
       .then((res) => {
         console.log(res.data)
+
         setRedirection(res.data)
+        setLoad1(true)
       })
       .catch((error) => {
         alert(error.response.status);
@@ -82,6 +89,7 @@ const UserHomePage = () => {
       .then((res) => {
         console.log(res.data)
         setRequested(res.data)
+        setLoad2(true)
       })
       .catch((error) => {
         alert(error.response.status);
@@ -92,16 +100,21 @@ const UserHomePage = () => {
       .then((res) => {
         console.log(res.data)
         setFollowing(res.data)
+        setLoad3(true)
       })
       .catch((error) => {
         alert(error.response.status);
       });
+    }else{
+      setLoad1(true)
+      setLoad2(true)
+      setLoad3(true)
     }
     })
     .catch((error) => {
       alert(error.response.status);
     });
-    */
+    
   }, [username, loggedUsername]);
 
   
@@ -116,14 +129,32 @@ const UserHomePage = () => {
   }
   const followClicked= () => {
     if(privateProfile){
+      var follow = {
+        "User" : loggedInId,
+        "FollowedUser" : user.ID,
+        "Private" : true
+      }
+      axios.post("/api/user-follow/followUser",follow).then((res)=> {console.log("uspesno")})
       setRequested(true)
     }
     else{
+      var follow = {
+        "User" : loggedInId,
+        "FollowedUser" : user.ID,
+        "Private" : false
+      }
+      axios.post("/api/user-follow/followUser",follow).then((res)=> {console.log("uspesno")})
       setFollowing(true)
     }
 
   }
   const unfollowClicked= () => {
+    var follow = {
+      "User" : loggedInId,
+      "UnfollowedUser" : user.ID,
+     
+    }
+    axios.put("/api/user-follow/unfollowUser",follow).then((res)=> {console.log("uspesno")})
     setFollowing(false)
 
   }
@@ -151,7 +182,10 @@ const UserHomePage = () => {
 
   const buttonForEditProfile = (
     <Button variant="outlined" color="inherit" style={{ marginLeft: "auto" }}>
-      <Link to="/accounts/edit/" style={{ textDecoration: "none", color: "gray" }}>
+      <Link
+        to="/accounts/edit/"
+        style={{ textDecoration: "none", color: "gray" }}
+      >
         Edit profile
       </Link>
     </Button>
@@ -175,10 +209,19 @@ const UserHomePage = () => {
         <Grid item xs={7}>
           <Grid container>
             {user !== undefined && (
+              <>
+              <Grid item xs={8}>
               <Typography variant="h6" style={{ margin: "auto" }}>
-                {user.Username}
+                {user.Username} {"  "}
+                {user.VerificationSettings.Verified && <img src={verification} style={{height:"20px", width:"20px", marginTop:"2%"}}></img>}
               </Typography>
+              </Grid>
+              <Grid item xs={3}>
+               
+                </Grid>
+                </>
             )}
+
             {loggedUsername === username && buttonForEditProfile}
             {requested && loggedUsername !== username && buttonForRequested}
             {following && loggedUsername !== username && !requested && buttonForUnfollow}
@@ -210,7 +253,9 @@ const UserHomePage = () => {
           <Grid container>
             {user !== undefined && (
               <>
-                <Typography>{user.Biography}</Typography>
+                <Typography style={{ textAlign: "left" }}>
+                  {user.Biography}
+                </Typography>
               </>
             )}
           </Grid>
@@ -222,7 +267,7 @@ const UserHomePage = () => {
 
   return (
     <div>
-      {userDetails}
+      {load1 && load2 && load3 && <>{userDetails}</>}
       <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
@@ -253,7 +298,9 @@ const UserHomePage = () => {
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
-          {user !== undefined && user !== null && <Posts userForProfile={user}></Posts>}
+          {user !== undefined && user !== null && (
+            <Posts userForProfile={user}></Posts>
+          )}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>

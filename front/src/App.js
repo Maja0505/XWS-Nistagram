@@ -8,7 +8,8 @@ import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
 import StoryBar from "./components/stories/StoryBar";
-
+import AdminHomePage from "./components/AdminHomePage"
+import LikedDislikedPost from "./components/LikedDislikedPost";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -53,11 +54,20 @@ function App() {
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
             ></Route>
-            <Route path="/dialog/:post"   render={(props) => <PostDialog {...props} />}>
+            <Route path="/admin" component={AdminHomePage}></Route>
+
+            <Route path="/dialog/:post"   render={(props) => <PostDialog {...props} />}></Route>
+            <Route
+              path="/dialog/:post"
+              render={(props) => <PostDialog {...props} />}
+            >
               <PostDialog></PostDialog>
             </Route>
-           
-
+            <Route
+              exact
+              path="/:username/liked-disliked/"
+              render={(props) => <LikedDislikedPost {...props} />}
+            ></Route>
           </Switch>
         </div>
       </Router>

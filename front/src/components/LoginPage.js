@@ -11,21 +11,26 @@ const LoginPage = () => {
   };
 
   const login = () => {
-  /*  axios
+    axios
       .get("/api/user/" + user.username)
       .then((res) => {
         console.log(res.data)
         localStorage.setItem("username", res.data.Username);
         localStorage.setItem("id", res.data.ID);
-        window.location.href =
+        if(user.username === "admin"){
+          window.location.href = "http://localhost:3000/admin"
+        }else{
+          window.location.href =
           "http://localhost:3000/homePage/" + res.data.Username;
+        }
+       
       })
       .catch((error) => {
         alert("Wrong username or password");
-      });*/
-      localStorage.setItem("username", user.username);
-      window.location.href =
-          "http://localhost:3000/homePage/" + user.username;
+      });
+      //localStorage.setItem("username", user.username);
+      /*window.location.href =
+          "http://localhost:3000/homePage/" + user.username;*/
   };
 
   return (

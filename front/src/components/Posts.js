@@ -118,19 +118,21 @@ const Posts = ({userForProfile}) => {
   };
 
   useEffect(() => {
-   /* axios.get(' ' + userForProfile.ID)
+    axios.get('/api/post/get-all-by-userid/' + userForProfile.ID)
       .then((res)=>
       {
         setPosts(res.data)
-      })*/
+      }).catch((error) => {
+
+      })
   }, [userForProfile])
 
 
   const getImage  = (image) => {
-  /*  axios.get('/api/post/get-image/' + image)
+    axios.get('/api/post/get-image/' + image)
       .then((res) => {
         return res.data
-      })*/
+      })
   }
 
   
