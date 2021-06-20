@@ -48,7 +48,7 @@ func (service *PostService) AddTag(tag *Model.Tag) error {
 	return nil
 }
 func (service *PostService) AddPostToFavourites(favouriteDTO *DTO.FavouriteDTO) error {
-	err := service.Repo.AddPostToFavourites(favouriteDTO.PostID, favouriteDTO.UserID)
+	err := service.Repo.AddPostToFavourites(favouriteDTO)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -57,7 +57,7 @@ func (service *PostService) AddPostToFavourites(favouriteDTO *DTO.FavouriteDTO) 
 }
 
 func (service *PostService) AddPostToCollection(favouriteDTO *DTO.FavouriteDTO) error {
-	err := service.Repo.AddPostToCollection(favouriteDTO.PostID, favouriteDTO.UserID, favouriteDTO.Collection)
+	err := service.Repo.AddPostToCollection(favouriteDTO)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -130,8 +130,49 @@ func (service *PostService) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	return post, err
 }
 
+func (service *PostService) GetUserWhoPostedComment(commentid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
+	username,err := service.Repo.GetUserWhoPostedComment(commentid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-usernames")
+
+	type UsernamesDTO struct {
+		Usernames []string
+	}
+
+	usernamesDTO := UsernamesDTO{}
+	usernamesDTO.Usernames = append(usernamesDTO.Usernames, *username)
+	fmt.Println(usernamesDTO.Usernames)
+	jsonUserids,_ := json.Marshal(usernamesDTO)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	fmt.Println(data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (service *PostService) GetTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
 	tags,err := service.Repo.GetTagsForPost(postid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return tags, err
+}
+
+func (service *PostService) GetPureTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
+	tags,err := service.Repo.GetPureTagsForPost(postid)
 	if err != nil{
 		fmt.Println(err)
 		return  nil, err
@@ -182,6 +223,38 @@ func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 	}
 	return comments, err
 }
+
+func (service *PostService) GetUsersTaggedOnPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
+	usernames, err := service.Repo.GetUsersTaggedOnPost(postid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	fmt.Println(usernames)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-usernames")
+
+	type UsernamesDTO struct {
+		Usernames []string
+	}
+
+	usernamesDTO := UsernamesDTO{}
+	usernamesDTO.Usernames = *usernames
+	jsonUserids,_ := json.Marshal(usernamesDTO)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (service *PostService) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
 	userids, err := service.Repo.GetUsersWhoLikedPost(postid)
 

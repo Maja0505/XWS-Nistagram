@@ -122,6 +122,27 @@ func (repo *UserRepository) FindUsernameByUserId(userIds dto.UserIdsDTO) (*[]dto
 	return &users,nil
 }
 
+func (repo *UserRepository) FindUserIdByUsername(usernames dto.UsernamesDTO) (*[]dto.UserByUsernameDTO, error){
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	var users []dto.UserByUsernameDTO
+
+	/*oids := make([]primitive.ObjectID, len(userIds.UserIds))	//konverotvanje stringa u ObjectID
+	for i := range userIds.UserIds {
+		objID, err := primitive.ObjectIDFromHex(userIds.UserIds[i])
+		if err == nil {
+			oids = append(oids, objID)
+		}
+		}*/
+	query := bson.M{"username": bson.M{"$in": usernames.Usernames}}
+	cursor,err := coll.Find(context.TODO(),query)
+	if err != nil{
+		return nil,err
+	}
+	err = cursor.All(context.TODO(),&users)
+	return &users,nil
+}
+
 func (repo *UserRepository) ChangePassword(username string, newPassword string) error {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
