@@ -121,9 +121,29 @@ func (handler *UserHandler) ConvertUserIdsToUsers(w http.ResponseWriter, r *http
 	if err != nil{
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(userIds)
 	users,err := handler.Service.ConvertUserIdsToUsers(userIds)
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
+}
+
+func (handler *UserHandler) ConvertUsernamesToUsers(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	var usernames dto.UsernamesDTO
+	err := json.NewDecoder(r.Body).Decode(&usernames)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("aaaa")
+	}
+	fmt.Println("usernames  ",usernames)
+	fmt.Println(usernames)
+	users,err := handler.Service.ConvertUsernamesToUsers(usernames)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		fmt.Println("aaaaa")
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
