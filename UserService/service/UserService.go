@@ -83,6 +83,14 @@ func (service *UserService) ConvertUserIdsToUsers(userIds dto.UserIdsDTO) (*[]dt
 	return users,nil
 }
 
+func (service *UserService) ConvertUsernamesToUsers(usernames dto.UsernamesDTO) (*[]dto.UserByUsernameDTO, error) {
+	users,err := service.Repo.FindUserIdByUsername(usernames)
+	if err != nil{
+		return nil, err
+	}
+	return users,nil
+}
+
 func (service *UserService) ChangePassword(username string,passwordDto dto.PasswordDTO) (bool,error) {
 	if passwordDto.NewPassword != passwordDto.ConfirmNewPassword{
 		return true,errors.New("Please make sure both passwords match.")

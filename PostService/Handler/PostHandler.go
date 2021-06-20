@@ -378,6 +378,29 @@ func (handler *PostHandler) GetTagsForPost(w http.ResponseWriter, r *http.Reques
 
 }
 
+func (handler *PostHandler) GetPureTagsForPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	postid := vars["id"]
+	postuuid, err := ParseUUID(postid)
+
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tags,_ := handler.Service.GetPureTagsForPost(postuuid)
+
+	if tags == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tags)
+
+}
+
 func (handler *PostHandler) GetCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -400,6 +423,56 @@ func (handler *PostHandler) GetCommentsForPost(w http.ResponseWriter, r *http.Re
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comments)
+
+}
+
+func (handler *PostHandler) GetUserWhoPostedComment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	commentid := vars["id"]
+	if commentid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var commentuuid, err = ParseUUID(commentid)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	username,_ := handler.Service.GetUserWhoPostedComment(commentuuid)
+
+	if username == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(username)
+
+}
+
+func (handler *PostHandler) GetUsersTaggedOnPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	postid := vars["id"]
+	if postid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var postuuid, err = ParseUUID(postid)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	userids,_ := handler.Service.GetUsersTaggedOnPost(postuuid)
+
+	if userids == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(userids)
 
 }
 

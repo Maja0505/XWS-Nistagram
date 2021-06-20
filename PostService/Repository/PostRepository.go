@@ -7,6 +7,7 @@ import (
 	"github.com/gocql/gocql"
 	"image"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -144,9 +145,9 @@ func (repo *PostRepository) AddComment(comment *Model.Comment) error {
 	return nil
 }
 
-func (repo *PostRepository) AddPostToFavourites(postid gocql.UUID, userid string) error {
+func (repo *PostRepository) AddPostToFavourites(favourite *DTO.FavouriteDTO) error {
 	if err := repo.Session.Query("INSERT INTO postkeyspace.favourites(userid, postid) VALUES(?, ?) IF NOT EXISTS",
-		userid, postid).Exec(); err != nil {
+		favourite.UserID, favourite.PostID).Exec(); err != nil {
 		fmt.Println("Error while adding post to favourites!")
 		fmt.Println(err)
 		return err
@@ -155,17 +156,17 @@ func (repo *PostRepository) AddPostToFavourites(postid gocql.UUID, userid string
 	return nil
 }
 
-func (repo *PostRepository) AddPostToCollection(postid gocql.UUID, userid string, collection string) error {
-	if repo.CheckIfPostIsInFavourites(userid, postid) == false{
+func (repo *PostRepository) AddPostToCollection(favourite *DTO.FavouriteDTO) error {
+	if repo.CheckIfPostIsInFavourites(favourite.UserID, favourite.PostID) == false{
 		return gocql.Error{Message: "Post is not in favourites!!"}
 	}
 	if err := repo.Session.Query("INSERT INTO postkeyspace.collections(userid, postid, collection) VALUES(?, ?, ?) IF NOT EXISTS",
-		userid, postid, collection).Exec(); err != nil {
-		fmt.Println("Error while adding post to collection: ", collection)
+		favourite.UserID, favourite.PostID, favourite.Collection).Exec(); err != nil {
+		fmt.Println("Error while adding post to collection: ", favourite.Collection)
 		fmt.Println(err)
 		return err
 	}
-	fmt.Println("Successfully added post to collection: ", collection)
+	fmt.Println("Successfully added post to collection: ", favourite.Collection)
 	return nil
 }
 
@@ -199,6 +200,7 @@ func (repo *PostRepository) DeleteComment(comment *Model.Comment) error {
 	fmt.Println("Successfully deleted comment!!")
 	return nil
 }
+
 func (repo *PostRepository) RemovePostFromFavourites(favourite *DTO.FavouriteDTO) error {
 	if err := repo.Session.Query("DELETE FROM postkeyspace.favourites where userid = ? AND postid = ? IF EXISTS;",
 		favourite.UserID, favourite.PostID).Exec(); err != nil {
@@ -209,6 +211,7 @@ func (repo *PostRepository) RemovePostFromFavourites(favourite *DTO.FavouriteDTO
 	fmt.Println("Successfully deleted post from favourites!!")
 	return nil
 }
+
 func (repo *PostRepository) RemovePostFromCollection(favourite *DTO.FavouriteDTO) error {
 	if err := repo.Session.Query("DELETE FROM postkeyspace.favourites where userid = ? AND postid = ? AND collection = ? IF EXISTS;",
 		favourite.UserID, favourite.PostID, favourite.Collection).Exec(); err != nil {
@@ -611,6 +614,39 @@ func (repo *PostRepository) GetTagsForPost(postid gocql.UUID) ( *[]Model.Tag, er
 	return &tags,nil
 }
 
+func (repo *PostRepository) GetPureTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
+	var tags []Model.Tag
+	m := map[string]interface{}{}
+
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.tags WHERE postid=?", postid).Iter()
+	for iter.MapScan(m) {
+		var tag = Model.Tag{
+			PostID:      m["postid"].(gocql.UUID),
+			Tag:   		 m["tag"].(string),
+		}
+		if strings.HasPrefix(tag.Tag, "@") == false{
+			tags = append(tags, tag)
+		}
+		m = map[string]interface{}{}
+	}
+	return &tags,nil
+}
+
+func (repo *PostRepository) GetUsersTaggedOnPost(postid gocql.UUID) (*[]string, error){
+	var tags, err = repo.GetTagsForPost(postid)
+	if err != nil{
+		return nil, err
+	}
+	var usernames []string
+	for _, tag := range *tags{
+		if strings.HasPrefix(tag.Tag,"@"){
+			var username = strings.SplitAfter(tag.Tag,"@")
+			usernames = append(usernames, username[1])
+		}
+	}
+	return &usernames, nil
+}
+
 func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Comment, error) {
 	var comments []Model.Comment
 	m := map[string]interface{}{}
@@ -627,6 +663,23 @@ func (repo *PostRepository) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 		m = map[string]interface{}{}
 	}
 	return &comments,nil
+}
+
+func (repo *PostRepository) GetUserWhoPostedComment(commentid gocql.UUID) ( *string, error){
+	iter:= repo.Session.Query("SELECT * FROM postkeyspace.comments WHERE id=? ALLOW FILTERING", commentid).Iter()
+	if iter.NumRows() == 0 {
+		return nil, gocql.Error{Message: "Comment does not exist!"}
+	}
+	var username string
+	m := map[string]interface{}{}
+	for iter.MapScan(m) {
+		username = m["userid"].(string)
+		m = map[string]interface{}{}
+	}
+	if username == ""{
+		return nil, gocql.Error{Message: "Username empty!"}
+	}
+	return &username, nil
 }
 
 func (repo *PostRepository) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]string, error) {
