@@ -7,38 +7,15 @@ import axios from "axios";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 
-const PushNotificationPage = ({user}) => {
+const PushNotificationPage = ({pushNotification, setPushNotification,load}) => {
   const username = localStorage.getItem("username");
-  const [accountPrivacy, setAccountPrivacy] = useState(false);
-  const [messageRequest, setMessageRequest] = useState(false);
-  const [allowTags, setAllowTags] = useState(false);
-  const [likesNotification, setLikesNotification] = useState(false)
-  const [commentNotification, setCommentNotification] = useState(false)
-  const [messageRequestNotification, setMessageRequestNotification] = useState(false)
-  const [messageNotification, setMessageNotification] = useState(false)
-  const [followRequestNotification, setFollowRequestNotification] = useState(false)
-  const [followNotification, setFollowNotification] = useState(false)
-  const [load, setLoad] = useState(false)
-
-
-  useEffect(() => {
-    if(user.NotificationSettings !== undefined) {
-        setLikesNotification(user.NotificationSettings.LikeNotification);
-        setCommentNotification(user.NotificationSettings.CommentNotification);
-        setMessageRequestNotification(user.NotificationSettings.MessageRequestNotification)
-        setMessageNotification(user.NotificationSettings.MessageNotification)
-        setFollowRequestNotification(user.NotificationSettings.FollowRequestNotification)
-        setFollowNotification(user.NotificationSettings.FollowNotification)
-        setLoad(true)
-    }
-  }, [user]);
 
 
   const HandleOnChangeLikesNotification = (value) => {
  
-      if(likesNotification !== value){
+      if(pushNotification.LikesNotification !== value){
         axios.put("/api/user/" + username + "/like-notification/" + value).then((res) => {
-            setLikesNotification(value === 'true');
+            setPushNotification({...pushNotification, LikeNotification: value === 'true'})
           });
       }
     
@@ -46,9 +23,10 @@ const PushNotificationPage = ({user}) => {
 
   const HandleOnChangeCommentNotification = (value) => {
  
-    if(commentNotification !== value){
+    if(pushNotification.CommentNotification !== value){
       axios.put("/api/user/" + username + "/comment-notification/" + value).then((res) => {
-          setCommentNotification(value === 'true');
+        setPushNotification({...pushNotification, CommentNotification: value === 'true'})
+
         });
     }
   
@@ -56,9 +34,10 @@ const PushNotificationPage = ({user}) => {
 
 const HandleOnChangeMessageRequestNotification = (value) => {
  
-    if(messageRequestNotification !== value){
+    if(pushNotification.MessageRequestNotification !== value){
       axios.put("/api/user/" + username + "/message-request-notification/" + value).then((res) => {
-          setMessageRequestNotification(value === 'true');
+        setPushNotification({...pushNotification, MessageRequestNotification: value === 'true'})
+
         });
     }
   
@@ -66,9 +45,9 @@ const HandleOnChangeMessageRequestNotification = (value) => {
 
 const HandleOnChangeMessageNotification = (value) => {
  
-    if(messageNotification !== value){
+    if(pushNotification.MessageNotification !== value){
       axios.put("/api/user/" + username + "/message-notification/" + value).then((res) => {
-          setMessageNotification(value === 'true');
+        setPushNotification({...pushNotification, MessageNotification: value === 'true'})
         });
     }
   
@@ -76,9 +55,9 @@ const HandleOnChangeMessageNotification = (value) => {
 
 const HandleOnChangeFollowRequestNotification = (value) => {
  
-    if(followRequestNotification !== value){
+    if(pushNotification.FollowRequestNotification !== value){
       axios.put("/api/user/" + username + "/follow-request-notification/" + value).then((res) => {
-          setFollowRequestNotification(value === 'true');
+        setPushNotification({...pushNotification, FollowRequestNotification: value === 'true'})
         });
     }
   
@@ -86,9 +65,9 @@ const HandleOnChangeFollowRequestNotification = (value) => {
 
 const HandleOnChangeFollowNotification = (value) => {
  
-    if(followNotification !== value){
+    if(pushNotification.FollowNotification !== value){
       axios.put("/api/user/" + username + "/follow-notification/" + value).then((res) => {
-          setFollowNotification(value === 'true');
+        setPushNotification({...pushNotification, FollowNotification: value === 'true'})
         });
     }
   
@@ -104,7 +83,7 @@ const HandleOnChangeFollowNotification = (value) => {
             </p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="likes" value={likesNotification} name="likes" onClick={(e) => HandleOnChangeLikesNotification(e.target.value)}>
+            <RadioGroup aria-label="likes" value={pushNotification.LikeNotification === true} name="likes" onClick={(e) => HandleOnChangeLikesNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
@@ -125,7 +104,7 @@ const HandleOnChangeFollowNotification = (value) => {
             <p style={{ fontSize: 25, textAlign: "left" }}>Comments notification</p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="comment" name="comment" value={commentNotification} onClick={(e)=> HandleOnChangeCommentNotification(e.target.value)}>
+            <RadioGroup aria-label="comment" name="comment" value={pushNotification.CommentNotification === true} onClick={(e)=> HandleOnChangeCommentNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
@@ -146,7 +125,7 @@ const HandleOnChangeFollowNotification = (value) => {
             <p style={{ fontSize: 25, textAlign: "left" }}>Messages request notification</p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="message-request" name="message-request" value={messageRequestNotification} onClick={(e)=> HandleOnChangeMessageRequestNotification(e.target.value)}>
+            <RadioGroup aria-label="message-request" name="message-request" value={pushNotification.MessageRequestNotification === true} onClick={(e)=> HandleOnChangeMessageRequestNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
@@ -167,7 +146,7 @@ const HandleOnChangeFollowNotification = (value) => {
             <p style={{ fontSize: 25, textAlign: "left" }}>Messages notification</p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="message" name="message" value={messageNotification} onClick={(e)=> HandleOnChangeMessageNotification(e.target.value)}>
+            <RadioGroup aria-label="message" name="message" value={pushNotification.MessageNotification === true} onClick={(e)=> HandleOnChangeMessageNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
@@ -190,7 +169,7 @@ const HandleOnChangeFollowNotification = (value) => {
             </p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="follow-request" name="follow-request" value={followRequestNotification} onClick={(e)=> HandleOnChangeFollowRequestNotification(e.target.value)}>
+            <RadioGroup aria-label="follow-request" name="follow-request" value={pushNotification.FollowRequestNotification === true} onClick={(e)=> HandleOnChangeFollowRequestNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
@@ -213,7 +192,7 @@ const HandleOnChangeFollowNotification = (value) => {
             </p>
           </Grid>
           <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="follow" name="follow" value={followNotification} onClick={(e)=> HandleOnChangeFollowNotification(e.target.value)}>
+            <RadioGroup aria-label="follow" name="follow" value={pushNotification.FollowNotification === true} onClick={(e)=> HandleOnChangeFollowNotification(e.target.value)}>
               <FormControlLabel value={false} control={<Radio />} label="Off" />
               <FormControlLabel
                 value={true}
