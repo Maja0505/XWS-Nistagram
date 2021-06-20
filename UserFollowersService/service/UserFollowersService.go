@@ -174,6 +174,15 @@ func (service *UserFollowersService) CheckFollowing(userId string, followedUserI
 	return following,err
 }
 
+func (service *UserFollowersService) CheckRequested(userId string, followedUserId string) (*interface{}, error) {
+	requested,err := service.Repository.CheckRequested(userId , followedUserId)
+	if err != nil{
+		return nil, err
+	}
+
+	return requested,err
+}
+
 
 func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByUsernameDTO,error){
 

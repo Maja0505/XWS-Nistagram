@@ -7,6 +7,9 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"log"
 	"net/http"
 	"os"
@@ -65,7 +68,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
 	router.HandleFunc("/create",handler.CreateRegisteredUser).Methods("POST")
 	router.HandleFunc("/{username}",handler.FindUserByUsername).Methods("GET")
-	router.HandleFunc("/search/{searchContent}",handler.SearchUser).Methods("GET")
+	router.HandleFunc("/search/{username}/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
 	router.HandleFunc("/convert-usernames",handler.ConvertUsernamesToUsers).Methods("POST")
 	router.HandleFunc("/change-password/{username}",handler.ChangePassword).Methods("PUT")
@@ -81,17 +84,16 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 
 }
 
-func init() {
-
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
 func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,router *mux.Router){
 
-	router.HandleFunc("/verificationRequest/create",handler.Create).Methods("POST")
+	router.HandleFunc("/verification-request/create",handler.Create).Methods("POST")
+	router.HandleFunc("/verification-request/update/{user}",handler.Update).Methods("PUT")
+	router.HandleFunc("/verification-request/all",handler.GetAllVerificationRequest).Methods("GET")
+	router.HandleFunc("/verification-request/{user}",handler.GetVerificationRequestByUser).Methods("GET")
+	router.HandleFunc("/verification-request/approve/{user}",handler.ApproveVerificationRequest).Methods("PUT")
+	router.HandleFunc("/verification-request/delete/{user}",handler.DeleteVerificationRequest).Methods("PUT")
+	router.HandleFunc("/verification-request/upload-verification-doc/{id}",handler.UploadImage).Methods("POST")
+	router.HandleFunc("/verification-request/get-image/{id}", handler.GetImage).Methods("GET")
 
 }
 
@@ -103,12 +105,14 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-}
 
+	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
+	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+
+}
 
 func main() {
 	database := initDB()
-	//fmt.Println(d.Collection("users").Find(context.TODO(),bson.M{}))
 
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)

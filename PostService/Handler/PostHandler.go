@@ -609,6 +609,67 @@ func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (handler *PostHandler) GetLikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	likedPosts,_ := handler.Service.GetLikedPostsForUser(userid)
+
+	if likedPosts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(likedPosts)
+
+}
+
+func (handler *PostHandler) GetDislikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	likedPosts,_ := handler.Service.GetDislikedPostsForUser(userid)
+
+	if likedPosts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(likedPosts)
+}
+
+func (handler *PostHandler) ReportContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var reportedConted DTO.ReportedContentDTO
+	err := json.NewDecoder(r.Body).Decode(&reportedConted)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.ReportContent(&reportedConted)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
+
 /*func (handler *PostHandler) GetAllLikesForPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Ulaziii")
 	w.Header().Set("Content-Type", "application/json")

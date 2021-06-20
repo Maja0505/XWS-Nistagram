@@ -62,7 +62,7 @@ func (repo *PostRepository) CreateTables() error{
 		return err
 	}
 
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	*/if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -87,27 +87,32 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.tags(postid uuid, tag text, PRIMARY KEY((postid), tag));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.tags(postid uuid, tag text, PRIMARY KEY((postid), tag));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.tagsDK(postid uuid, tag text, PRIMARY KEY((tag), postid));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.tagsDK(postid uuid, tag text, PRIMARY KEY((tag), postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.favourites(userid text, postid uuid, PRIMARY KEY((userid), postid));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.favourites(userid text, postid uuid, PRIMARY KEY((userid), postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE postkeyspace.collections(userid text, postid uuid, collection text, PRIMARY KEY((userid), collection, postid));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.collections(userid text, postid uuid, collection text, PRIMARY KEY((userid), collection, postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	 */
+
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.reported_contents(id uuid, description text, contentid text, userid text, adminid text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
 	fmt.Println("Successfully dropped and created tables!!")
 
 	return nil
@@ -484,9 +489,9 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 	}
 	for iter.MapScan(m) {
 		iter2 := repo.Session.Query("SELECT * FROM postkeyspace.postcounters WHERE postid=?", m["id"].(gocql.UUID)).Iter()
-		if iter2.NumRows() == 0{
-			continue
-		}
+		/*if iter2.NumRows() == 0{
+			//continue
+		}*/
 		iter2.MapScan(m2)
 		if iter2.NumRows() == 1{
 			var a int64 = m2["likes"].(int64)
@@ -699,7 +704,7 @@ func (repo *PostRepository) GetUsersWhoDislikedPost(postid gocql.UUID) ( *[]stri
 }
 
 func (repo *PostRepository) GetImage(imagepath string) (image.Image, error){
-	var directory string = "Images/"
+	var directory string = "post-documents/"
 	var imgpath string = directory + imagepath
 	img, err := LoadImage(imgpath)
 	if err != nil{
@@ -722,3 +727,67 @@ func LoadImage(imagepath string) (image.Image, error){
 	}
 	return img, nil
 }
+
+func (repo *PostRepository) GetLikedPostsForUser(userid string) ( *[]Model.Post, error) {
+
+	var postids []gocql.UUID
+	var posts []Model.Post
+	m := map[string]interface{}{}
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.likes WHERE userid=? ALLOW FILTERING", userid).Iter()
+
+	for iter.MapScan(m) {
+		var postid = m["postid"].(gocql.UUID)
+		postids = append(postids, postid)
+		m = map[string]interface{}{}
+	}
+	for i:=0; i< len(postids); i++{
+		var post,err = repo.FindPostById(postids[i])
+		if err != nil{
+			continue
+		}
+		if post != nil {
+			posts = append(posts, *post)
+		}
+	}
+	return &posts, nil
+}
+
+func (repo *PostRepository) GetDislikedPostsForUser(userid string) (*[]Model.Post, error) {
+
+	var postids []gocql.UUID
+	var posts []Model.Post
+	m := map[string]interface{}{}
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.dislikes WHERE userid=? ALLOW FILTERING", userid).Iter()
+
+	for iter.MapScan(m) {
+		var postid = m["postid"].(gocql.UUID)
+		postids = append(postids, postid)
+		m = map[string]interface{}{}
+	}
+	for i:=0; i< len(postids); i++{
+		var post,err = repo.FindPostById(postids[i])
+		if err != nil{
+			continue
+		}
+		if post != nil {
+			posts = append(posts, *post)
+		}
+	}
+	return &posts, nil
+}
+
+func (repo *PostRepository) ReportContent(content *Model.ReportedContent) error {
+	ID, _ := gocql.RandomUUID()
+	if err := repo.Session.Query("INSERT INTO postkeyspace.reported_contents(id, description, contentid, userid, adminid) VALUES(?, ?, ?, ?, ?)",
+		ID, content.Description, content.ContentID, content.UserID, content.AdminID).Exec(); err != nil {
+		fmt.Println("Error while creating report!")
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("Successfully created report!!")
+	return nil
+}
+
+
+
+

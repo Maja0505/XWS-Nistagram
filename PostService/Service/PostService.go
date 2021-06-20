@@ -323,6 +323,38 @@ func (service *PostService) GetImage(imagepath string) ( image.Image, error) {
 	return img, err
 }
 
+func (service *PostService) GetLikedPostsForUser(userid string) (*[]Model.Post, error) {
+	likedPost, err := service.Repo.GetLikedPostsForUser(userid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return likedPost, err
+}
+
+func (service *PostService) GetDislikedPostsForUser(userid string) (*[]Model.Post, error) {
+	dislikedPost, err := service.Repo.GetDislikedPostsForUser(userid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return dislikedPost, err
+}
+
+func (service *PostService) ReportContent(reportedContentDTO *DTO.ReportedContentDTO) error {
+	reportedContent := Mapper.ConvertReportedContentDTOToReportedContent(reportedContentDTO)
+	err := service.Repo.ReportContent(reportedContent)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
 /*func (service *PostService) GetAllLikesForPost(postid string) error {
 	err := service.Repo.GetAllLikesForPost(postid)
 	if err != nil{

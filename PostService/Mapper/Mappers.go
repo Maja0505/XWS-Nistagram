@@ -27,3 +27,22 @@ func ConvertCommentDTOToComment(commentDTO *DTO.CommentDTO) *Model.Comment {
 	comment.Content = commentDTO.Content
 	return &comment
 }
+
+func ConvertReportedContentDTOToReportedContent(reportedContentDTO *DTO.ReportedContentDTO) *Model.ReportedContent{
+	var reportedContent Model.ReportedContent
+	reportedContent.ID = reportedContentDTO.ID
+	reportedContent.Description = reportedContentDTO.Description
+	reportedContent.UserID = reportedContentDTO.UserID
+	reportedContent.AdminID = reportedContentDTO.AdminID
+	reportedContent.ContentID = reportedContentDTO.ContentID
+	return &reportedContent
+}
+
+func ConvertCreateStoryDTOToPost(storyDTO *DTO.CreateStoryDTO) *Model.Story {
+	var story Model.Story
+	story.Image = storyDTO.Image
+	story.UserID = storyDTO.UserID
+	story.ForCloseFriends = storyDTO.ForCloseFriends
+	story.Highlights = storyDTO.Highlights
+	return &story
+}

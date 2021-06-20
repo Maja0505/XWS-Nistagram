@@ -10,6 +10,7 @@ services:
     volumes:
       - ./ApiGateway/nginx.conf:/etc/nginx/nginx.conf
       - ./ApiGateway/api_gateway.conf:/etc/nginx/api_gateway.conf
+    restart: always
 
   user-service:
     image: user-service:compose_build
@@ -26,6 +27,9 @@ services:
       - mongo
     links: 
       - mongo
+    tmpfs:
+      - /var/run
+      - /var/cache/verification-docs/*
 
   post-service:
     image: post-service:compose_build
@@ -40,6 +44,9 @@ services:
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
     restart: on-failure
+    tmpfs:
+      - /var/run
+      - /var/cache/post-documents/*
     depends_on:
       - cass
     links: 
@@ -68,7 +75,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - /data/db:/data/db
+      - ./data/db:/data/db
     networks:
       - network1
 

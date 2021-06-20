@@ -85,11 +85,11 @@ func (repo *UserRepository) FindUserByUsername(username string) ( *model.Registe
 
 }
 
-func (repo *UserRepository) FindAllUsersBySearchingContent(searchContent string) (*[]model.RegisteredUser,error) {
+func (repo *UserRepository) FindAllUsersBySearchingContent(username string,searchContent string) (*[]model.RegisteredUser,error) {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
 	var users []model.RegisteredUser
-	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"}}})
+	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username},{"$ne","admin"}}})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -266,6 +266,18 @@ func (repo *UserRepository) UpdateFollowNotificationSetting(username string, fol
 	coll := db.Collection("users")
 
 	_,err := coll.UpdateOne(context.TODO(),bson.M{"username":username},bson.D{{"$set",bson.D{{"notification_settings.follow_notification",followNotification}}}})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (repo *UserRepository) UpdateVerificationSettings(userId string,category model.Category) error {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+
+	_,err := coll.UpdateOne(context.TODO(),bson.M{"id_string":userId},bson.D{{"$set",bson.D{{"verification_settings.verified",true},{"verification_settings.category", category}}}})
 	if err != nil {
 		return err
 	}
