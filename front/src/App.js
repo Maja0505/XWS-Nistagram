@@ -7,8 +7,7 @@ import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
-import StoryBar from "./components/StoryBar";
-import ContentDetails from "./components/ContentDetails";
+import StoryBar from "./components/stories/StoryBar";
 
 
 function App() {
@@ -39,7 +38,7 @@ function App() {
       <Router>
         <div className="App">
           <NavBar></NavBar>
-          <ContentDetails></ContentDetails>
+          <StoryBar></StoryBar>
           <Switch>
             <Route exact path="/" component={StartPage}></Route>
             <Route
