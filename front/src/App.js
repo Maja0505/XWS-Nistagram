@@ -11,6 +11,7 @@ import StoryBar from "./components/StoryBar";
 import ContentDetails from "./components/ContentDetails";
 import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
+import HashTagPost from "./components/HashTagPost";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -77,6 +78,11 @@ function App() {
               exact
               path="/:username/liked-disliked/"
               render={(props) => <LikedDislikedPost {...props} />}
+            ></Route>
+            <Route
+              exact
+              path="/explore/tags/:tag/"
+              render={(props) => <HashTagPost {...props} />}
             ></Route>
           </Switch>
         </div>

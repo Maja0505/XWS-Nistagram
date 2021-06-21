@@ -10,7 +10,7 @@ const AddPost = ({ setTabValue }) => {
   const loggedUserId = localStorage.getItem("id");
   const [isVideo, setIsVideo] = useState(false);
 
-  const createPost = () => {
+  const createPost = async () => {
     if (!isVideo) {
       uploadImage();
     } else {
@@ -18,8 +18,29 @@ const AddPost = ({ setTabValue }) => {
     }
   };
 
+  const addTags = (postDTO) => {
+    var listOfTags = description.split("#");
+    if (listOfTags.length > 0) {
+      for (var i = 1; i < listOfTags.length; i++) {
+        let tag = listOfTags[i].split(" ")[0];
+        axios
+          .post("/api/post/add-tag", {
+            Tag: tag,
+            PostID: postDTO.ID,
+          })
+          .then((res) => {
+            console.log("Upisan tag  " + tag);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    }
+  };
+
   const uploadVideo = () => {
     var postDTO = {
+      ID: uuidv4(),
       Description: description,
       Image: uuidv4().toString() + "A" + loggedUserId.toString() + ".mp4",
       UserID: loggedUserId,
@@ -41,6 +62,7 @@ const AddPost = ({ setTabValue }) => {
           .then((res1) => {
             console.log("Uspesno kreirao post");
             console.log(postDTO);
+            addTags(postDTO);
             setTabValue(0);
           })
           .catch((error) => {
@@ -54,6 +76,7 @@ const AddPost = ({ setTabValue }) => {
 
   const uploadImage = () => {
     var postDTO = {
+      ID: uuidv4(),
       Description: description,
       Image: uuidv4().toString() + "A" + loggedUserId.toString() + ".jpg",
       UserID: loggedUserId,
@@ -75,6 +98,7 @@ const AddPost = ({ setTabValue }) => {
           .then((res1) => {
             console.log("Uspesno kreirao post");
             console.log(postDTO);
+            addTags(postDTO);
             setTabValue(0);
           })
           .catch((error) => {

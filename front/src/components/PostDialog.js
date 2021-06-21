@@ -8,7 +8,6 @@ import {
   Grid,
   Paper,
   Divider,
-  List,
   Grow,
   Popper,
   MenuItem,
@@ -50,6 +49,7 @@ const PostDialog = () => {
 
   const { post } = useParams();
   const [imagePost, setImagePost] = useState();
+  const [descriptionArray, setDescriptionArray] = useState([]);
   const [commentsForPost, setCommentsForPost] = useState([]);
   const [postIsLiked, setPostIsLiked] = useState(false);
   const [postIsDisliked, setPostIsDisliked] = useState(false);
@@ -104,6 +104,7 @@ const PostDialog = () => {
 
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
+      makeDescriptionFromPost(res.data.Description);
       console.log(res.data);
     });
     var like = {
@@ -177,6 +178,24 @@ const PostDialog = () => {
   const handleOpenDialogForReport = () => {
     setOpenDialogForReport(true);
     setOpen((prevOpen) => !prevOpen);
+  };
+
+  const makeDescriptionFromPost = async (text) => {
+    console.log(text);
+    var resultDescription = [];
+    var listOfWords = text.split("#");
+    if (listOfWords.length > 0) {
+      resultDescription.push(listOfWords[0]);
+      for (var i = 1; i < listOfWords.length; i++) {
+        var listOfWordsStartWithHash = listOfWords[i].split(" ");
+        resultDescription.push("#" + listOfWordsStartWithHash[0]);
+        for (var j = 1; j < listOfWordsStartWithHash.length; j++) {
+          resultDescription.push(" " + listOfWordsStartWithHash[j]);
+        }
+      }
+    }
+    setDescriptionArray(resultDescription);
+    console.log(resultDescription);
   };
 
   const dropDowMenuForPost = (
@@ -298,6 +317,22 @@ const PostDialog = () => {
                   </Grid>
                 </Grid>
                 <Grid container style={{ height: "60%", overflow: "auto" }}>
+                  <div>
+                    {descriptionArray.map((word) =>
+                      word.charAt(0) === "#" ? (
+                        <>
+                          <Link
+                            to={`/explore/tags/${word.substring(1)}/`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            {word}
+                          </Link>
+                        </>
+                      ) : (
+                        `${word}`
+                      )
+                    )}
+                  </div>
                   <CommentsForPost
                     commentsForPost={commentsForPost}
                     setCommentsForPost={setCommentsForPost}
