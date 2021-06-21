@@ -724,6 +724,65 @@ func (handler *PostHandler) ReportContent(w http.ResponseWriter, r *http.Request
 
 }
 
+func (handler *PostHandler) GetCollectionsForUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	if userid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	collections,_ := handler.Service.GetCollectionsForUser(userid)
+
+	if collections == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(collections)
+}
+
+func (handler *PostHandler) CheckIfPostExistsInFavourites(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	postid := vars["post"]
+	if userid == "" || postid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var postuuid, err = ParseUUID(postid)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	exist := handler.Service.CheckIfPostExistsInFavourites(userid,postuuid)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(exist)
+}
+
+func (handler *PostHandler) GetAllCollectionsForPostByUser(w http.ResponseWriter,r  *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userid := vars["id"]
+	postid := vars["post"]
+	if userid == "" || postid == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var postuuid, err = ParseUUID(postid)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	collections,_ := handler.Service.GetAllCollectionsForPostByUser(userid,postuuid)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(collections)
+}
+
 /*func (handler *PostHandler) GetAllLikesForPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Ulaziii")
 	w.Header().Set("Content-Type", "application/json")

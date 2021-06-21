@@ -138,6 +138,9 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/report-content", handler.ReportContent).Methods("POST")
 	router.HandleFunc("/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/video-get/{videoId}", handler.GetVideo).Methods("GET")
+	router.HandleFunc("/get-collections-for-user/{id}", handler.GetCollectionsForUser).Methods("GET")
+	router.HandleFunc("/post-exists-in-favourites/{id}/{post}", handler.CheckIfPostExistsInFavourites).Methods("GET")
+	router.HandleFunc("/get-all-collections-for-post-by-user/{id}/{post}", handler.GetAllCollectionsForPostByUser).Methods("GET")
 
 }
 

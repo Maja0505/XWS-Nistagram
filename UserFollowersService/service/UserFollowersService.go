@@ -183,6 +183,15 @@ func (service *UserFollowersService) CheckRequested(userId string, followedUserI
 	return requested,err
 }
 
+func (service *UserFollowersService) CheckMuted(userId string, mutedUserId string) (*interface{}, error) {
+	muted,err := service.Repository.CheckMuted(userId , mutedUserId)
+	if err != nil{
+		return nil, err
+	}
+
+	return muted,err
+}
+
 
 func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByUsernameDTO,error){
 

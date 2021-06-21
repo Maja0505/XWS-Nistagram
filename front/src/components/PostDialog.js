@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import BookmarkBorderSharpIcon from "@material-ui/icons/BookmarkBorderSharp";
+import BookmarkSharpIcon from "@material-ui/icons/BookmarkSharp";
 import FavoriteBorderSharpIcon from "@material-ui/icons/FavoriteBorderSharp";
 import SendOutlinedIcon from "@material-ui/icons/SendOutlined";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
@@ -29,6 +30,7 @@ import CommentsForPost from "./CommentsForPost";
 import { Link } from "react-router-dom";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import DialogForReport from "./DialogForReport";
+import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 
 const useStyles = makeStyles((theme) => ({
   orange: {
@@ -56,6 +58,8 @@ const PostDialog = () => {
   const [open, setOpen] = useState(false);
   const [openDialogForReport, setOpenDialogForReport] = useState(false);
   const anchorRef = useRef(null);
+  const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
+  const [postSavedToFavourites, setPostSavedToFavourites] = useState(false);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -127,6 +131,16 @@ const PostDialog = () => {
         setPostIsDisliked(false);
       }
     });
+
+    axios
+      .get("/api/post/post-exists-in-favourites/" + loggedUserId + "/" + post)
+      .then((res) => {
+        if (res.data == true) {
+          setPostSavedToFavourites(true);
+        } else if (res.data == false) {
+          setPostSavedToFavourites(false);
+        }
+      });
   }, [open]);
 
   const HandleClickLike = () => {
@@ -178,6 +192,10 @@ const PostDialog = () => {
   const handleOpenDialogForReport = () => {
     setOpenDialogForReport(true);
     setOpen((prevOpen) => !prevOpen);
+  };
+
+  const openSaveToFavoritesDialog = () => {
+    setSaveToFavoritesDialog(true);
   };
 
   const makeDescriptionFromPost = async (text) => {
@@ -314,6 +332,28 @@ const PostDialog = () => {
                       onClick={handleToggle}
                     ></MoreHorizIcon>
                     {dropDowMenuForPost}
+                    <Divider />
+                    <SendOutlinedIcon
+                      fontSize="large"
+                      style={{ cursor: "pointer" }}
+                    ></SendOutlinedIcon>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Divider />
+
+                    {postSavedToFavourites ? (
+                      <BookmarkSharpIcon
+                        onClick={openSaveToFavoritesDialog}
+                        style={{ marginLeft: "80%", cursor: "pointer" }}
+                        fontSize="large"
+                      ></BookmarkSharpIcon>
+                    ) : (
+                      <BookmarkBorderSharpIcon
+                        onClick={openSaveToFavoritesDialog}
+                        style={{ marginLeft: "80%", cursor: "pointer" }}
+                        fontSize="large"
+                      ></BookmarkBorderSharpIcon>
+                    )}
                   </Grid>
                 </Grid>
                 <Grid container style={{ height: "60%", overflow: "auto" }}>
@@ -459,6 +499,24 @@ const PostDialog = () => {
         open={openDialogForReport}
         setOpen={setOpenDialogForReport}
       ></DialogForReport>
+      {openDialogForReport && (
+        <DialogForReport
+          loggedUserId={loggedUserId}
+          post={post}
+          open={openDialogForReport}
+          setOpen={setOpenDialogForReport}
+        ></DialogForReport>
+      )}
+      {saveToFavoritesDialog && (
+        <DialogForSaveToFavorites
+          loggedUserId={loggedUserId}
+          post={post}
+          open={saveToFavoritesDialog}
+          setOpen={setSaveToFavoritesDialog}
+          saved={postSavedToFavourites}
+          setSaved={setPostSavedToFavourites}
+        ></DialogForSaveToFavorites>
+      )}
     </div>
   );
 };

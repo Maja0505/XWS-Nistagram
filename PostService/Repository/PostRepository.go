@@ -208,12 +208,24 @@ func (repo *PostRepository) RemovePostFromFavourites(favourite *DTO.FavouriteDTO
 		fmt.Println(err)
 		return err
 	}
+	collections,err := repo.GetAllCollectionsForPostByUser(favourite.UserID,favourite.PostID)
+	if err != nil{
+		fmt.Println(err)
+	}
+	for _, collection := range *collections {
+		favourite.Collection = collection
+		err = repo.RemovePostFromCollection(favourite)
+		if err != nil{
+			fmt.Println(err)
+		}
+	}
+
 	fmt.Println("Successfully deleted post from favourites!!")
 	return nil
 }
 
 func (repo *PostRepository) RemovePostFromCollection(favourite *DTO.FavouriteDTO) error {
-	if err := repo.Session.Query("DELETE FROM postkeyspace.favourites where userid = ? AND postid = ? AND collection = ? IF EXISTS;",
+	if err := repo.Session.Query("DELETE FROM postkeyspace.collections where userid = ? AND postid = ? AND collection = ? IF EXISTS;",
 		favourite.UserID, favourite.PostID, favourite.Collection).Exec(); err != nil {
 		fmt.Println("Error while deleting post from collection: ", favourite.Collection)
 		fmt.Println(err)
@@ -786,6 +798,28 @@ func (repo *PostRepository) ReportContent(content *Model.ReportedContent) error 
 	}
 	fmt.Println("Successfully created report!!")
 	return nil
+}
+
+func (repo *PostRepository) GetCollectionsForUser(userid string) (*[] string, error) {
+	var collections []string
+	var collection string
+	iter := repo.Session.Query("SELECT collection FROM postkeyspace.collections WHERE userid=? ALLOW FILTERING", userid).Iter()
+	for iter.Scan(&collection){
+		collections = append(collections, collection)
+	}
+
+	return &collections, nil
+}
+
+func (repo *PostRepository) GetAllCollectionsForPostByUser(userid string, postuuid gocql.UUID) ( *[]string, error) {
+	var collections []string
+	var collection string
+	iter := repo.Session.Query("SELECT collection FROM postkeyspace.collections WHERE userid=? and postid=? ALLOW FILTERING", userid,postuuid).Iter()
+	for iter.Scan(&collection){
+		collections = append(collections, collection)
+	}
+
+	return &collections, nil
 }
 
 

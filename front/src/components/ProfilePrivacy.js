@@ -4,13 +4,25 @@ import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import DialogForListBlockUser from "./DialogForListBlockUser";
+import DialogForListMuteUser from "./DialogForListMuteUser";
 
 const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
     const username = localStorage.getItem("username");
+    const loggedUserId = localStorage.getItem("id");
+
+    const [openDialogForListBlockUsers, setOpenDialogForListBlockUsers] = useState(false)
+    const [openDialogForListMuteUsers, setOpenDialogForListMuteUsers] = useState(false)
+
+    const handleClickViewAllBlock = () => {
+      setOpenDialogForListBlockUsers(true)
+    }
+
+    const handleClickViewAllMute = () => {
+      setOpenDialogForListMuteUsers(true)
+    }
 
     useEffect(() => {
-     
     }, [profileSettings.Public,profileSettings.MessageRequest,profileSettings.AllowTags])
 
       const HandleOnChangeAccountPrivacy = () => {
@@ -125,8 +137,28 @@ const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
           </Grid>
           <Divider />
         </Grid>
+        <Grid style={{ height: "30%", width: "100%" }}>
+          <Grid style={{ height: "30%", width: "100%" }}>
+            <p style={{ fontSize: 25, textAlign: "left" }}>Connections</p>
+          </Grid>
+          <Grid container style={{ height: "30%", width: "100%" }}>
+            <Grid container style={{ height: "50%", width: "100%" }}>
+              <Grid item xs={3}>All blocked users</Grid>
+              <Grid item xs={3}><Button onClick={handleClickViewAllBlock}>View all</Button></Grid>
+            </Grid>
+            <Grid container style={{ height: "50%", width: "100%" }}>
+              <Grid item xs={3}>All muted users</Grid>
+              <Grid item xs={3}><Button onClick={handleClickViewAllMute}>View all</Button></Grid>
+            </Grid>
+
+          </Grid>
+          <Divider />
+        </Grid>
       </Grid>}
       <Grid item xs={1}></Grid>
+      {openDialogForListBlockUsers && <DialogForListBlockUser loggedUserId={loggedUserId} open={openDialogForListBlockUsers} setOpen={setOpenDialogForListBlockUsers}></DialogForListBlockUser>}
+      {openDialogForListMuteUsers && <DialogForListMuteUser loggedUserId={loggedUserId} open={openDialogForListMuteUsers} setOpen={setOpenDialogForListMuteUsers}></DialogForListMuteUser>}
+
     </Grid>
   );
 };

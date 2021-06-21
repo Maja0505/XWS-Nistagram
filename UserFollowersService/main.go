@@ -97,6 +97,8 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 
 	router.HandleFunc("/checkFollowing/{userId}/{followedUserId}",handler.CheckFollowing).Methods("GET")
 	router.HandleFunc("/checkRequested/{userId}/{requestedUserId}",handler.CheckRequested).Methods("GET")
+	router.HandleFunc("/checkMuted/{userId}/{mutedUserId}",handler.CheckMuted).Methods("GET")
+
 
 
 
@@ -107,6 +109,7 @@ func handleUserBlockFunctions(handler *handler.BlockedUserHandler,router *mux.Ro
 	router.HandleFunc("/blockUser",handler.BlockUser).Methods("POST")
 	router.HandleFunc("/getAllBlockUsers/{userId}",handler.GetAllBlockedUsers).Methods("GET")
 	router.HandleFunc("/checkBlock/{userId}/{blockedUserId}",handler.CheckBlock).Methods("GET")
+	router.HandleFunc("/unblockUser",handler.UnblockUser).Methods("PUT")
 
 }
 

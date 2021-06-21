@@ -2,6 +2,7 @@ package repository
 
 import (
 	"XWS-Nistagram/UserFollowersService/model"
+	"errors"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -97,4 +98,21 @@ func (repository *BlockedUserRepository) CheckBlock(userId string, blockedUserId
 	}
 
 	return nil, nil
+}
+
+func (repository *BlockedUserRepository) UnblockUser(m *model.BlockRelationship) error {
+	result,err := repository.Session.Run("match (u1:User{ userId:$userId1 } )-[r:block]->( u2:User{ userId:$userId2 }) delete r return r" , map[string]interface{}{
+		"userId1" : m.User,
+		"userId2" : m.BlockedUser,
+	})
+
+	if err != nil{
+		return err
+	}
+
+	if !result.Next(){
+		return errors.New("User are already unfollowed, or user1,user2 or relationship doesn't exist")
+	}
+
+	return nil
 }

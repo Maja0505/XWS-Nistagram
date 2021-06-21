@@ -15,6 +15,13 @@ import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
 import verification from "../images/verification.png";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import { Grow, Popper, MenuItem, MenuList } from "@material-ui/core";
+import { useRef } from "react";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import DialogForBlockUser from "./DialogForBlockUser";
+import DialogForMuteUser from "./DialogForMuteUser";
+import Collections from "./Collections.js";
 import {
   GridOn,
   BookmarkBorder,
@@ -29,6 +36,7 @@ const UserHomePage = () => {
   const [tabValue, setTabValue] = useState(0);
   const { username } = useParams();
   const [following, setFollowing] = useState(false);
+  const [muted, setMuted] = useState(false);
   const [redirection, setRedirection] = useState(false);
   const [requested, setRequested] = useState(false);
   const [privateProfile, setPrivateProfile] = useState(false);
@@ -38,6 +46,33 @@ const UserHomePage = () => {
   const [load1, setLoad1] = useState(false);
   const [load2, setLoad2] = useState(false);
   const [load3, setLoad3] = useState(false);
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+  const [openDialogForBlock, setOpenDialogForBlock] = useState(false);
+  const [openDialogForMute, setOpenDialogForMute] = useState(false);
+
+  const loggedUserId = localStorage.getItem("id");
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
+
+  const prevOpen = useRef(open);
 
   const users = [
     {
@@ -127,6 +162,22 @@ const UserHomePage = () => {
             .catch((error) => {
               alert(error.response.status);
             });
+
+          axios
+            .get(
+              "/api/user-follow/checkMuted/" +
+                loggedInId +
+                "/" +
+                res.data.IdString
+            )
+            .then((res) => {
+              console.log(res.data);
+              setMuted(res.data);
+              setLoad3(true);
+            })
+            .catch((error) => {
+              alert(error.response.status);
+            });
         } else {
           setLoad1(true);
           setLoad2(true);
@@ -137,6 +188,29 @@ const UserHomePage = () => {
         alert(error.response.status);
       });
   }, [username, loggedUsername]);
+
+  const handleClickUnmute = () => {
+    var muteDto = {
+      User: loggedUserId,
+      Friend: user.ID,
+      Mute: false,
+    };
+    axios.put("/api/user-follow/setMuteFriend", muteDto).then((res) => {
+      console.log("uspelo");
+      setOpen((prevOpen) => !prevOpen);
+      setMuted(false);
+    });
+  };
+
+  const handleOpenDialogForBlock = () => {
+    setOpenDialogForBlock(true);
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleOpenDialogForMute = () => {
+    setOpenDialogForMute(true);
+    setOpen((prevOpen) => !prevOpen);
+  };
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);
@@ -228,6 +302,72 @@ const UserHomePage = () => {
     </Button>
   );
 
+  const dropDowMenuForProfile = (
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      role={undefined}
+      transition
+      disablePortal
+      style={{ width: "15%", zIndex: "1" }}
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          {...TransitionProps}
+          style={{
+            transformOrigin:
+              placement === "bottom" ? "center top" : "center bottom",
+          }}
+        >
+          <Paper>
+            <ClickAwayListener onClickAway={handleClose}>
+              <MenuList
+                autoFocusItem={open}
+                id="menu-list-grow"
+                onKeyDown={handleListKeyDown}
+              >
+                <MenuItem onClick={handleOpenDialogForBlock}>
+                  <Grid container>
+                    <Grid item xs={3}></Grid>
+                    <Grid item xs={9}>
+                      <div style={{ width: "100%" }} style={{ color: "red" }}>
+                        Block this user
+                      </div>
+                    </Grid>
+                  </Grid>
+                </MenuItem>
+                {following && !muted && (
+                  <MenuItem onClick={handleOpenDialogForMute}>
+                    <Grid container>
+                      <Grid item xs={3}></Grid>
+                      <Grid item xs={9}>
+                        <div style={{ width: "100%" }} style={{ color: "red" }}>
+                          Mute this user
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                )}
+                {muted && (
+                  <MenuItem onClick={handleClickUnmute}>
+                    <Grid container>
+                      <Grid item xs={3}></Grid>
+                      <Grid item xs={9}>
+                        <div style={{ width: "100%" }} style={{ color: "red" }}>
+                          Unmute
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                )}
+              </MenuList>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  );
+
   const userDetails = (
     <Grid container style={{ marginTop: "3%" }}>
       <Grid item xs={2}></Grid>
@@ -247,7 +387,13 @@ const UserHomePage = () => {
           <Grid container>
             {user !== undefined && (
               <>
-                <Grid item xs={8}>
+                <Grid
+                  item
+                  xs={3}
+                  style={{
+                    textAlign: "left",
+                  }}
+                >
                   <Typography variant="h6" style={{ margin: "auto" }}>
                     {user.Username} {"  "}
                     {user.VerificationSettings.Verified && (
@@ -262,20 +408,47 @@ const UserHomePage = () => {
                     )}
                   </Typography>
                 </Grid>
-                <Grid item xs={3}></Grid>
               </>
             )}
 
-            {loggedUsername === username && buttonForEditProfile}
-            {requested && loggedUsername !== username && buttonForRequested}
-            {following &&
-              loggedUsername !== username &&
-              !requested &&
-              buttonForUnfollow}
-            {!following &&
-              loggedUsername !== username &&
-              !requested &&
-              buttonForFollow}
+            <Grid item xs={3}>
+              {loggedUsername === username && buttonForEditProfile}
+              {requested && loggedUsername !== username && buttonForRequested}
+              {following &&
+                loggedUsername !== username &&
+                !requested &&
+                buttonForUnfollow}
+              {!following &&
+                loggedUsername !== username &&
+                !requested &&
+                buttonForFollow}
+            </Grid>
+
+            <Grid item xs={2}></Grid>
+
+            <Grid
+              item
+              xs={4}
+              style={{
+                textAlign: "right",
+              }}
+            >
+              {loggedUsername !== username && (
+                <>
+                  <MoreHorizIcon
+                    style={{
+                      textAlign: "right",
+                      cursor: "pointer",
+                    }}
+                    aria-controls={open ? "menu-list-grow" : undefined}
+                    aria-haspopup="true"
+                    ref={anchorRef}
+                    onClick={handleToggle}
+                  ></MoreHorizIcon>
+                  {dropDowMenuForProfile}
+                </>
+              )}
+            </Grid>
           </Grid>
           <br></br>
           <Grid container>
@@ -315,7 +488,7 @@ const UserHomePage = () => {
 
   return (
     <div>
-      {load1 && load2 && load3 && <>{userDetails}</>}
+      {<>{userDetails}</>}
       <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
@@ -355,10 +528,31 @@ const UserHomePage = () => {
           {user !== undefined && user !== null && tabValue === 0 && (
             <Posts userForProfile={user}></Posts>
           )}
-          {user !== undefined && user !== null && tabValue === 1 && <AddPost setTabValue={setTabValue} />}
+          {user !== undefined && user !== null && tabValue === 1 && (
+            <AddPost setTabValue={setTabValue} />
+          )}
+          {user !== undefined && user !== null && tabValue === 1 && (
+            <Collections></Collections>
+          )}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
+      {user !== undefined && (
+        <DialogForBlockUser
+          loggedUserId={loggedUserId}
+          blockedUserId={user.ID}
+          open={openDialogForBlock}
+          setOpen={setOpenDialogForBlock}
+        ></DialogForBlockUser>
+      )}
+      {user !== undefined && (
+        <DialogForMuteUser
+          loggedUserId={loggedUserId}
+          muteUserId={user.ID}
+          open={openDialogForMute}
+          setOpen={setOpenDialogForMute}
+        ></DialogForMuteUser>
+      )}
     </div>
   );
 };

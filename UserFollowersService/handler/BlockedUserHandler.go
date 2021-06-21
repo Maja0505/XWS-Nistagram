@@ -76,3 +76,22 @@ func (handler *BlockedUserHandler) CheckBlock(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(block)
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *BlockedUserHandler) UnblockUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var data model.BlockRelationship
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.Service.UnblockUser(&data)
+	if err != nil{
+		http.Error(w,err.Error(),417)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
