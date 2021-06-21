@@ -43,3 +43,11 @@ func (service *BlockedUserService) CheckBlock(userId string, blockedUserId strin
 	return block, nil
 }
 
+func (service *BlockedUserService) UnblockUser(m *model.BlockRelationship) error {
+	err := service.Repository.UnblockUser(m)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+

@@ -11,6 +11,7 @@ import StoryBar from "./components/StoryBar";
 import ContentDetails from "./components/ContentDetails";
 import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
+import PostsForCollection from "./components/PostsForCollection";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -46,7 +47,6 @@ function App() {
       <Router>
         <div className="App">
           <NavBar></NavBar>
-          <ContentDetails></ContentDetails>
           <Switch>
             <Route exact path="/" component={StartPage}></Route>
             <Route
@@ -57,10 +57,18 @@ function App() {
             <Route exact path="/accounts/*" component={Settings}></Route>
             <Route path="/login" component={LoginPage}></Route>
             <Route path="/registration" component={RegistrationPage}></Route>
-            <Route
+            <Route exact
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
-            ></Route>
+            >
+            </Route>
+
+            <Route
+              path="/homePage/:username/collection/:collection"
+              render={(props) => <PostsForCollection {...props} />}
+            >
+            </Route>
+
             <Route path="/admin" component={AdminHomePage}></Route>
 
             <Route

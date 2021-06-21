@@ -284,3 +284,25 @@ func (handler *UserFollowersHandler) CheckRequested(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(requested)
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *UserFollowersHandler) CheckMuted(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	mutedUserId := vars["mutedUserId"]
+
+	if userId == "" || mutedUserId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	muted,err := handler.Service.CheckMuted(userId,mutedUserId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(muted)
+	w.WriteHeader(http.StatusOK)
+}

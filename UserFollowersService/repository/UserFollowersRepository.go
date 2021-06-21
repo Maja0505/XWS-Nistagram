@@ -323,3 +323,21 @@ func (repository *UserFollowersRepository) DeleteAll(){
 		return
 	}
 }
+
+func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId string) (*interface{}, error ){
+
+	result,err := repository.Session.Run("match(:User{userId:$userId1}) -[r:follow]->(:User{userId:$userId2}) return r.mute", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : mutedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
+}
