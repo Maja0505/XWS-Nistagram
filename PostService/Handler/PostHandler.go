@@ -528,7 +528,7 @@ func (handler *PostHandler) GetUsersWhoDislikedPost(w http.ResponseWriter, r *ht
 
 func (handler *PostHandler) GetImageOld(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Type", "image/*")
 	vars := mux.Vars(r)
 	imagepath := vars["id"]
 	if imagepath == "" {
@@ -608,6 +608,60 @@ func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 
 
 }
+
+func (handler *PostHandler) UploadVideo(w http.ResponseWriter,r *http.Request){
+	vars := mux.Vars(r)
+	imagePath := vars["videoId"]
+	r.ParseMultipartForm(10 << 20)
+	file, _, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+
+	dst, err := os.Create("post-documents/" + imagePath +".mp4")
+	defer dst.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Successfully Uploaded File\n" + dst.Name())
+
+	w.WriteHeader(http.StatusOK)
+
+
+}
+
+func (handler *PostHandler) GetVideo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "video/mp4")
+	vars := mux.Vars(r)
+	imagepath := vars["videoId"]
+	if imagepath == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	file,err := ioutil.ReadFile("post-documents/" + imagepath)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+	w.Write(file)
+
+
+}
+
 
 func (handler *PostHandler) GetLikedPostsForUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")

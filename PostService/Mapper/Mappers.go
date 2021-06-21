@@ -3,18 +3,19 @@ package Mapper
 import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
+	"time"
 )
 
 func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	var post Model.Post
 	post.ID = postDTO.ID
-	post.CreatedAt = postDTO.CreatedAt
+	post.CreatedAt = time.Now()
 	post.Description = postDTO.Description
-	post.DislikesCount = postDTO.DislikesCount
-	post.LikesCount = postDTO.LikesCount
+	post.DislikesCount = 0
+	post.LikesCount = 0
 	post.Image = postDTO.Image
 	post.UserID = postDTO.UserID
-	post.CommentsCount = postDTO.CommentsCount
+	post.CommentsCount = 0
 	return &post
 }
 

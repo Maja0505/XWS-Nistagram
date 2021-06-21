@@ -175,12 +175,27 @@ const PostsForCollection = () => {
                   }}
                   onClick={() => handleClickImage(post)}
                 >
-                  <span
-                    className={classes.imageSrc}
-                    style={{
-                      backgroundImage: `url("http://localhost:8080/api/post/get-image/${post.Image}") `,
-                    }}
+                 {post.Image.substring(
+                  post.Image.length - 3,
+                  post.Image.length
+                ) === "jpg" && (
+                  <img
+                    width="100%"
+                    height="100%"
+                    src={`http://localhost:8080/api/post/get-image/${post.Image}`}
                   />
+                )}
+                {post.Image.substring(
+                  post.Image.length - 3,
+                  post.Image.length
+                ) !== "jpg" && (
+                  <video width="100%" height="100%" controls>
+                    <source
+                      src={`http://localhost:8080/api/post/video-get/${post.Image}`}
+                      type="video/mp4"
+                    />
+                  </video>
+                )}
                   <span className={classes.imageBackdrop} />
                   <span className={classes.imageButton}>
                     <Typography
