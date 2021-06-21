@@ -332,28 +332,6 @@ const PostDialog = () => {
                       onClick={handleToggle}
                     ></MoreHorizIcon>
                     {dropDowMenuForPost}
-                    <Divider />
-                    <SendOutlinedIcon
-                      fontSize="large"
-                      style={{ cursor: "pointer" }}
-                    ></SendOutlinedIcon>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Divider />
-
-                    {postSavedToFavourites ? (
-                      <BookmarkSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkSharpIcon>
-                    ) : (
-                      <BookmarkBorderSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkBorderSharpIcon>
-                    )}
                   </Grid>
                 </Grid>
                 <Grid container style={{ height: "60%", overflow: "auto" }}>
@@ -415,20 +393,30 @@ const PostDialog = () => {
                         )}
                       </Grid>
 
-                      <Grid item xs={2}>
-                        <Divider />
-                        <SendOutlinedIcon
-                          fontSize="large"
-                          style={{ cursor: "pointer" }}
-                        ></SendOutlinedIcon>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Divider />
-                        <BookmarkBorderSharpIcon
-                          style={{ marginLeft: "80%", cursor: "pointer" }}
-                          fontSize="large"
-                        ></BookmarkBorderSharpIcon>
-                      </Grid>
+                  <Grid item xs={2}>
+                      <Divider />
+                    <SendOutlinedIcon
+                      fontSize="large"
+                      style={{ cursor: "pointer" }}
+                    ></SendOutlinedIcon>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Divider />
+
+                    {postSavedToFavourites ? (
+                      <BookmarkSharpIcon
+                        onClick={openSaveToFavoritesDialog}
+                        style={{ marginLeft: "80%", cursor: "pointer" }}
+                        fontSize="large"
+                      ></BookmarkSharpIcon>
+                    ) : (
+                      <BookmarkBorderSharpIcon
+                        onClick={openSaveToFavoritesDialog}
+                        style={{ marginLeft: "80%", cursor: "pointer" }}
+                        fontSize="large"
+                      ></BookmarkBorderSharpIcon>
+                    )}
+                  </Grid>
                     </Grid>
                     <Grid container style={{ height: "70%" }}>
                       <Grid item xs={5}>

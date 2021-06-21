@@ -531,7 +531,7 @@ const UserHomePage = () => {
           {user !== undefined && user !== null && tabValue === 1 && (
             <AddPost setTabValue={setTabValue} />
           )}
-          {user !== undefined && user !== null && tabValue === 1 && (
+          {user !== undefined && user !== null && tabValue === 2 && (
             <Collections></Collections>
           )}
         </Grid>
