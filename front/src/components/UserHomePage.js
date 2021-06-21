@@ -14,168 +14,205 @@ import avatar from "../images/nistagramAvatar.jpg";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
-import verification from "../images/verification.png"
-
+import verification from "../images/verification.png";
 import {
   GridOn,
   BookmarkBorder,
   AssignmentIndOutlined,
+  AddPhotoAlternateOutlined,
 } from "@material-ui/icons";
+
+import AddPost from "./AddPost";
 
 const UserHomePage = () => {
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
   const { username } = useParams();
-  const [following,setFollowing] = useState(false);
-  const [redirection,setRedirection] = useState(false); 
-  const [requested,setRequested] = useState(false); 
-  const [privateProfile,setPrivateProfile] =useState(false);
+  const [following, setFollowing] = useState(false);
+  const [redirection, setRedirection] = useState(false);
+  const [requested, setRequested] = useState(false);
+  const [privateProfile, setPrivateProfile] = useState(false);
 
   const loggedUsername = localStorage.getItem("username");
   const loggedInId = localStorage.getItem("id");
-  const [load1,setLoad1] = useState(false)
-  const [load2,setLoad2] = useState(false)
-  const [load3,setLoad3] = useState(false)
+  const [load1, setLoad1] = useState(false);
+  const [load2, setLoad2] = useState(false);
+  const [load3, setLoad3] = useState(false);
 
-  
-  const users=[{ 	Username :"Perica",
-                  FirstName :"Perica",
-                  LastName:"Peric",
-                  DateOfBirth :"krdlkjf",
-                  Email :"Peric.peric@gmail.com",
-                  PhoneNumber :"0490843",
-                  Gender :"Female",
-                  Biography :"Jedna vrlo uspesan gospodin",
-                  WebSite :"Pericaperic.com"},
-  
-                { 	Username :"marko",
-                    FirstName :"Marko",
-                    LastName:"Markovic",
-                    DateOfBirth :"krdlkjf",
-                    Email :"marko.markovic@gmail.com",
-                    PhoneNumber :"0490843",
-                    Gender :"Male",
-                    Biography :"Jedna vrlo uspesan gospodin",
-                    WebSite :"Pericaperic.com"},]
+  const users = [
+    {
+      Username: "Perica",
+      FirstName: "Perica",
+      LastName: "Peric",
+      DateOfBirth: "krdlkjf",
+      Email: "Peric.peric@gmail.com",
+      PhoneNumber: "0490843",
+      Gender: "Female",
+      Biography: "Jedna vrlo uspesan gospodin",
+      WebSite: "Pericaperic.com",
+    },
+
+    {
+      Username: "marko",
+      FirstName: "Marko",
+      LastName: "Markovic",
+      DateOfBirth: "krdlkjf",
+      Email: "marko.markovic@gmail.com",
+      PhoneNumber: "0490843",
+      Gender: "Male",
+      Biography: "Jedna vrlo uspesan gospodin",
+      WebSite: "Pericaperic.com",
+    },
+  ];
 
   useEffect(() => {
-    console.log(username)
-    console.log(loggedUsername)
+    console.log(username);
+    console.log(loggedUsername);
     //setUser(users.filter(user => user.Username === username)[0])
-    
+
     //setFollowing(false)
     //setPrivateProfile(true)
     axios
-    .get("/api/user/" + username)
-    .then((res) => {
-      console.log(res.data);
-      setUser(res.data);
-      setPrivateProfile(res.data.ProfileSettings.Public)
-      if(res.data.IdString !== loggedInId ){
-      axios
-      .get("/api/user-follow/checkBlock/" + loggedInId + "/" + res.data.IdString)
+      .get("/api/user/" + username)
       .then((res) => {
-        console.log(res.data)
+        console.log(res.data);
+        setUser(res.data);
+        setPrivateProfile(res.data.ProfileSettings.Public);
+        if (res.data.IdString !== loggedInId) {
+          axios
+            .get(
+              "/api/user-follow/checkBlock/" +
+                loggedInId +
+                "/" +
+                res.data.IdString
+            )
+            .then((res) => {
+              console.log(res.data);
 
-        setRedirection(res.data)
-        setLoad1(true)
+              setRedirection(res.data);
+              setLoad1(true);
+            })
+            .catch((error) => {
+              alert(error.response.status);
+            });
+
+          axios
+            .get(
+              "/api/user-follow/checkRequested/" +
+                loggedInId +
+                "/" +
+                res.data.IdString
+            )
+            .then((res) => {
+              console.log(res.data);
+              setRequested(res.data);
+              setLoad2(true);
+            })
+            .catch((error) => {
+              alert(error.response.status);
+            });
+
+          axios
+            .get(
+              "/api/user-follow/checkFollowing/" +
+                loggedInId +
+                "/" +
+                res.data.IdString
+            )
+            .then((res) => {
+              console.log(res.data);
+              setFollowing(res.data);
+              setLoad3(true);
+            })
+            .catch((error) => {
+              alert(error.response.status);
+            });
+        } else {
+          setLoad1(true);
+          setLoad2(true);
+          setLoad3(true);
+        }
       })
       .catch((error) => {
         alert(error.response.status);
       });
-
-      axios
-      .get("/api/user-follow/checkRequested/" + loggedInId + "/" + res.data.IdString)
-      .then((res) => {
-        console.log(res.data)
-        setRequested(res.data)
-        setLoad2(true)
-      })
-      .catch((error) => {
-        alert(error.response.status);
-      });
-
-      axios
-      .get("/api/user-follow/checkFollowing/" + loggedInId + "/" + res.data.IdString)
-      .then((res) => {
-        console.log(res.data)
-        setFollowing(res.data)
-        setLoad3(true)
-      })
-      .catch((error) => {
-        alert(error.response.status);
-      });
-    }else{
-      setLoad1(true)
-      setLoad2(true)
-      setLoad3(true)
-    }
-    })
-    .catch((error) => {
-      alert(error.response.status);
-    });
-    
   }, [username, loggedUsername]);
-
-  
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const requestedClicked= () => {
-    setRequested(!requested)
-
-  }
-  const followClicked= () => {
-    if(privateProfile){
+  const requestedClicked = () => {
+    setRequested(!requested);
+  };
+  const followClicked = () => {
+    if (privateProfile) {
       var follow = {
-        "User" : loggedInId,
-        "FollowedUser" : user.ID,
-        "Private" : true
-      }
-      axios.post("/api/user-follow/followUser",follow).then((res)=> {console.log("uspesno")})
-      setRequested(true)
-    }
-    else{
+        User: loggedInId,
+        FollowedUser: user.ID,
+        Private: true,
+      };
+      axios.post("/api/user-follow/followUser", follow).then((res) => {
+        console.log("uspesno");
+      });
+      setRequested(true);
+    } else {
       var follow = {
-        "User" : loggedInId,
-        "FollowedUser" : user.ID,
-        "Private" : false
-      }
-      axios.post("/api/user-follow/followUser",follow).then((res)=> {console.log("uspesno")})
-      setFollowing(true)
+        User: loggedInId,
+        FollowedUser: user.ID,
+        Private: false,
+      };
+      axios.post("/api/user-follow/followUser", follow).then((res) => {
+        console.log("uspesno");
+      });
+      setFollowing(true);
     }
-
-  }
-  const unfollowClicked= () => {
+  };
+  const unfollowClicked = () => {
     var follow = {
-      "User" : loggedInId,
-      "UnfollowedUser" : user.ID,
-     
-    }
-    axios.put("/api/user-follow/unfollowUser",follow).then((res)=> {console.log("uspesno")})
-    setFollowing(false)
-
-  }
+      User: loggedInId,
+      UnfollowedUser: user.ID,
+    };
+    axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
+      console.log("uspesno");
+    });
+    setFollowing(false);
+  };
 
   const buttonForUnfollow = (
-    <Button variant="contained" color="default" style={{ margin: "auto" }} onClick = {unfollowClicked}>
-     Following 
+    <Button
+      variant="contained"
+      color="default"
+      style={{ margin: "auto" }}
+      onClick={unfollowClicked}
+    >
+      Following
     </Button>
   );
 
   const buttonForFollow = (
-    <Button variant="contained" color="primary" style={{ margin: "auto" }}
-    onClick = {followClicked} >
+    <Button
+      variant="contained"
+      color="primary"
+      style={{ margin: "auto" }}
+      onClick={followClicked}
+    >
       Follow
     </Button>
   );
 
   const buttonForRequested = (
-    <Button variant="contained" color="primary"  style={{ margin: "auto",marginLeft:"30px"
-                                              ,backgroundColor:"whitesmoke",color:"darkgray" }}
-                                              onClick={requestedClicked}>
+    <Button
+      variant="contained"
+      color="primary"
+      style={{
+        margin: "auto",
+        marginLeft: "30px",
+        backgroundColor: "whitesmoke",
+        color: "darkgray",
+      }}
+      onClick={requestedClicked}
+    >
       Requested
     </Button>
   );
@@ -210,24 +247,35 @@ const UserHomePage = () => {
           <Grid container>
             {user !== undefined && (
               <>
-              <Grid item xs={8}>
-              <Typography variant="h6" style={{ margin: "auto" }}>
-                {user.Username} {"  "}
-                {user.VerificationSettings.Verified && <img src={verification} style={{height:"20px", width:"20px", marginTop:"2%"}}></img>}
-              </Typography>
-              </Grid>
-              <Grid item xs={3}>
-               
+                <Grid item xs={8}>
+                  <Typography variant="h6" style={{ margin: "auto" }}>
+                    {user.Username} {"  "}
+                    {user.VerificationSettings.Verified && (
+                      <img
+                        src={verification}
+                        style={{
+                          height: "20px",
+                          width: "20px",
+                          marginTop: "2%",
+                        }}
+                      ></img>
+                    )}
+                  </Typography>
                 </Grid>
-                </>
+                <Grid item xs={3}></Grid>
+              </>
             )}
 
             {loggedUsername === username && buttonForEditProfile}
             {requested && loggedUsername !== username && buttonForRequested}
-            {following && loggedUsername !== username && !requested && buttonForUnfollow}
-            { !following && loggedUsername !== username && !requested && buttonForFollow}
-          
-            
+            {following &&
+              loggedUsername !== username &&
+              !requested &&
+              buttonForUnfollow}
+            {!following &&
+              loggedUsername !== username &&
+              !requested &&
+              buttonForFollow}
           </Grid>
           <br></br>
           <Grid container>
@@ -280,6 +328,12 @@ const UserHomePage = () => {
             >
               <Tab label="Posts" icon={<GridOn />} style={{ margin: "auto" }} />
               <Tab
+                label="Add post"
+                icon={<AddPhotoAlternateOutlined />}
+                style={{ margin: "auto" }}
+              />
+
+              <Tab
                 label="Saved"
                 icon={<BookmarkBorder />}
                 style={{ margin: "auto" }}
@@ -298,9 +352,10 @@ const UserHomePage = () => {
       <Grid container>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
-          {user !== undefined && user !== null && (
+          {user !== undefined && user !== null && tabValue === 0 && (
             <Posts userForProfile={user}></Posts>
           )}
+          {user !== undefined && user !== null && tabValue === 1 && <AddPost setTabValue={setTabValue} />}
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>

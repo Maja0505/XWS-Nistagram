@@ -34,7 +34,7 @@ func init() {
 		fmt.Println("Error while inserting postkeyspace")
 		fmt.Println(err)
 	}
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
@@ -136,6 +136,8 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-liked-posts-for-user/{id}", handler.GetLikedPostsForUser).Methods("GET")
 	router.HandleFunc("/get-disliked-posts-for-user/{id}", handler.GetDislikedPostsForUser).Methods("GET")
 	router.HandleFunc("/report-content", handler.ReportContent).Methods("POST")
+	router.HandleFunc("/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
+	router.HandleFunc("/video-get/{videoId}", handler.GetVideo).Methods("GET")
 
 }
 
