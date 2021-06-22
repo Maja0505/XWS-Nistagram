@@ -306,3 +306,25 @@ func (handler *UserFollowersHandler) CheckMuted(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(muted)
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *UserFollowersHandler) CheckClosed(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	closedUserId := vars["closedUserId"]
+
+	if userId == "" || closedUserId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	muted,err := handler.Service.CheckClosed(userId,closedUserId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(muted)
+	w.WriteHeader(http.StatusOK)
+}

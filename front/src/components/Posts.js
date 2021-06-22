@@ -103,11 +103,12 @@ const useStyles = makeStyles((theme) => ({
   },*/
 }));
 
-const Posts = ({ userForProfile }) => {
+const Posts = ({ userForProfile,username}) => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
-  const [posts, setPosts] = useState([]);
   const [postID, setPostID] = useState({});
+  const [posts, setPosts] = useState([]);
+
 
   const id = localStorage.getItem("id");
 
@@ -120,9 +121,15 @@ const Posts = ({ userForProfile }) => {
     axios
       .get("/api/post/get-all-by-userid/" + userForProfile.ID)
       .then((res) => {
-        setPosts(res.data);
+        if (res.data){
+          setPosts(res.data);
+        }else{
+          setPosts([]);
+        }
       })
-      .catch((error) => {});
+      .catch((error) => {
+        setPosts([]);
+      });
   }, [userForProfile]);
 
   const getImage = (image) => {
@@ -133,9 +140,9 @@ const Posts = ({ userForProfile }) => {
 
   return (
     <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
+      {redirection === true && <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>}
       <Grid container>
-        {posts !== null &&
+        {posts !== null && posts !== undefined &&
           posts.map((post) => (
             <Grid
               item
@@ -210,6 +217,21 @@ const Posts = ({ userForProfile }) => {
               </ButtonBase>
             </Grid>
           ))}
+        {(posts === null || posts === undefined || posts.length === 0) &&
+          <Grid container>
+              <Grid item xs={3}></Grid>
+              <Grid item xs={6}>
+                <Typography variant="h5" color="textSecondary">
+                No Posts Yet
+              </Typography>
+               </Grid>
+              <Grid item xs={3}></Grid>
+
+          </Grid>
+
+        
+        
+        }
         {images.length % 3 === 1 && (
           <>
             <Grid item xs={4} /> <Grid item xs={4} />

@@ -18,6 +18,7 @@ func ConvertRegisteredUserDtoToRegisteredUser(registeredUserDto *dto.RegisteredU
 	registeredUser.PhoneNumber = registeredUserDto.PhoneNumber
 	registeredUser.Biography = registeredUserDto.Biography
 	registeredUser.WebSite = registeredUserDto.WebSite
+    registeredUser.ProfilePicture = registeredUserDto.ProfilePicture
 
 	return &registeredUser
 }

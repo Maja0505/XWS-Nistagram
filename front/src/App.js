@@ -13,6 +13,7 @@ import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
+import StoryFeeds from "./components/StoryFeeds";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -72,15 +73,10 @@ function App() {
             <Route path="/admin" component={AdminHomePage}></Route>
 
             <Route
-              path="/dialog/:post"
+              path="/dialog/:username/:post"
               render={(props) => <PostDialog {...props} />}
             ></Route>
-            <Route
-              path="/dialog/:post"
-              render={(props) => <PostDialog {...props} />}
-            >
-              <PostDialog></PostDialog>
-            </Route>
+
             <Route
               exact
               path="/:username/liked-disliked/"
@@ -91,6 +87,7 @@ function App() {
               path="/explore/tags/:tag/"
               render={(props) => <HashTagPost {...props} />}
             ></Route>
+            <Route exact path="/story/feed/" component={StoryFeeds}></Route>
           </Switch>
         </div>
       </Router>

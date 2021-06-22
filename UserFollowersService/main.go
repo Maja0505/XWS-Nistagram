@@ -98,6 +98,7 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 	router.HandleFunc("/checkFollowing/{userId}/{followedUserId}",handler.CheckFollowing).Methods("GET")
 	router.HandleFunc("/checkRequested/{userId}/{requestedUserId}",handler.CheckRequested).Methods("GET")
 	router.HandleFunc("/checkMuted/{userId}/{mutedUserId}",handler.CheckMuted).Methods("GET")
+	router.HandleFunc("/checkClosed/{userId}/{closedUserId}",handler.CheckClosed).Methods("GET")
 
 
 
