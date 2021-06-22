@@ -31,6 +31,10 @@ import { Link } from "react-router-dom";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import DialogForReport from "./DialogForReport";
 import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
+import UsersList from "./UsersList";
+import Picker from 'emoji-picker-react';
+
+
 
 const useStyles = makeStyles((theme) => ({
   orange: {
@@ -45,11 +49,12 @@ const useStyles = makeStyles((theme) => ({
 
 const PostDialog = () => {
   const classes = useStyles();
-  const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
   const [newComment, setNewComment] = useState("");
 
   const { post } = useParams();
+  const { username } = useParams();
+
   const [imagePost, setImagePost] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
   const [commentsForPost, setCommentsForPost] = useState([]);
@@ -60,6 +65,13 @@ const PostDialog = () => {
   const anchorRef = useRef(null);
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
   const [postSavedToFavourites, setPostSavedToFavourites] = useState(false);
+  const [openDialogForLikes,setOpenDialogForLikes] = useState(false)
+  const [openDialogForDislikes,setOpenDialogForDislikes] = useState(false)
+  const [likers,setLikers] = useState([])
+  const [dislikers,setDislikers] = useState([])
+  const [openPicker,setOpenPicker] = useState(false);
+
+
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -109,6 +121,7 @@ const PostDialog = () => {
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
       makeDescriptionFromPost(res.data.Description);
+
       console.log(res.data);
     });
     var like = {
@@ -179,13 +192,16 @@ const PostDialog = () => {
 
   const handleClickAllLikes = () => {
     axios.get("/api/post/get-users-who-liked-post/" + post).then((res) => {
-      console.log(res.data);
+      setLikers(res.data)
+      setOpenDialogForLikes(true)
     });
   };
 
   const handleClickAllDislikes = () => {
     axios.get("/api/post/get-users-who-disliked-post/" + post).then((res) => {
-      console.log(res.data);
+      setDislikers(res.data)
+      setOpenDialogForDislikes(true)
+
     });
   };
 
@@ -258,6 +274,33 @@ const PostDialog = () => {
     </Popper>
   );
 
+
+
+  const addToComment = (event, emojiObject) => {
+    setNewComment(newComment + emojiObject.emoji)
+  };
+
+  const Emojis = (
+    <>
+    {openPicker &&
+    <Grid container>
+      <Grid item xs={7}></Grid>
+      <Grid item xs={5}><Picker onEmojiClick={addToComment} /></Grid>
+
+		</Grid>
+    }
+    </>
+  )
+
+  const handleClickOpenPicker = () => {
+    if(openPicker){
+      setOpenPicker(false)
+    }else{
+      setOpenPicker(true)
+
+    }
+  }
+
   return (
     <div>
       <Grid container>
@@ -320,6 +363,7 @@ const PostDialog = () => {
                     </h4>
                   </Grid>
                   <Grid item xs={2}>
+                    {imagePost && loggedUserId !== imagePost.UserID && 
                     <MoreHorizIcon
                       style={{
                         marginTop: "50%",
@@ -331,6 +375,7 @@ const PostDialog = () => {
                       ref={anchorRef}
                       onClick={handleToggle}
                     ></MoreHorizIcon>
+                    }
                     {dropDowMenuForPost}
                   </Grid>
                 </Grid>
@@ -420,20 +465,25 @@ const PostDialog = () => {
                     </Grid>
                     <Grid container style={{ height: "70%" }}>
                       <Grid item xs={5}>
+                      {imagePost !== undefined && imagePost !== null &&
                         <h5
                           onClick={handleClickAllLikes}
                           style={{ cursor: "pointer" }}
                         >
-                          Likes
+                        {imagePost.LikesCount}{" "} Likes
                         </h5>
+                        }
                       </Grid>
                       <Grid item xs={5}>
+                      {imagePost !== undefined && imagePost !== null &&
+
                         <h5
                           onClick={handleClickAllDislikes}
                           style={{ cursor: "pointer" }}
                         >
-                          Dislikes
+                        {imagePost.DislikesCount}{" "}  Dislikes
                         </h5>
+                        }
                       </Grid>
                       <Grid item xs={2}></Grid>
                     </Grid>
@@ -449,6 +499,7 @@ const PostDialog = () => {
                           cursor: "pointer",
                         }}
                         fontSize="large"
+                        onClick={handleClickOpenPicker}
                       ></SentimentSatisfiedRoundedIcon>
                     </Grid>
                     <Grid item xs={7}>
@@ -474,12 +525,18 @@ const PostDialog = () => {
                       </Button>
                     </Grid>
                   </Grid>
+
                 </Grid>
+
               </Grid>
+
             </Grid>
           </Paper>
+          {Emojis}
+
         </Grid>
         <Grid item xs={2}></Grid>
+
       </Grid>
       <DialogForReport
         loggedUserId={loggedUserId}
@@ -504,6 +561,24 @@ const PostDialog = () => {
           saved={postSavedToFavourites}
           setSaved={setPostSavedToFavourites}
         ></DialogForSaveToFavorites>
+      )}
+
+      {openDialogForLikes && (
+        <UsersList
+        label = "People who like post"
+          users={likers}
+          open={openDialogForLikes}
+          setOpen={setOpenDialogForLikes}
+        ></UsersList>
+      )}  
+
+    {openDialogForDislikes && (
+        <UsersList
+        label = "People who dislike post"
+          users={dislikers}
+          open={openDialogForDislikes}
+          setOpen={setOpenDialogForDislikes}
+        ></UsersList>
       )}
     </div>
   );

@@ -28,7 +28,7 @@ import {
   AssignmentIndOutlined,
   AddPhotoAlternateOutlined,
 } from "@material-ui/icons";
-
+import UsersList from "./UsersList";
 import AddPost from "./AddPost";
 
 const UserHomePage = () => {
@@ -50,6 +50,12 @@ const UserHomePage = () => {
   const anchorRef = useRef(null);
   const [openDialogForBlock, setOpenDialogForBlock] = useState(false);
   const [openDialogForMute, setOpenDialogForMute] = useState(false);
+  const [allFollows,setAllFollows] = useState([])
+  const [allFollowers,setAllFollowers] = useState([])
+  const [openDialogForFollows,setOpenDialogForFollows] = useState(false)
+  const [openDialogForFollowers,setOpenDialogForFollowers] = useState(false)
+
+
 
   const loggedUserId = localStorage.getItem("id");
 
@@ -107,6 +113,7 @@ const UserHomePage = () => {
 
     //setFollowing(false)
     //setPrivateProfile(true)
+   
     axios
       .get("/api/user/" + username)
       .then((res) => {
@@ -178,14 +185,68 @@ const UserHomePage = () => {
             .catch((error) => {
               alert(error.response.status);
             });
+        
+            axios.get("/api/user-follow/allFollows/" + res.data.IdString)
+              .then((res)=> {
+                  if(res.data){
+                    setAllFollows(res.data)
+                  }else{
+                    setAllFollows([])
+
+                  }
+              }).catch((error) => {
+                setAllFollows([])
+                alert(error.response.status);
+              });
+
+            axios.get("/api/user-follow/allFollowers/" +  res.data.IdString)
+            .then((res)=> {
+                            
+              if(res.data){
+                setAllFollowers(res.data)
+              }else{
+                setAllFollowers([])
+
+              }
+            }).catch((error) => {
+              setAllFollowers([])
+              alert(error.response.status);
+            });
+          
         } else {
+
+          axios.get("/api/user-follow/allFollows/" + res.data.IdString)
+          .then((res)=> {
+              if(res.data){
+                setAllFollows(res.data)
+              }else{
+                setAllFollows([])
+              }
+          }).catch((error) => {
+            setAllFollows([])
+            alert(error.response.status);
+          });
+
+        axios.get("/api/user-follow/allFollowers/" +  res.data.IdString)
+        .then((res)=> {
+                        
+          if(res.data){
+            setAllFollowers(res.data)
+          }else{
+            setAllFollowers([])
+          }
+        }).catch((error) => {
+          setAllFollowers([])
+          alert(error.response.status);
+        });
           setLoad1(true);
           setLoad2(true);
           setLoad3(true);
         }
+        
       })
       .catch((error) => {
-        alert(error.response.status);
+        console.log(error)
       });
   }, [username, loggedUsername]);
 
@@ -252,6 +313,14 @@ const UserHomePage = () => {
     });
     setFollowing(false);
   };
+
+  const handleClickOnFollowers = () => {
+    setOpenDialogForFollowers(true)
+  }
+
+  const handleClickOnFollows = () => {
+    setOpenDialogForFollows(true)
+  }
 
   const buttonForUnfollow = (
     <Button
@@ -454,12 +523,12 @@ const UserHomePage = () => {
           <Grid container>
             {user !== undefined && (
               <>
-                <FormLabel>{user.NumberOfPosts} posts</FormLabel>
-                <FormLabel style={{ marginLeft: "auto" }}>
-                  {user.Followers} followers
+                <FormLabel>0 posts</FormLabel>
+                <FormLabel style={{ marginLeft: "auto",cursor:"pointer"}} onClick={handleClickOnFollowers}>
+                  {allFollowers.length} followers
                 </FormLabel>
-                <FormLabel style={{ marginLeft: "auto" }}>
-                  {user.Following} following
+                <FormLabel style={{ marginLeft: "auto",cursor:"pointer" }} onClick={handleClickOnFollows}>
+                  {allFollows.length} following
                 </FormLabel>{" "}
               </>
             )}
@@ -489,7 +558,7 @@ const UserHomePage = () => {
   return (
     <div>
       {<>{userDetails}</>}
-      <Grid container style={{ marginTop: "2%" }}>
+      {loggedUsername === username && <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
           <Paper>
@@ -520,13 +589,37 @@ const UserHomePage = () => {
           </Paper>
         </Grid>
         <Grid item xs={2}></Grid>
-      </Grid>
+      </Grid>}
+
+
+      {loggedUsername !== username && <Grid container style={{ marginTop: "2%" }}>
+        <Grid item xs={2}></Grid>
+        <Grid item xs={8}>
+          <Paper>
+            <Tabs
+              value={tabValue}
+              onChange={handleChangeTab}
+              indicatorColor="primary"
+              textColor="inherit"
+            >
+              <Tab label="Posts" icon={<GridOn />} style={{ margin: "auto" }} />
+              <Tab
+                label="Tagged"
+                icon={<AssignmentIndOutlined />}
+                style={{ margin: "auto" }}
+              />
+            </Tabs>
+          </Paper>
+        </Grid>
+        <Grid item xs={2}></Grid>
+      </Grid>}
 
       <Grid container>
         <Grid item xs={2}></Grid>
+        {user !== undefined && user !== null && loggedUsername === user.Username &&
         <Grid item xs={8}>
           {user !== undefined && user !== null && tabValue === 0 && (
-            <Posts userForProfile={user}></Posts>
+           <Posts userForProfile={user} username={username}></Posts>
           )}
           {user !== undefined && user !== null && tabValue === 1 && (
             <AddPost setTabValue={setTabValue} />
@@ -534,7 +627,16 @@ const UserHomePage = () => {
           {user !== undefined && user !== null && tabValue === 2 && (
             <Collections></Collections>
           )}
-        </Grid>
+        </Grid>}
+
+        {user !== undefined && user !== null && loggedUsername !== user.Username &&  
+         <Grid item xs={8}>
+            {user !== undefined && user !== null && tabValue === 0 && (
+            <Posts userForProfile={user} username={username}></Posts>
+          )}
+          </Grid>
+        }
+
         <Grid item xs={2}></Grid>
       </Grid>
       {user !== undefined && (
@@ -552,6 +654,24 @@ const UserHomePage = () => {
           open={openDialogForMute}
           setOpen={setOpenDialogForMute}
         ></DialogForMuteUser>
+      )}
+
+    {openDialogForFollowers && (
+        <UsersList
+          label = "Followers"
+          users={allFollowers}
+          open={openDialogForFollowers}
+          setOpen={setOpenDialogForFollowers}
+        ></UsersList>
+      )}
+
+    {openDialogForFollows && (
+        <UsersList
+        label = "Following"
+          users={allFollows}
+          open={openDialogForFollows}
+          setOpen={setOpenDialogForFollows}
+        ></UsersList>
       )}
     </div>
   );

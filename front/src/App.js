@@ -72,15 +72,10 @@ function App() {
             <Route path="/admin" component={AdminHomePage}></Route>
 
             <Route
-              path="/dialog/:post"
+              path="/dialog/:username/:post"
               render={(props) => <PostDialog {...props} />}
             ></Route>
-            <Route
-              path="/dialog/:post"
-              render={(props) => <PostDialog {...props} />}
-            >
-              <PostDialog></PostDialog>
-            </Route>
+
             <Route
               exact
               path="/:username/liked-disliked/"
