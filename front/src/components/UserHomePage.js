@@ -6,6 +6,8 @@ import {
   Paper,
   Tabs,
   Tab,
+  Divider,
+
 } from "@material-ui/core";
 
 import { useState, useEffect } from "react";
@@ -21,6 +23,7 @@ import { useRef } from "react";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import DialogForBlockUser from "./DialogForBlockUser";
 import DialogForMuteUser from "./DialogForMuteUser";
+import FollowRequest from "./FollowRequests";
 import Collections from "./Collections.js";
 import {
   GridOn,
@@ -54,10 +57,17 @@ const UserHomePage = () => {
   const [allFollowers,setAllFollowers] = useState([])
   const [openDialogForFollows,setOpenDialogForFollows] = useState(false)
   const [openDialogForFollowers,setOpenDialogForFollowers] = useState(false)
+  const [openDialogForFollowRequests,setOpenDialogForFollowRequests] = useState(false)
+
 
 
 
   const loggedUserId = localStorage.getItem("id");
+
+
+  const clickShowFollowRequests = () => {
+    setOpenDialogForFollowRequests(true)
+  }
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -452,6 +462,7 @@ const UserHomePage = () => {
             }}
           />
         </Grid>
+        {user !== undefined &&
         <Grid item xs={7}>
           <Grid container>
             {user !== undefined && (
@@ -517,6 +528,12 @@ const UserHomePage = () => {
                   {dropDowMenuForProfile}
                 </>
               )}
+
+              {loggedUsername === username && (
+                <>
+                 <Button onClick={clickShowFollowRequests}>View follow request</Button>
+                </>
+              )}
             </Grid>
           </Grid>
           <br></br>
@@ -549,16 +566,18 @@ const UserHomePage = () => {
               </>
             )}
           </Grid>
-        </Grid>
+        </Grid>}
       </Grid>
       <Grid item xs={2}></Grid>
     </Grid>
   );
 
   return (
+    <>
+    {user !== undefined && 
     <div>
       {<>{userDetails}</>}
-      {loggedUsername === username && <Grid container style={{ marginTop: "2%" }}>
+      {user !== undefined && loggedUsername === username && <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
           <Paper>
@@ -592,7 +611,7 @@ const UserHomePage = () => {
       </Grid>}
 
 
-      {loggedUsername !== username && <Grid container style={{ marginTop: "2%" }}>
+      {loggedUsername !== username && !user.ProfileSettings.Public && <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2}></Grid>
         <Grid item xs={8}>
           <Paper>
@@ -629,7 +648,7 @@ const UserHomePage = () => {
           )}
         </Grid>}
 
-        {user !== undefined && user !== null && loggedUsername !== user.Username &&  
+        {user !== undefined && user !== null && loggedUsername !== user.Username && !user.ProfileSettings.Public ||  (following && user.ProfileSettings.Public) &&
          <Grid item xs={8}>
             {user !== undefined && user !== null && tabValue === 0 && (
             <Posts userForProfile={user} username={username}></Posts>
@@ -637,7 +656,24 @@ const UserHomePage = () => {
           </Grid>
         }
 
-        <Grid item xs={2}></Grid>
+        {user !== undefined && user !== null && loggedUsername !== user.Username && user.ProfileSettings.Public && !following && 
+         <Grid item xs={8}>
+            {user !== undefined && user !== null && tabValue === 0 && (
+              <Paper style={{width:"100%",height:"100%"}} >
+                <Typography variant="h5" color="textSecondary">
+                  This Account is Private
+                </Typography>
+                <p>Follow to see their photos and videos.</p>
+
+
+              </Paper>
+             
+              
+          )}
+          </Grid>
+        }
+
+      <Grid item xs={2}></Grid>
       </Grid>
       {user !== undefined && (
         <DialogForBlockUser
@@ -673,7 +709,17 @@ const UserHomePage = () => {
           setOpen={setOpenDialogForFollows}
         ></UsersList>
       )}
+
+    {openDialogForFollowRequests && (
+        <FollowRequest
+        loggedUserId={loggedUserId}
+        open={openDialogForFollowRequests}
+          setOpen={setOpenDialogForFollowRequests}
+        ></FollowRequest>
+      )}
     </div>
+    }
+    </>
   );
 };
 
