@@ -192,6 +192,15 @@ func (service *UserFollowersService) CheckMuted(userId string, mutedUserId strin
 	return muted,err
 }
 
+func (service *UserFollowersService) CheckClosed(userId string, closedUserId string) (*interface{}, error) {
+	closed,err := service.Repository.CheckClosed(userId , closedUserId)
+	if err != nil{
+		return nil, err
+	}
+
+	return closed,err
+}
+
 
 func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByUsernameDTO,error){
 

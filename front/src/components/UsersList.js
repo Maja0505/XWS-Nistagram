@@ -86,6 +86,10 @@ export default function UsersList({label,users,open, setOpen }) {
     setOpen(false);
   }
 
+  const handleClickSetToCloseFriend = (user) => {
+    console.log("aaaaaaa")
+  }
+
 
   return (
     <div>
@@ -108,6 +112,9 @@ export default function UsersList({label,users,open, setOpen }) {
                     {user.Username}
                 </Grid>
             </Grid>
+
+          
+          
        ))}
 
           

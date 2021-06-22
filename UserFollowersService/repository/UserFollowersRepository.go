@@ -341,3 +341,20 @@ func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId
 
 	return nil, nil
 }
+
+func (repository *UserFollowersRepository) CheckClosed(userId string, closedUserId string) (*interface{}, error) {
+	result,err := repository.Session.Run("match(:User{userId:$userId1}) -[r:follow]->(:User{userId:$userId2}) return r.close_friend", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : closedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
+}

@@ -40,6 +40,7 @@ const UserHomePage = () => {
   const { username } = useParams();
   const [following, setFollowing] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [close, setClose] = useState(false);
   const [redirection, setRedirection] = useState(false);
   const [requested, setRequested] = useState(false);
   const [privateProfile, setPrivateProfile] = useState(false);
@@ -195,6 +196,22 @@ const UserHomePage = () => {
             .catch((error) => {
               alert(error.response.status);
             });
+
+            axios
+            .get(
+              "/api/user-follow/checkClosed/" +
+                loggedInId +
+                "/" +
+                res.data.IdString
+            )
+            .then((res) => {
+              console.log(res.data);
+              setClose(res.data);
+              setLoad3(true);
+            })
+            .catch((error) => {
+              alert(error.response.status);
+            });
         
             axios.get("/api/user-follow/allFollows/" + res.data.IdString)
               .then((res)=> {
@@ -290,6 +307,35 @@ const UserHomePage = () => {
   const requestedClicked = () => {
     setRequested(!requested);
   };
+
+  const handleSetToClose = () => {
+    var closeDto = {
+      User:loggedUserId,
+      Friend: user.IdString,
+      Close: true
+    }
+    axios.put("/api/user-follow/setCloseFriend",closeDto)
+      .then((res)=> {
+        console.log("uspesno")
+        setClose(true)
+      })
+  }
+
+  const handleSetToRemoveFromClose = () => {
+    var closeDto = {
+      User:loggedUserId,
+      Friend: user.IdString,
+      Close: false
+    }
+    axios.put("/api/user-follow/setCloseFriend",closeDto)
+      .then((res)=> {
+        console.log("uspesno")
+        setClose(false)
+
+      })
+  }
+
+
   const followClicked = () => {
     if (privateProfile) {
       var follow = {
@@ -427,13 +473,37 @@ const UserHomePage = () => {
                     </Grid>
                   </MenuItem>
                 )}
-                {muted && (
+                {following && !close && (
+                  <MenuItem onClick={handleSetToClose}>
+                    <Grid container>
+                      <Grid item xs={3}></Grid>
+                      <Grid item xs={9}>
+                        <div style={{ width: "100%" }} style={{ color: "red" }}>
+                          Set to close friends
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                )}
+                {following && muted && (
                   <MenuItem onClick={handleClickUnmute}>
                     <Grid container>
                       <Grid item xs={3}></Grid>
                       <Grid item xs={9}>
                         <div style={{ width: "100%" }} style={{ color: "red" }}>
                           Unmute
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                )}
+                {following && close && (
+                  <MenuItem onClick={handleSetToRemoveFromClose}>
+                    <Grid container>
+                      <Grid item xs={3}></Grid>
+                      <Grid item xs={9}>
+                        <div style={{ width: "100%" }} style={{ color: "red" }}>
+                          Remove from close friends
                         </div>
                       </Grid>
                     </Grid>
