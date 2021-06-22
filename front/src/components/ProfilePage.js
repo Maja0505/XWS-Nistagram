@@ -23,16 +23,57 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setUserCopy,load}) => {
+const ProfilePage = ({
+  user,
+  setUser,
+  selectedValue,
+  setSelectedValue,
+  userCopy,
+  setUserCopy,
+  load,
+}) => {
   const classes = useStyles();
   const username = localStorage.getItem("username");
+  const [selectedFile, setSelectedFile] = useState();
+  const [image, setImage] = useState();
+  const loggedUserId = localStorage.getItem("id");
+
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     setUser({ ...user, Gender: selectedValue });
   };
 
+  const ChangeProfileImage = (event) => {
+    setSelectedFile(null);
+
+    console.log(user);
+    setUser({ ...user, ProfilePicture: loggedUserId });
+    console.log(userCopy);
+
+    var formData = new FormData();
+    console.log(event.target.files[0]);
+    var file = event.target.files[0];
+    formData.append("myFile", file);
+    const reader = new FileReader();
+    var url = reader.readAsDataURL(file);
+    reader.onloadend = function (e) {
+      setSelectedFile(reader.result);
+    }.bind(this);
+
+    setImage(formData);
+  };
 
   const handleClickSubmit = () => {
+    if (user.ProfilePicture !== userCopy.ProfilePicture) {
+      axios
+        .post("/api/user/upload-profile-doc/" + loggedUserId, image, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((res) => {
+          console.log("Uspesno upload-ovao sliku");
+        });
+    }
+
     var userDto = {
       Username: user.Username,
       FirstName: user.FirstName,
@@ -43,6 +84,7 @@ const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setU
       Gender: selectedValue === "female" ? 1 : 0,
       Biography: user.Biography,
       WebSite: user.WebSite,
+      ProfilePicture: user.ProfilePicture + ".jpg",
     };
     axios.put("/api/user/update/" + user.Username, userDto).then((res) => {
       setUserCopy({
@@ -54,7 +96,9 @@ const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setU
         Email: user.Email,
         PhoneNumber: user.PhoneNumber,
         Gender: user.Gender,
+        ProfilePicture: user.ProfilePicture + ".jpg",
       });
+      setUser({ ...user, ProfilePicture: loggedUserId + ".jpg" });
       localStorage.setItem("username", user.Username);
     });
   };
@@ -64,9 +108,32 @@ const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setU
       {load && (
         <Grid container item xs={12}>
           <Grid item xs={2}>
-            <Grid item style={{ height: "12%", textAlign: "right" }}>
-              <Avatar className={classes.orange}>N</Avatar>
-            </Grid>
+            {userCopy !== undefined &&
+              userCopy !== null &&
+              userCopy.ProfilePicture !== undefined && (
+                <Grid item style={{ height: "12%", textAlign: "right" }}>
+                  {selectedFile && (
+                    <Avatar
+                      alt="N"
+                      src={selectedFile}
+                      style={{ marginLeft: "auto" }}
+                    />
+                  )}
+                  {!selectedFile && userCopy.ProfilePicture !== "" && (
+                    <Avatar
+                      alt="N"
+                      src={
+                        "http://localhost:8080/api/user/get-image/" +
+                        userCopy.ProfilePicture
+                      }
+                      style={{ marginLeft: "auto" }}
+                    />
+                  )}
+                  {!selectedFile && userCopy.ProfilePicture === "" && (
+                    <Avatar style={{ marginLeft: "auto" }}>N</Avatar>
+                  )}
+                </Grid>
+              )}
 
             <Grid item style={{ height: "12%", textAlign: "right" }}>
               Name
@@ -96,11 +163,23 @@ const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setU
               <Grid item xs={12} style={{ height: "12%", textAlign: "right" }}>
                 <p style={{ textAlign: "left", margin: 0, fontSize: 20 }}>
                   {userCopy.Username}
-                </p>
-                <p style={{ textAlign: "left", margin: 0 }}>
-                  {" "}
-                  <Button style={{ fontSize: 12 }} color="primary">
+                </p>{" "}
+                <p style={{ textAlign: "left" }}>
+                  <Button
+                    style={{ fontSize: 12 }}
+                    color="primary"
+                    component="label"
+                  >
                     Change profile photo
+                    <input
+                      hidden
+                      accept="image/*"
+                      multiple
+                      type="file"
+                      name="myFile"
+                      onChange={(event) => ChangeProfileImage(event)}
+                      style={{ display: "none" }}
+                    />
                   </Button>
                 </p>
               </Grid>
@@ -198,7 +277,8 @@ const ProfilePage = ({ user,setUser,selectedValue,setSelectedValue,userCopy,setU
                       user.Biography !== userCopy.Biography ||
                       user.Email !== userCopy.Email ||
                       user.PhoneNumber !== userCopy.PhoneNumber ||
-                      user.Gender !== userCopy.Gender) &&
+                      user.Gender !== userCopy.Gender ||
+                      user.ProfilePicture !== userCopy.ProfilePicture) &&
                     user.Username !== ""
                       ? false
                       : true

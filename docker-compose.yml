@@ -30,6 +30,7 @@ services:
     tmpfs:
       - /var/run
       - /var/cache/verification-docs/*
+      - /var/cache/profile-docs/*
 
   post-service:
     image: post-service:compose_build
