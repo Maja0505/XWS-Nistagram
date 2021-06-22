@@ -7,7 +7,6 @@ import {
   Tabs,
   Tab,
   Divider,
-
 } from "@material-ui/core";
 
 import { useState, useEffect } from "react";
@@ -54,21 +53,18 @@ const UserHomePage = () => {
   const anchorRef = useRef(null);
   const [openDialogForBlock, setOpenDialogForBlock] = useState(false);
   const [openDialogForMute, setOpenDialogForMute] = useState(false);
-  const [allFollows,setAllFollows] = useState([])
-  const [allFollowers,setAllFollowers] = useState([])
-  const [openDialogForFollows,setOpenDialogForFollows] = useState(false)
-  const [openDialogForFollowers,setOpenDialogForFollowers] = useState(false)
-  const [openDialogForFollowRequests,setOpenDialogForFollowRequests] = useState(false)
-
-
-
+  const [allFollows, setAllFollows] = useState([]);
+  const [allFollowers, setAllFollowers] = useState([]);
+  const [openDialogForFollows, setOpenDialogForFollows] = useState(false);
+  const [openDialogForFollowers, setOpenDialogForFollowers] = useState(false);
+  const [openDialogForFollowRequests, setOpenDialogForFollowRequests] =
+    useState(false);
 
   const loggedUserId = localStorage.getItem("id");
 
-
   const clickShowFollowRequests = () => {
-    setOpenDialogForFollowRequests(true)
-  }
+    setOpenDialogForFollowRequests(true);
+  };
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -124,7 +120,7 @@ const UserHomePage = () => {
 
     //setFollowing(false)
     //setPrivateProfile(true)
-   
+
     axios
       .get("/api/user/" + username)
       .then((res) => {
@@ -197,7 +193,7 @@ const UserHomePage = () => {
               alert(error.response.status);
             });
 
-            axios
+          axios
             .get(
               "/api/user-follow/checkClosed/" +
                 loggedInId +
@@ -212,68 +208,69 @@ const UserHomePage = () => {
             .catch((error) => {
               alert(error.response.status);
             });
-        
-            axios.get("/api/user-follow/allFollows/" + res.data.IdString)
-              .then((res)=> {
-                  if(res.data){
-                    setAllFollows(res.data)
-                  }else{
-                    setAllFollows([])
 
-                  }
-              }).catch((error) => {
-                setAllFollows([])
-                alert(error.response.status);
-              });
-
-            axios.get("/api/user-follow/allFollowers/" +  res.data.IdString)
-            .then((res)=> {
-                            
-              if(res.data){
-                setAllFollowers(res.data)
-              }else{
-                setAllFollowers([])
-
+          axios
+            .get("/api/user-follow/allFollows/" + res.data.IdString)
+            .then((res) => {
+              if (res.data) {
+                setAllFollows(res.data);
+              } else {
+                setAllFollows([]);
               }
-            }).catch((error) => {
-              setAllFollowers([])
+            })
+            .catch((error) => {
+              setAllFollows([]);
               alert(error.response.status);
             });
-          
-        } else {
 
-          axios.get("/api/user-follow/allFollows/" + res.data.IdString)
-          .then((res)=> {
-              if(res.data){
-                setAllFollows(res.data)
-              }else{
-                setAllFollows([])
+          axios
+            .get("/api/user-follow/allFollowers/" + res.data.IdString)
+            .then((res) => {
+              if (res.data) {
+                setAllFollowers(res.data);
+              } else {
+                setAllFollowers([]);
               }
-          }).catch((error) => {
-            setAllFollows([])
-            alert(error.response.status);
-          });
+            })
+            .catch((error) => {
+              setAllFollowers([]);
+              alert(error.response.status);
+            });
+        } else {
+          axios
+            .get("/api/user-follow/allFollows/" + res.data.IdString)
+            .then((res) => {
+              if (res.data) {
+                setAllFollows(res.data);
+              } else {
+                setAllFollows([]);
+              }
+            })
+            .catch((error) => {
+              setAllFollows([]);
+              alert(error.response.status);
+            });
 
-        axios.get("/api/user-follow/allFollowers/" +  res.data.IdString)
-        .then((res)=> {
-                        
-          if(res.data){
-            setAllFollowers(res.data)
-          }else{
-            setAllFollowers([])
-          }
-        }).catch((error) => {
-          setAllFollowers([])
-          alert(error.response.status);
-        });
+          axios
+            .get("/api/user-follow/allFollowers/" + res.data.IdString)
+            .then((res) => {
+              if (res.data) {
+                setAllFollowers(res.data);
+              } else {
+                setAllFollowers([]);
+              }
+            })
+            .catch((error) => {
+              setAllFollowers([]);
+              alert(error.response.status);
+            });
           setLoad1(true);
           setLoad2(true);
           setLoad3(true);
         }
-        
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       });
   }, [username, loggedUsername]);
 
@@ -310,31 +307,27 @@ const UserHomePage = () => {
 
   const handleSetToClose = () => {
     var closeDto = {
-      User:loggedUserId,
+      User: loggedUserId,
       Friend: user.IdString,
-      Close: true
-    }
-    axios.put("/api/user-follow/setCloseFriend",closeDto)
-      .then((res)=> {
-        console.log("uspesno")
-        setClose(true)
-      })
-  }
+      Close: true,
+    };
+    axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
+      console.log("uspesno");
+      setClose(true);
+    });
+  };
 
   const handleSetToRemoveFromClose = () => {
     var closeDto = {
-      User:loggedUserId,
+      User: loggedUserId,
       Friend: user.IdString,
-      Close: false
-    }
-    axios.put("/api/user-follow/setCloseFriend",closeDto)
-      .then((res)=> {
-        console.log("uspesno")
-        setClose(false)
-
-      })
-  }
-
+      Close: false,
+    };
+    axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
+      console.log("uspesno");
+      setClose(false);
+    });
+  };
 
   const followClicked = () => {
     if (privateProfile) {
@@ -371,12 +364,12 @@ const UserHomePage = () => {
   };
 
   const handleClickOnFollowers = () => {
-    setOpenDialogForFollowers(true)
-  }
+    setOpenDialogForFollowers(true);
+  };
 
   const handleClickOnFollows = () => {
-    setOpenDialogForFollows(true)
-  }
+    setOpenDialogForFollows(true);
+  };
 
   const buttonForUnfollow = (
     <Button
@@ -522,121 +515,148 @@ const UserHomePage = () => {
       <Grid item xs={2}></Grid>
       <Grid container item xs={8}>
         <Grid item xs={4}>
-          <img
-            src={avatar}
-            alt="Not founded"
-            style={{
-              borderRadius: "50%",
-              border: "1px solid",
-              width: "40%",
-            }}
-          />
-        </Grid>
-        {user !== undefined &&
-        <Grid item xs={7}>
-          <Grid container>
-            {user !== undefined && (
-              <>
-                <Grid
-                  item
-                  xs={3}
-                  style={{
-                    textAlign: "left",
-                  }}
-                >
-                  <Typography variant="h6" style={{ margin: "auto" }}>
-                    {user.Username} {"  "}
-                    {user.VerificationSettings.Verified && (
-                      <img
-                        src={verification}
-                        style={{
-                          height: "20px",
-                          width: "20px",
-                          marginTop: "2%",
-                        }}
-                      ></img>
-                    )}
-                  </Typography>
-                </Grid>
-              </>
-            )}
-
-            <Grid item xs={3}>
-              {loggedUsername === username && buttonForEditProfile}
-              {requested && loggedUsername !== username && buttonForRequested}
-              {following &&
-                loggedUsername !== username &&
-                !requested &&
-                buttonForUnfollow}
-              {!following &&
-                loggedUsername !== username &&
-                !requested &&
-                buttonForFollow}
-            </Grid>
-
-            <Grid item xs={2}></Grid>
-
-            <Grid
-              item
-              xs={4}
+          {user !== undefined && user.ProfilePicture !== "" && (
+            <img
+              src={
+                "http://localhost:8080/api/user/get-image/" +
+                user.ProfilePicture
+              }
+              alt="Not founded"
               style={{
-                textAlign: "right",
+                borderRadius: "50%",
+                border: "1px solid",
+                width: "150px",
+                height: "150px",
               }}
-            >
-              {loggedUsername !== username && (
+            />
+          )}
+          {user !== undefined && user.ProfilePicture === "" && (
+            <img
+              src={avatar}
+              alt="Not founded"
+              style={{
+                borderRadius: "50%",
+                border: "1px solid",
+                width: "150px",
+                height: "150px",
+              }}
+            />
+          )}
+        </Grid>
+        {user !== undefined && (
+          <Grid item xs={7}>
+            <Grid container>
+              {user !== undefined && (
                 <>
-                  <MoreHorizIcon
+                  <Grid
+                    item
+                    xs={3}
                     style={{
-                      textAlign: "right",
-                      cursor: "pointer",
+                      textAlign: "left",
                     }}
-                    aria-controls={open ? "menu-list-grow" : undefined}
-                    aria-haspopup="true"
-                    ref={anchorRef}
-                    onClick={handleToggle}
-                  ></MoreHorizIcon>
-                  {dropDowMenuForProfile}
+                  >
+                    <Typography variant="h6" style={{ margin: "auto" }}>
+                      {user.Username} {"  "}
+                      {user.VerificationSettings.Verified && (
+                        <img
+                          src={verification}
+                          style={{
+                            height: "20px",
+                            width: "20px",
+                            marginTop: "2%",
+                          }}
+                        ></img>
+                      )}
+                    </Typography>
+                  </Grid>
                 </>
               )}
 
-              {loggedUsername === username && (
+              <Grid item xs={3}>
+                {loggedUsername === username && buttonForEditProfile}
+                {requested && loggedUsername !== username && buttonForRequested}
+                {following &&
+                  loggedUsername !== username &&
+                  !requested &&
+                  buttonForUnfollow}
+                {!following &&
+                  loggedUsername !== username &&
+                  !requested &&
+                  buttonForFollow}
+              </Grid>
+
+              <Grid item xs={2}></Grid>
+
+              <Grid
+                item
+                xs={4}
+                style={{
+                  textAlign: "right",
+                }}
+              >
+                {loggedUsername !== username && (
+                  <>
+                    <MoreHorizIcon
+                      style={{
+                        textAlign: "right",
+                        cursor: "pointer",
+                      }}
+                      aria-controls={open ? "menu-list-grow" : undefined}
+                      aria-haspopup="true"
+                      ref={anchorRef}
+                      onClick={handleToggle}
+                    ></MoreHorizIcon>
+                    {dropDowMenuForProfile}
+                  </>
+                )}
+
+                {loggedUsername === username && (
+                  <>
+                    <Button onClick={clickShowFollowRequests}>
+                      View follow request
+                    </Button>
+                  </>
+                )}
+              </Grid>
+            </Grid>
+            <br></br>
+            <Grid container>
+              {user !== undefined && (
                 <>
-                 <Button onClick={clickShowFollowRequests}>View follow request</Button>
+                  <FormLabel>0 posts</FormLabel>
+                  <FormLabel
+                    style={{ marginLeft: "auto", cursor: "pointer" }}
+                    onClick={handleClickOnFollowers}
+                  >
+                    {allFollowers.length} followers
+                  </FormLabel>
+                  <FormLabel
+                    style={{ marginLeft: "auto", cursor: "pointer" }}
+                    onClick={handleClickOnFollows}
+                  >
+                    {allFollows.length} following
+                  </FormLabel>{" "}
+                </>
+              )}
+            </Grid>
+            {user !== undefined && (
+              <Grid container style={{ marginTop: "1%" }}>
+                <Typography variant="inherit" align="left">
+                  {user.FirstName} {user.LastName}
+                </Typography>
+              </Grid>
+            )}
+            <Grid container>
+              {user !== undefined && (
+                <>
+                  <Typography style={{ textAlign: "left" }}>
+                    {user.Biography}
+                  </Typography>
                 </>
               )}
             </Grid>
           </Grid>
-          <br></br>
-          <Grid container>
-            {user !== undefined && (
-              <>
-                <FormLabel>0 posts</FormLabel>
-                <FormLabel style={{ marginLeft: "auto",cursor:"pointer"}} onClick={handleClickOnFollowers}>
-                  {allFollowers.length} followers
-                </FormLabel>
-                <FormLabel style={{ marginLeft: "auto",cursor:"pointer" }} onClick={handleClickOnFollows}>
-                  {allFollows.length} following
-                </FormLabel>{" "}
-              </>
-            )}
-          </Grid>
-          {user !== undefined && (
-            <Grid container style={{ marginTop: "1%" }}>
-              <Typography variant="inherit" align="left">
-                {user.FirstName} {user.LastName}
-              </Typography>
-            </Grid>
-          )}
-          <Grid container>
-            {user !== undefined && (
-              <>
-                <Typography style={{ textAlign: "left" }}>
-                  {user.Biography}
-                </Typography>
-              </>
-            )}
-          </Grid>
-        </Grid>}
+        )}
       </Grid>
       <Grid item xs={2}></Grid>
     </Grid>
@@ -644,151 +664,169 @@ const UserHomePage = () => {
 
   return (
     <>
-    {user !== undefined && 
-    <div>
-      {<>{userDetails}</>}
-      {user !== undefined && loggedUsername === username && <Grid container style={{ marginTop: "2%" }}>
-        <Grid item xs={2}></Grid>
-        <Grid item xs={8}>
-          <Paper>
-            <Tabs
-              value={tabValue}
-              onChange={handleChangeTab}
-              indicatorColor="primary"
-              textColor="inherit"
-            >
-              <Tab label="Posts" icon={<GridOn />} style={{ margin: "auto" }} />
-              <Tab
-                label="Add post"
-                icon={<AddPhotoAlternateOutlined />}
-                style={{ margin: "auto" }}
-              />
-
-              <Tab
-                label="Saved"
-                icon={<BookmarkBorder />}
-                style={{ margin: "auto" }}
-              />
-              <Tab
-                label="Tagged"
-                icon={<AssignmentIndOutlined />}
-                style={{ margin: "auto" }}
-              />
-            </Tabs>
-          </Paper>
-        </Grid>
-        <Grid item xs={2}></Grid>
-      </Grid>}
-
-
-      {loggedUsername !== username && !user.ProfileSettings.Public && <Grid container style={{ marginTop: "2%" }}>
-        <Grid item xs={2}></Grid>
-        <Grid item xs={8}>
-          <Paper>
-            <Tabs
-              value={tabValue}
-              onChange={handleChangeTab}
-              indicatorColor="primary"
-              textColor="inherit"
-            >
-              <Tab label="Posts" icon={<GridOn />} style={{ margin: "auto" }} />
-              <Tab
-                label="Tagged"
-                icon={<AssignmentIndOutlined />}
-                style={{ margin: "auto" }}
-              />
-            </Tabs>
-          </Paper>
-        </Grid>
-        <Grid item xs={2}></Grid>
-      </Grid>}
-
-      <Grid container>
-        <Grid item xs={2}></Grid>
-        {user !== undefined && user !== null && loggedUsername === user.Username &&
-        <Grid item xs={8}>
-          {user !== undefined && user !== null && tabValue === 0 && (
-           <Posts userForProfile={user} username={username}></Posts>
-          )}
-          {user !== undefined && user !== null && tabValue === 1 && (
-            <AddPost setTabValue={setTabValue} />
-          )}
-          {user !== undefined && user !== null && tabValue === 2 && (
-            <Collections></Collections>
-          )}
-        </Grid>}
-
-        {user !== undefined && user !== null && loggedUsername !== user.Username && !user.ProfileSettings.Public ||  (following && user.ProfileSettings.Public) &&
-         <Grid item xs={8}>
-            {user !== undefined && user !== null && tabValue === 0 && (
-            <Posts userForProfile={user} username={username}></Posts>
-          )}
-          </Grid>
-        }
-
-        {user !== undefined && user !== null && loggedUsername !== user.Username && user.ProfileSettings.Public && !following && 
-         <Grid item xs={8}>
-            {user !== undefined && user !== null && tabValue === 0 && (
-              <Paper style={{width:"100%",height:"100%"}} >
-                <Typography variant="h5" color="textSecondary">
-                  This Account is Private
-                </Typography>
-                <p>Follow to see their photos and videos.</p>
-
-
-              </Paper>
-             
-              
-          )}
-          </Grid>
-        }
-
-      <Grid item xs={2}></Grid>
-      </Grid>
       {user !== undefined && (
-        <DialogForBlockUser
-          loggedUserId={loggedUserId}
-          blockedUserId={user.ID}
-          open={openDialogForBlock}
-          setOpen={setOpenDialogForBlock}
-        ></DialogForBlockUser>
-      )}
-      {user !== undefined && (
-        <DialogForMuteUser
-          loggedUserId={loggedUserId}
-          muteUserId={user.ID}
-          open={openDialogForMute}
-          setOpen={setOpenDialogForMute}
-        ></DialogForMuteUser>
-      )}
+        <div>
+          {<>{userDetails}</>}
+          {user !== undefined && loggedUsername === username && (
+            <Grid container style={{ marginTop: "2%" }}>
+              <Grid item xs={2}></Grid>
+              <Grid item xs={8}>
+                <Paper>
+                  <Tabs
+                    value={tabValue}
+                    onChange={handleChangeTab}
+                    indicatorColor="primary"
+                    textColor="inherit"
+                  >
+                    <Tab
+                      label="Posts"
+                      icon={<GridOn />}
+                      style={{ margin: "auto" }}
+                    />
+                    <Tab
+                      label="Add post"
+                      icon={<AddPhotoAlternateOutlined />}
+                      style={{ margin: "auto" }}
+                    />
 
-    {openDialogForFollowers && (
-        <UsersList
-          label = "Followers"
-          users={allFollowers}
-          open={openDialogForFollowers}
-          setOpen={setOpenDialogForFollowers}
-        ></UsersList>
-      )}
+                    <Tab
+                      label="Saved"
+                      icon={<BookmarkBorder />}
+                      style={{ margin: "auto" }}
+                    />
+                    <Tab
+                      label="Tagged"
+                      icon={<AssignmentIndOutlined />}
+                      style={{ margin: "auto" }}
+                    />
+                  </Tabs>
+                </Paper>
+              </Grid>
+              <Grid item xs={2}></Grid>
+            </Grid>
+          )}
 
-    {openDialogForFollows && (
-        <UsersList
-        label = "Following"
-          users={allFollows}
-          open={openDialogForFollows}
-          setOpen={setOpenDialogForFollows}
-        ></UsersList>
-      )}
+          {loggedUsername !== username && !user.ProfileSettings.Public && (
+            <Grid container style={{ marginTop: "2%" }}>
+              <Grid item xs={2}></Grid>
+              <Grid item xs={8}>
+                <Paper>
+                  <Tabs
+                    value={tabValue}
+                    onChange={handleChangeTab}
+                    indicatorColor="primary"
+                    textColor="inherit"
+                  >
+                    <Tab
+                      label="Posts"
+                      icon={<GridOn />}
+                      style={{ margin: "auto" }}
+                    />
+                    <Tab
+                      label="Tagged"
+                      icon={<AssignmentIndOutlined />}
+                      style={{ margin: "auto" }}
+                    />
+                  </Tabs>
+                </Paper>
+              </Grid>
+              <Grid item xs={2}></Grid>
+            </Grid>
+          )}
 
-    {openDialogForFollowRequests && (
-        <FollowRequest
-        loggedUserId={loggedUserId}
-        open={openDialogForFollowRequests}
-          setOpen={setOpenDialogForFollowRequests}
-        ></FollowRequest>
+          <Grid container>
+            <Grid item xs={2}></Grid>
+            {user !== undefined &&
+              user !== null &&
+              loggedUsername === user.Username && (
+                <Grid item xs={8}>
+                  {user !== undefined && user !== null && tabValue === 0 && (
+                    <Posts userForProfile={user} username={username}></Posts>
+                  )}
+                  {user !== undefined && user !== null && tabValue === 1 && (
+                    <AddPost setTabValue={setTabValue} />
+                  )}
+                  {user !== undefined && user !== null && tabValue === 2 && (
+                    <Collections></Collections>
+                  )}
+                </Grid>
+              )}
+
+            {(user !== undefined &&
+              user !== null &&
+              loggedUsername !== user.Username &&
+              !user.ProfileSettings.Public) ||
+              (following && user.ProfileSettings.Public && (
+                <Grid item xs={8}>
+                  {user !== undefined && user !== null && tabValue === 0 && (
+                    <Posts userForProfile={user} username={username}></Posts>
+                  )}
+                </Grid>
+              ))}
+
+            {user !== undefined &&
+              user !== null &&
+              loggedUsername !== user.Username &&
+              user.ProfileSettings.Public &&
+              !following && (
+                <Grid item xs={8}>
+                  {user !== undefined && user !== null && tabValue === 0 && (
+                    <Paper style={{ width: "100%", height: "100%" }}>
+                      <Typography variant="h5" color="textSecondary">
+                        This Account is Private
+                      </Typography>
+                      <p>Follow to see their photos and videos.</p>
+                    </Paper>
+                  )}
+                </Grid>
+              )}
+
+            <Grid item xs={2}></Grid>
+          </Grid>
+          {user !== undefined && (
+            <DialogForBlockUser
+              loggedUserId={loggedUserId}
+              blockedUserId={user.ID}
+              open={openDialogForBlock}
+              setOpen={setOpenDialogForBlock}
+            ></DialogForBlockUser>
+          )}
+          {user !== undefined && (
+            <DialogForMuteUser
+              loggedUserId={loggedUserId}
+              muteUserId={user.ID}
+              open={openDialogForMute}
+              setOpen={setOpenDialogForMute}
+            ></DialogForMuteUser>
+          )}
+
+          {openDialogForFollowers && (
+            <UsersList
+              label="Followers"
+              users={allFollowers}
+              open={openDialogForFollowers}
+              setOpen={setOpenDialogForFollowers}
+            ></UsersList>
+          )}
+
+          {openDialogForFollows && (
+            <UsersList
+              label="Following"
+              users={allFollows}
+              open={openDialogForFollows}
+              setOpen={setOpenDialogForFollows}
+            ></UsersList>
+          )}
+
+          {openDialogForFollowRequests && (
+            <FollowRequest
+              loggedUserId={loggedUserId}
+              open={openDialogForFollowRequests}
+              setOpen={setOpenDialogForFollowRequests}
+            ></FollowRequest>
+          )}
+        </div>
       )}
-    </div>
-    }
     </>
   );
 };

@@ -21,7 +21,7 @@ export default function ContentDetails() {
   const stories = [
     {
       "profile_name": "Jeremy",
-      "video_url": "assets/penguins-1.mp4",
+      "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
       "duration": 7,
       "type":"video",
     },
@@ -39,9 +39,9 @@ export default function ContentDetails() {
     },
     {
       "profile_name": "Chupachup",
-      "video_url": "assets/penguins-3.mp4",
+      "video_url": "https://picsum.photos/432/768",
       "duration": 7,
-      "type":"video"
+      "type":"image"
     },
     {
       "profile_name": "Aron",
@@ -66,7 +66,7 @@ export default function ContentDetails() {
   }
 
   const showStoryBar=(  <div>
-                          <Grid style={{ backgroundColor: "white",width:"80%",height: "5%",marginTop: "1%",overflowX: "auto",display:"flex"  }} >
+                          <Grid style={{ backgroundColor: "white",width:"70%",height: "5%",overflowX: "auto",display:"flex" ,margin:"auto",marginTop:"2%" }} >
                             {stories.map((story, index) => (
                               <div  onClick={ () => openStories()} className="cover-image-box">
                                 <img src={avatar} onClick={ () => storyClicked(story)} />

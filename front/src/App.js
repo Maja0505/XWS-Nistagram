@@ -13,6 +13,7 @@ import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
+import StoryFeeds from "./components/StoryFeeds";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -86,6 +87,7 @@ function App() {
               path="/explore/tags/:tag/"
               render={(props) => <HashTagPost {...props} />}
             ></Route>
+            <Route exact path="/story/feed/" component={StoryFeeds}></Route>
           </Switch>
         </div>
       </Router>
