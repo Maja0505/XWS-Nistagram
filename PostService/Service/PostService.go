@@ -382,11 +382,34 @@ func (service *PostService) GetAllCollectionsForPostByUser(userid string, postuu
 	return collections, err
 }
 
-/*func (service *PostService) GetAllLikesForPost(postid string) error {
-	err := service.Repo.GetAllLikesForPost(postid)
-	if err != nil{
-		fmt.Println(err)
-		return  err
+func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
+
+	var postsByAllNotMutedFollowedUsers []Model.Post
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allNotMutedFollows/" + userid)
+
+	resp, err := http.Get(reqUrl)
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
 	}
-	return nil
-}*/
+	body, err := ioutil.ReadAll(resp.Body)
+	var notMutedFollowedUsers []string
+	err = json.Unmarshal(body, &notMutedFollowedUsers)
+	if err != nil{
+		return nil, err
+	}
+
+	for _,userId := range notMutedFollowedUsers {
+
+		postsByOneUser,err := service.Repo.FindPostsByUserId(userId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+	}
+
+	return &postsByAllNotMutedFollowedUsers,nil
+
+}

@@ -217,6 +217,24 @@ func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) 
 	return &followedUsers,nil
 }
 
+func (repository *UserFollowersRepository) GetAllNotMutedFollowedUsersByUser(userId string) (*[]interface{}, error){
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u1.userId = $userId and r.mute=FALSE RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
 
 func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}

@@ -8,7 +8,6 @@ import (
 
 func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	var post Model.Post
-	post.ID = postDTO.ID
 	post.CreatedAt = time.Now()
 	post.Description = postDTO.Description
 	post.DislikesCount = 0

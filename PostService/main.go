@@ -141,6 +141,7 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-collections-for-user/{id}", handler.GetCollectionsForUser).Methods("GET")
 	router.HandleFunc("/post-exists-in-favourites/{id}/{post}", handler.CheckIfPostExistsInFavourites).Methods("GET")
 	router.HandleFunc("/get-all-collections-for-post-by-user/{id}/{post}", handler.GetAllCollectionsForPostByUser).Methods("GET")
+	router.HandleFunc("/get-all-post-feeds-for-user/{userId}", handler.GetAllPostFeedsForUser).Methods("GET")
 
 }
 

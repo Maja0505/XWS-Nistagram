@@ -113,6 +113,18 @@ func (service *UserFollowersService) GetAllFollowersByUser(userId string) (*[]dt
 	return usernamesDTOList,nil
 }
 
+func (service *UserFollowersService) GetAllNotMutedFollowedUsersByUser(userId string)(*[]interface{}, error){
+
+	users,err := service.Repository.GetAllNotMutedFollowedUsersByUser(userId)
+
+	if err !=nil {
+		return nil,err
+	}
+
+	return users,nil
+
+}
+
 func (service *UserFollowersService) GetAllFollowRequests(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	users,err := service.Repository.GetAllFollowRequests(userId)
@@ -163,7 +175,6 @@ func (service *UserFollowersService) GetAllMuteFriends(userId string) (*[]dto.Us
 
 	return usernamesDTOList,nil
 }
-
 
 func (service *UserFollowersService) CheckFollowing(userId string, followedUserId string) (*interface{}, error) {
 	following,err := service.Repository.CheckFollowing(userId , followedUserId)

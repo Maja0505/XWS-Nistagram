@@ -91,6 +91,7 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 
 	router.HandleFunc("/allFollows/{userId}",handler.GetAllFollowedUsers).Methods("GET")
 	router.HandleFunc("/allFollowers/{userId}",handler.GetAllFollowersByUser).Methods("GET")
+	router.HandleFunc("/allNotMutedFollows/{userId}",handler.GetAllNotMutedFollowedUsers).Methods("GET")
 	router.HandleFunc("/allFollowRequests/{userId}",handler.GetAllFollowRequests).Methods("GET")
 	router.HandleFunc("/allCloseFriends/{userId}",handler.GetAllCloseFriends).Methods("GET")
 	router.HandleFunc("/allMuteFriends/{userId}",handler.GetAllMuteFriends).Methods("GET")
