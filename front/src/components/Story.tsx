@@ -9,15 +9,19 @@ import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import { Story as StoryModel } from "../models/Story";
 import avatar from "../images/nistagramAvatar.jpg";
 
+
 interface Props {
   onClose: Function;
   stories: StoryModel[];
 }
  
-export default function Story({ onClose, stories }: Props) {
+export default function Story({ onClose, stories }: Props ){
   const [storyPaused, setStoryPaused] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const storyIndexRef = useRef(0);
+
+
+
 
   useEffect(() => {
     const video = document.getElementById("video") as HTMLVideoElement;
@@ -51,6 +55,8 @@ export default function Story({ onClose, stories }: Props) {
     if ((element as HTMLElement).className === "story-container") onClose();
   }
 
+
+
   function getProgressBarClassName(index: number) {
     if (index < storyIndex) {
       return "progress-bar progress-bar-finished";
@@ -61,10 +67,11 @@ export default function Story({ onClose, stories }: Props) {
     }
   }
 
-  const storyVideo = (<video onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src={stories[storyIndex].video_url} autoPlay></video>
-  )
+  const storyVideo = (
 
-  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src={stories[storyIndex].video_url} style={{height:"100"}} ></img>
+<video onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src={stories[storyIndex].video_url} autoPlay  width="100%" style={{marginTop:"30%"}} ></video>  )
+
+  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src={stories[storyIndex].video_url} style={{height:"90%",width:"100%"}} ></img>
   )
 
   return (
@@ -73,8 +80,8 @@ export default function Story({ onClose, stories }: Props) {
         <div className="title">
           <img src={avatar} />
           <div className="details">
-            <span>Ovde treba username</span>
-            <span>Ovde treba vreme</span>
+            <span>{stories[storyIndex].profile_name}</span>
+            <span>{stories[storyIndex].subheading}</span>
           </div>
           {storyPaused && <span className="pause">PAUSED</span>}
           <MoreHoriz style={{marginLeft: storyPaused==true ? "10px" : "300px"}} />
@@ -87,7 +94,7 @@ export default function Story({ onClose, stories }: Props) {
             </div>
           ))}
         </div>
-        <div className="video">
+        <div className= {stories[storyIndex].type === "image" ? "image" : "video" }>
           {stories[storyIndex].type === "image" ? storyImage : storyVideo }
           {storyIndex !== 0 && <ChevronLeft onClick={(e) => setStoryIndex((value) => value - 1)} className="previous hoverable" />}
           {storyIndex !== stories.length - 1 && <ChevronRight onClick={(e) => setStoryIndex((value) => value + 1)} className="next hoverable" />}
