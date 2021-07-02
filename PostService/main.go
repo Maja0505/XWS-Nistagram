@@ -76,6 +76,11 @@ func init() {
 		fmt.Println(err)
 	}
 
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id uuid, userid text, createdat timestamp, expiredat timestamp, image text,highlights boolean,for_close_friends boolean, PRIMARY KEY((userid, id)) );").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+
 	fmt.Println("Cassandra well initialized!")
 }
 
@@ -141,6 +146,7 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-collections-for-user/{id}", handler.GetCollectionsForUser).Methods("GET")
 	router.HandleFunc("/post-exists-in-favourites/{id}/{post}", handler.CheckIfPostExistsInFavourites).Methods("GET")
 	router.HandleFunc("/get-all-collections-for-post-by-user/{id}/{post}", handler.GetAllCollectionsForPostByUser).Methods("GET")
+	router.HandleFunc("/get-all-post-feeds-for-user/{userId}", handler.GetAllPostFeedsForUser).Methods("GET")
 
 }
 
@@ -153,6 +159,8 @@ func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
 	router.HandleFunc("/story/all-not-expired/{userId}", handler.GetAllNotExpiredStoriesByUser).Methods("GET")
 	router.HandleFunc("/story/all-for-close-friends/{userId}", handler.GetAllStoriesForCloseFriendsByUser).Methods("GET")
 	router.HandleFunc("/story/all-highlights/{userId}", handler.GetAllHighlightsStoriesByUser).Methods("GET")
+	router.HandleFunc("/story/all-follows-with-stories/{userId}", handler.GetAllFollowsWithStories).Methods("GET")
+
 
 	router.HandleFunc("/story/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/story/video-get/{videoId}", handler.GetVideo).Methods("GET")

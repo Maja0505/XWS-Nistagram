@@ -119,9 +119,9 @@ func (repo *PostRepository) CreateTables() error{
 }
 
 func (repo *PostRepository) Create(post *Model.Post) error {
-	//ID, _ := gocql.RandomUUID()
+	ID, _ := gocql.RandomUUID()
 	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, image, userid) VALUES(?, ?, ?, ?, ?)",
-		post.ID, post.CreatedAt, post.Description, post.Image, post.UserID).Exec(); err != nil {
+		ID, post.CreatedAt, post.Description, post.Image, post.UserID).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return err

@@ -783,27 +783,27 @@ func (handler *PostHandler) GetAllCollectionsForPostByUser(w http.ResponseWriter
 	json.NewEncoder(w).Encode(collections)
 }
 
-/*func (handler *PostHandler) GetAllLikesForPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Ulaziii")
+func (handler *PostHandler) GetAllPostFeedsForUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	postid := mux.Vars(r)["id"]
-	i, err := strconv.Atoi(postid)
-	fmt.Println("Link dobar ", i)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	err2 := handler.Service.GetAllLikesForPost(postid)
-	if err2 != nil{
-	fmt.Println(err2)
-	w.WriteHeader(http.StatusExpectationFailed)
-	return
+	userId := mux.Vars(r)["userId"]
+
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	posts,err := handler.Service.GetAllPostFeedsForUser(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
 
-}*/
+	json.NewEncoder(w).Encode(posts)
+
+	w.WriteHeader(http.StatusOK)
+
+}
 
 func ParseUUID(input string) (gocql.UUID, error) {
 	var u gocql.UUID
