@@ -3,6 +3,7 @@ package Mapper
 import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
+	"strconv"
 	"time"
 )
 
@@ -45,4 +46,47 @@ func ConvertCreateStoryDTOToPost(storyDTO *DTO.CreateStoryDTO) *Model.Story {
 	story.ForCloseFriends = storyDTO.ForCloseFriends
 	story.Highlights = storyDTO.Highlights
 	return &story
+}
+
+func ConvertStoryListToStoryDTOList(stories *[]Model.Story) *[]DTO.StoryDTO{
+	var storiesDtos []DTO.StoryDTO
+
+	for _, story := range *stories {
+		storiesDtos = append(storiesDtos,*convertStoryToStoryDTO(&story))
+	}
+
+	return &storiesDtos
+}
+
+func convertStoryToStoryDTO(s *Model.Story) *DTO.StoryDTO {
+	var storyDto DTO.StoryDTO
+
+	storyDto.ID = s.ID
+	storyDto.UserID = s.UserID
+	storyDto.Duration = 10
+	storyDto.ForCloseFriends = s.ForCloseFriends
+	storyDto.Highlights = s.Highlights
+	storyDto.Media = s.Image
+	if s.Image[len(s.Image) - 3 : len(s.Image)] == "jpg" {
+		storyDto.Type = "image"
+	}else{
+		storyDto.Type = "video"
+	}
+	storyDto.Subheading = "Posted " + calculateMinutes(s.CreatedAt) + " ago"
+
+	return &storyDto
+}
+
+func calculateMinutes(createdAt time.Time) string {
+	var stringDuration string
+	now := time.Now()
+	duration := now.Minute() - createdAt.Minute()
+	if duration/60 >= 1{
+		stringDuration = strconv.Itoa(duration/60) + "h"
+	}else{
+		stringDuration = strconv.Itoa(duration) + "min"
+	}
+
+	return stringDuration
+
 }

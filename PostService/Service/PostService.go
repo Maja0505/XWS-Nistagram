@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type PostService struct {
@@ -410,6 +411,27 @@ func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Pos
 		postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
 	}
 
+	var feedSlice FeedSlice
+	feedSlice = postsByAllNotMutedFollowedUsers
+	sort.Sort(feedSlice)
+	postsByAllNotMutedFollowedUsers = feedSlice
+
 	return &postsByAllNotMutedFollowedUsers,nil
 
+}
+
+
+//for sorting post feeds by created time
+type FeedSlice []Model.Post
+
+func (f FeedSlice) Len() int {
+	return len(f)
+}
+
+func (f FeedSlice) Less(i, j int) bool {
+	return f[i].CreatedAt.After(f[j].CreatedAt)
+}
+
+func (f FeedSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
 }

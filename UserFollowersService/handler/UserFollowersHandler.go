@@ -175,6 +175,50 @@ func (handler *UserFollowersHandler) GetAllNotMutedFollowedUsers(w http.Response
 
 }
 
+func (handler *UserFollowersHandler) GetAllFollowsWhomUserIsCloseFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllFollowsWhomUserIsCloseFriend(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *UserFollowersHandler) GetAllFollowsWhomUserIsNotCloseFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllFollowsWhomUserIsNotCloseFriend(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
 func (handler *UserFollowersHandler) GetAllFollowersByUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)

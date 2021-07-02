@@ -30,7 +30,7 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 		session neo4j.Session
 		err     error
 	)
-	if driver, err = neo4j.NewDriver("neo4j://neo4j:7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
+	if driver, err = neo4j.NewDriver("neo4j://localhost:7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
 	}
 	if session = driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite}); err != nil {
@@ -92,6 +92,9 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 	router.HandleFunc("/allFollows/{userId}",handler.GetAllFollowedUsers).Methods("GET")
 	router.HandleFunc("/allFollowers/{userId}",handler.GetAllFollowersByUser).Methods("GET")
 	router.HandleFunc("/allNotMutedFollows/{userId}",handler.GetAllNotMutedFollowedUsers).Methods("GET")
+	router.HandleFunc("/allAllFollowsWhomUserIsCloseFriend/{userId}",handler.GetAllFollowsWhomUserIsCloseFriend).Methods("GET")
+	router.HandleFunc("/allAllFollowsWhomUserIsNotCloseFriend/{userId}",handler.GetAllFollowsWhomUserIsNotCloseFriend).Methods("GET")
+
 	router.HandleFunc("/allFollowRequests/{userId}",handler.GetAllFollowRequests).Methods("GET")
 	router.HandleFunc("/allCloseFriends/{userId}",handler.GetAllCloseFriends).Methods("GET")
 	router.HandleFunc("/allMuteFriends/{userId}",handler.GetAllMuteFriends).Methods("GET")

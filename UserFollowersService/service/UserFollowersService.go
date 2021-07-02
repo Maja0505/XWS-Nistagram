@@ -125,6 +125,81 @@ func (service *UserFollowersService) GetAllNotMutedFollowedUsersByUser(userId st
 
 }
 
+func (service *UserFollowersService) GetAllFollowsWhomUserIsCloseFriend(userId string)(*[]interface{}, error){
+
+	notMutedFollows,err := service.Repository.GetAllNotMutedFollowedUsersByUser(userId)
+	follows,err := service.Repository.GetAllFollowsWhomUserIsCloseFriend(userId)
+
+	var users []interface{}
+	
+
+	if err !=nil {
+		return nil,err
+	}
+
+	for _, notMutedFollowUserId := range *notMutedFollows {
+		for _, followUserId := range *follows {
+			if notMutedFollowUserId == followUserId{
+				users = append(users, notMutedFollowUserId)
+				break
+			}
+		}
+	}
+	return &users,nil
+
+}
+
+func (service *UserFollowersService) GetAllFollowsWhomUserIsNotCloseFriend(userId string)(*[]interface{}, error){
+
+	notMutedFollows,err := service.Repository.GetAllNotMutedFollowedUsersByUser(userId)
+	follows,err := service.Repository.GetAllFollowsWhomUserIsCloseFriend(userId)
+
+	var users []interface{}
+
+	if err !=nil {
+		return nil,err
+	}
+
+	for _, notMutedFollowUserId := range *notMutedFollows {
+		add := true
+		for _, followUserId := range *follows {
+			if notMutedFollowUserId == followUserId{
+				add = false
+				break
+			}
+		}
+		if add{
+			users = append(users,notMutedFollowUserId)
+		}
+	}
+	return &users,nil
+
+}
+
+func (service *UserFollowersService) GetAllFollowsWithoutFollowsWhomUserIsCloseFriend(userId string)(*[]interface{}, error){
+
+	notMutedFollows,err := service.Repository.GetAllNotMutedFollowedUsersByUser(userId)
+	follows,err := service.Repository.GetAllFollowsWhomUserIsCloseFriend(userId)
+
+	var users []interface{}
+
+
+	if err !=nil {
+		return nil,err
+	}
+
+	for _, notMutedFollowUserId := range *notMutedFollows {
+		for _, followUserId := range *follows {
+			if notMutedFollowUserId == followUserId{
+				users = append(users, notMutedFollowUserId)
+				break
+			}
+		}
+	}
+	return &users,nil
+
+}
+
 func (service *UserFollowersService) GetAllFollowRequests(userId string) (*[]dto.UserByUsernameDTO, error) {
 
 	users,err := service.Repository.GetAllFollowRequests(userId)
