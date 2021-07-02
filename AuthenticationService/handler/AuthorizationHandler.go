@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/casbin/casbin"
 	"github.com/casbin/casbin/persist"
+	fileadapter "github.com/casbin/casbin/persist/file-adapter"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ type AuthorizationHandler struct{
 	AuthenticationService *service.AuthenticationService
 }
 // Authorize determines if current subject has been authorized to take an action on an object.
-func (handler *AuthorizationHandler) Authorize(obj string, act string, adapter persist.Adapter) gin.HandlerFunc {
+func (handler *AuthorizationHandler) Authorize() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := handler.AuthenticationService.TokenValid(c.Request)
 		if err != nil {
@@ -29,8 +30,10 @@ func (handler *AuthorizationHandler) Authorize(obj string, act string, adapter p
 			return
 		}
 		// casbin enforces policy
-		ok, err := enforce(metadata.Role, obj, act, adapter)
-		//ok, err := enforce(val.(string), obj, act, adapter)
+		pwd, _ := os.Getwd()
+		adapter := fileadapter.NewAdapter(pwd+"\\model\\authorization\\policy.csv")
+		ok, err := enforce(metadata.Role, c.Request.URL.Path,c.Request.Method, adapter)
+
 		if err != nil {
 			log.Println(err)
 			c.AbortWithStatusJSON(500, "error occurred when authorizing user")
@@ -43,6 +46,8 @@ func (handler *AuthorizationHandler) Authorize(obj string, act string, adapter p
 		c.Next()
 	}
 }
+
+
 
 func enforce(sub string, obj string, act string, adapter persist.Adapter) (bool, error) {
 	pwd, _ := os.Getwd()

@@ -2,11 +2,16 @@ package main
 
 import (
 	"XWS-Nistagram/AuthenticationService/handler"
+	"XWS-Nistagram/AuthenticationService/model"
+	"XWS-Nistagram/AuthenticationService/model/authentication"
 	"XWS-Nistagram/AuthenticationService/repository"
 	"XWS-Nistagram/AuthenticationService/service"
-	"github.com/casbin/casbin/persist/file-adapter"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"os"
 )
@@ -27,8 +32,8 @@ func initDB() *redis.Client {
 	return client
 }
 
-func initRepo(database *redis.Client) *repository.AuthenticationRepository {
-	return &repository.AuthenticationRepository{Database: database}
+func initRepo(tokenDatabase *redis.Client,userDatabase *gorm.DB) *repository.AuthenticationRepository {
+	return &repository.AuthenticationRepository{TokenDatabase: tokenDatabase,UserDatabase:userDatabase}
 }
 
 func initService(repo *repository.AuthenticationRepository) *service.AuthenticationService {
@@ -44,15 +49,15 @@ func initAuthorizationHandler(authenticatonService *service.AuthenticationServic
 
 func handleFunc(authenticationHandler *handler.AuthenticationHandler,authorizationHandler *handler.AuthorizationHandler) {
 	router := gin.Default()
-	pwd, _ := os.Getwd()
-	fileAdapter := fileadapter.NewAdapter(pwd+"\\model\\authorization\\policy.csv")
+
 	router.POST("/login", authenticationHandler.Login)
 	authorized := router.Group("/")
 	authorized.Use(gin.Logger())
 	authorized.Use(gin.Recovery())
 	authorized.Use(authenticationHandler.TokenAuthMiddleware())
 	{
-		authorized.POST("/todo",  authorizationHandler.Authorize("resource", "write", fileAdapter), authenticationHandler.CreateTodo)
+		authorized.POST("/authorize", authorizationHandler.Authorize())
+		authorized.POST("/authorizeDemonstration", authorizationHandler.Authorize(), authenticationHandler.CreateTodo)
 		authorized.POST("/logout", authenticationHandler.Logout)
 		authorized.POST("/refreshToken", authenticationHandler.RefreshToken)
 	}
@@ -60,9 +65,33 @@ func handleFunc(authenticationHandler *handler.AuthenticationHandler,authorizati
 
 }
 
+
+
+func initPostgreDB() *gorm.DB{
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", "localhost", "postgres","root", "authdetailsdb", "5432")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	db.Migrator().DropTable(&model.User{})
+	db.AutoMigrate(&authentication.User{})
+	user := authentication.User{ID: 1,Username: "Pera",Password: "pera",Role:"Admin"}
+	user1 := authentication.User{ID: 2,Username: "Marko",Password: "marko",Role:"User"}
+	user2:= authentication.User{ID: 3,Username: "Dana",Password: "dana",Role:"Agent"}
+	db.Create(&user)
+	db.Create(&user1)
+	db.Create(&user2)
+
+	fmt.Println("Successfully connected!")
+	return db
+}
+
+
 func main(){
 	redis:=initDB()
-	repository:=initRepo(redis)
+	postgres:=initPostgreDB()
+	repository:=initRepo(redis,postgres)
 	service:=initService(repository)
 	authenticationHandler:=initAuthenticationHandler(service)
 	authorizationHandler:=initAuthorizationHandler(service)

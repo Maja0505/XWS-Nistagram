@@ -136,6 +136,15 @@ func (service *AuthenticationService) CreateAuth(id uint64, tokenDetails *authen
 func (service *AuthenticationService) DeleteAuth(accessUuid string) (int64,error) {
 	return service.Repository.DeleteAuth(accessUuid)
 }
+func (service *AuthenticationService)  CheckCredentials(username string,password string) (bool,bool) {
+	return service.Repository.CheckCredentials(username,password)
+}
+
+func (service *AuthenticationService)  GetByUsername(username string) (authentication.User) {
+	user,_:=service.Repository.GetByUsername(username)
+	return user
+}
+
 
 
 

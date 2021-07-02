@@ -1,6 +1,2 @@
-p, user, resource, read
-p, username, resource, read
-p, admin, resource, read
-p, admin, resource, write
-g, alice, admin
-g, bob, user
+p, User, /authorize, POST
+p, Agent, /authorize, POST

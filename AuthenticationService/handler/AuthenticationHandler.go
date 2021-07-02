@@ -15,21 +15,7 @@ type AuthenticationHandler struct{
 	Service *service.AuthenticationService
 }
 
-var user = authentication.User{
-	ID:            900,
-	Username: "username",
-	Password: "password",
-	Phone: "49123454322", //this is a random number
-	Role: "admin",
-}
 
-var user2 = authentication.User{
-	ID:            2,
-	Username: "username2",
-	Password: "password2",
-	Phone: "49123454322", //this is a random number
-	Role:"user",
-}
 
 func (handler *AuthenticationHandler) Login(c *gin.Context) {
 	var u authentication.User
@@ -37,9 +23,18 @@ func (handler *AuthenticationHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 		return
 	}
+
+	handler.Service.Repository.GetByUsername(u.Username)
 	//compare the user from the request, with the one we defined:
-	if user.Username != u.Username || user.Password != u.Password {
-		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
+	found,credentialsValid :=handler.Service.CheckCredentials(u.Username,u.Password)
+	if !found{
+		c.JSON(http.StatusUnauthorized, "User not found")
+		return
+	}
+	user:=handler.Service.GetByUsername(u.Username)
+	fmt.Println("uloga", user.Role)
+	if !credentialsValid{
+		c.JSON(http.StatusUnauthorized, "Please provide valid credentials")
 		return
 	}
 	tokenDetails, err := handler.Service.CreateToken(user.ID,user.Role)
@@ -47,7 +42,7 @@ func (handler *AuthenticationHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	saveErr := handler.Service.CreateAuth(user.ID, tokenDetails)
+	saveErr := handler.Service.CreateAuth(u.ID, tokenDetails)
 	if saveErr != nil {
 		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}
