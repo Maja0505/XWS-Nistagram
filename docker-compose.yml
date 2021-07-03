@@ -44,10 +44,14 @@ services:
       POST_SERVICE_HOST: cass
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      USER_FOLLOWERS_SERVICE_PORT: 8080
+      USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
     restart: on-failure
     tmpfs:
       - /var/run
       - /var/cache/post-documents/*
+      - /var/cache/Videos/*
+      - /var/cache/Images/*
     depends_on:
       - cass
     links: 

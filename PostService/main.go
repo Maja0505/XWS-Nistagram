@@ -164,8 +164,8 @@ func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
 
 	router.HandleFunc("/story/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/story/video-get/{videoId}", handler.GetVideo).Methods("GET")
-	router.HandleFunc("/story/image-upload/{imageId}", handler.UploadVideo).Methods("POST")
-	router.HandleFunc("/story/image-get/{imageId}", handler.GetVideo).Methods("GET")
+	router.HandleFunc("/story/image-upload/{imageId}", handler.UploadImage).Methods("POST")
+	router.HandleFunc("/story/image-get/{imageId}", handler.GetImage).Methods("GET")
 
 
 }
