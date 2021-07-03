@@ -22,10 +22,10 @@ var  client *redis.Client
 func initDB() *redis.Client {
 	dsn := os.Getenv("REDIS_DSN")
 	if len(dsn) == 0 {
-		dsn = "localhost:6379"
+		dsn = "redis:6379"
 	}
 	client = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "redis:6379",
 		Password: "",
 		DB: 0,
 	})
