@@ -1,2 +1,4 @@
 p, User, /authorize, POST
-p, Agent, /authorize, POST
+p,Agent,/authorizeDemonstration,POST
+p,Agent,/authorize,POST
+

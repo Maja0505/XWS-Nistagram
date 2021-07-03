@@ -51,12 +51,13 @@ func handleFunc(authenticationHandler *handler.AuthenticationHandler,authorizati
 	router := gin.Default()
 
 	router.POST("/login", authenticationHandler.Login)
+
 	authorized := router.Group("/")
 	authorized.Use(gin.Logger())
 	authorized.Use(gin.Recovery())
 	authorized.Use(authenticationHandler.TokenAuthMiddleware())
 	{
-		authorized.POST("/authorize", authorizationHandler.Authorize())
+		authorized.POST("/authorize",  authorizationHandler.Authorize())
 		authorized.POST("/authorizeDemonstration", authorizationHandler.Authorize(), authenticationHandler.CreateTodo)
 		authorized.POST("/logout", authenticationHandler.Logout)
 		authorized.POST("/refreshToken", authenticationHandler.RefreshToken)
