@@ -9,6 +9,7 @@ import PostDialog from "./PostDialog";
 import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const images = [
   {
@@ -103,14 +104,14 @@ const useStyles = makeStyles((theme) => ({
   },*/
 }));
 
-const Posts = ({ userForProfile,username}) => {
+const PostsForCollection = () => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
-  const [postID, setPostID] = useState({});
   const [posts, setPosts] = useState([]);
-
-
-  const id = localStorage.getItem("id");
+  const [postID, setPostID] = useState({});
+  const loggedUserId = localStorage.getItem("id");
+  const username = localStorage.getItem("username");
+  const { collection } = useParams();
 
   const handleClickImage = (post) => {
     setRedirectiton(true);
@@ -118,19 +119,27 @@ const Posts = ({ userForProfile,username}) => {
   };
 
   useEffect(() => {
-    axios
-      .get("/api/post/get-all-by-userid/" + userForProfile.ID)
-      .then((res) => {
-        if (res.data){
+    if (collection === "allPosts") {
+      axios
+        .get("/api/post/get-favourite-posts/" + loggedUserId)
+        .then((res) => {
           setPosts(res.data);
-        }else{
-          setPosts([]);
-        }
-      })
-      .catch((error) => {
-        setPosts([]);
-      });
-  }, [userForProfile]);
+        })
+        .catch((error) => {});
+    } else {
+      axios
+        .get(
+          "/api/post/get-posts-from-collection/" +
+            loggedUserId +
+            "/" +
+            collection
+        )
+        .then((res) => {
+          setPosts(res.data);
+        })
+        .catch((error) => {});
+    }
+  }, []);
 
   const getImage = (image) => {
     axios.get("/api/post/get-image/" + image).then((res) => {
@@ -139,28 +148,34 @@ const Posts = ({ userForProfile,username}) => {
   };
 
   return (
-    <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>}
-      <Grid container>
-        {posts !== null && posts !== undefined &&
-          posts.map((post) => (
-            <Grid
-              item
-              xs={4}
-              style={{ margin: "auto", marginTop: "2%" }}
-              key={post.ID}
-            >
-              <ButtonBase
-                focusRipple
+    <Grid container>
+      <Grid item xs={2}></Grid>
+      <Grid item xs={8}>
+        {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
+        <Grid container style={{ margin: "auto"}}>
+          {collection === "allPosts" && <h3>All Posts</h3>}
+          {collection !== "allPosts" && <h3>{collection}</h3>}
+        </Grid>
+        <Grid container>
+          {posts !== null &&
+            posts.map((post) => (
+              <Grid
+                item
+                xs={4}
+                style={{ margin: "auto"}}
                 key={post.ID}
-                className={classes.image}
-                focusVisibleClassName={classes.focusVisible}
-                style={{
-                  width: "95%",
-                }}
-                onClick={() => handleClickImage(post)}
               >
-                {post.Image.substring(
+                <ButtonBase
+                  focusRipple
+                  key={post.ID}
+                  className={classes.image}
+                  focusVisibleClassName={classes.focusVisible}
+                  style={{
+                    width: "95%",
+                  }}
+                  onClick={() => handleClickImage(post)}
+                >
+                 {post.Image.substring(
                   post.Image.length - 3,
                   post.Image.length
                 ) === "jpg" && (
@@ -181,66 +196,52 @@ const Posts = ({ userForProfile,username}) => {
                     />
                   </video>
                 )}
-
-                <span className={classes.imageBackdrop} />
-                <span className={classes.imageButton}>
-                  <Typography
-                    component="span"
-                    variant="subtitle1"
-                    color="inherit"
-                    className={classes.imageTitle}
-                    style={{ padding: 0, width: "50%" }}
-                    width="30%"
-                  >
-                    <Grid container>
-                      <Grid item xs={1}>
-                        <ThumbUpAltIcon></ThumbUpAltIcon>
+                  <span className={classes.imageBackdrop} />
+                  <span className={classes.imageButton}>
+                    <Typography
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle}
+                      style={{ padding: 0, width: "50%" }}
+                      width="30%"
+                    >
+                      <Grid container>
+                        <Grid item xs={1}>
+                          <ThumbUpAltIcon></ThumbUpAltIcon>
+                        </Grid>
+                        <Grid item xs={3}>
+                          {post.LikesCount}
+                        </Grid>
+                        <Grid item xs={1}>
+                          <ThumbDownIcon></ThumbDownIcon>
+                        </Grid>
+                        <Grid item xs={3}>
+                          {post.DislikesCount}
+                        </Grid>
+                        <Grid item xs={1}>
+                          <ModeCommentIcon></ModeCommentIcon>
+                        </Grid>
+                        <Grid item xs={3}>
+                          {post.CommentsCount}
+                        </Grid>
                       </Grid>
-                      <Grid item xs={3}>
-                        {post.LikesCount}
-                      </Grid>
-                      <Grid item xs={1}>
-                        <ThumbDownIcon></ThumbDownIcon>
-                      </Grid>
-                      <Grid item xs={3}>
-                        {post.DislikesCount}
-                      </Grid>
-                      <Grid item xs={1}>
-                        <ModeCommentIcon></ModeCommentIcon>
-                      </Grid>
-                      <Grid item xs={3}>
-                        {post.CommentsCount}
-                      </Grid>
-                    </Grid>
-                  </Typography>
-                </span>
-              </ButtonBase>
-            </Grid>
-          ))}
-        {(posts === null || posts === undefined || posts.length === 0) &&
-          <Grid container>
-              <Grid item xs={3}></Grid>
-              <Grid item xs={6}>
-                <Typography variant="h5" color="textSecondary">
-                No Posts Yet
-              </Typography>
-               </Grid>
-              <Grid item xs={3}></Grid>
-
-          </Grid>
-
-        
-        
-        }
-        {images.length % 3 === 1 && (
-          <>
-            <Grid item xs={4} /> <Grid item xs={4} />
-          </>
-        )}
-        {images.length % 3 === 2 && <Grid item xs={4} />}
+                    </Typography>
+                  </span>
+                </ButtonBase>
+              </Grid>
+            ))}
+          {images.length % 3 === 1 && (
+            <>
+              <Grid item xs={4} /> <Grid item xs={4} />
+            </>
+          )}
+          {images.length % 3 === 2 && <Grid item xs={4} />}
+        </Grid>
       </Grid>
-    </div>
+      <Grid item xs={2}></Grid>
+    </Grid>
   );
 };
 
-export default Posts;
+export default PostsForCollection;

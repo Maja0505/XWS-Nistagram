@@ -4,70 +4,77 @@ import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import DialogForListBlockUser from "./DialogForListBlockUser";
+import DialogForListMuteUser from "./DialogForListMuteUser";
 
-
-const ProfilePrivacy = ({user}) => {
+const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
     const username = localStorage.getItem("username");
-    const [accountPrivacy,setAccountPrivacy] = useState(false)
-    const [messageRequest,setMessageRequest] = useState(false)
-    const [allowTags,setAllowTags] = useState(false)
-    const [load, setLoad] = useState(false)
+    const loggedUserId = localStorage.getItem("id");
+
+    const [openDialogForListBlockUsers, setOpenDialogForListBlockUsers] = useState(false)
+    const [openDialogForListMuteUsers, setOpenDialogForListMuteUsers] = useState(false)
+
+    const handleClickViewAllBlock = () => {
+      setOpenDialogForListBlockUsers(true)
+    }
+
+    const handleClickViewAllMute = () => {
+      setOpenDialogForListMuteUsers(true)
+    }
 
     useEffect(() => {
-      console.log(user)
-      if(user.ProfileSettings !== undefined) {
-        setAccountPrivacy(user.ProfileSettings.Public)
-        setMessageRequest(user.ProfileSettings.MessageRequest)
-        setAllowTags(user.ProfileSettings.AllowTags)
-        setLoad(true)
-      }
-      }, [user]);
+    }, [profileSettings.Public,profileSettings.MessageRequest,profileSettings.AllowTags])
 
       const HandleOnChangeAccountPrivacy = () => {
-          if(accountPrivacy){
+          if(profileSettings.Public){
+            console.log(profileSettings.Public)
               axios.put("/api/user/" + username + "/public-profile/false" )
                 .then((res)=> {
-                    setAccountPrivacy(false)
+                    setProfileSettings({...profileSettings, Public:false})
                 })
           }else{
+            console.log(profileSettings.Public)
+
             axios.put("/api/user/" + username + "/public-profile/true" )
             .then((res)=> {
-                setAccountPrivacy(true)
+              setProfileSettings({...profileSettings, Public:true})
             })
           }
+
+          
       }
 
       const HandleOnChangeMessageRequest = () => {
-        if(messageRequest){
+        if(profileSettings.MessageRequest){
             axios.put("/api/user/" + username + "/message-request/false" )
               .then((res)=> {
-                  setMessageRequest(false)
+                setProfileSettings({...profileSettings, MessageRequest:false})
               })
         }else{
           axios.put("/api/user/" + username + "/message-request/true" )
           .then((res)=> {
-            setMessageRequest(true)
+            setProfileSettings({...profileSettings, MessageRequest:true})
           })
         }
     }
 
     const HandleOnChangeAllowTags = () => {
-        if(allowTags){
+        if(profileSettings.AllowTags){
             axios.put("/api/user/" + username + "/allow-tags/false" )
               .then((res)=> {
-                  setAllowTags(false)
+                setProfileSettings({...profileSettings, AllowTags:false})
               })
         }else{
           axios.put("/api/user/" + username + "/allow-tags/true" )
           .then((res)=> {
-            setAllowTags(true)
+            setProfileSettings({...profileSettings, AllowTags:true})
           })
         }
     }
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
       <Grid item xs={1}></Grid>
-     {load && <Grid container item xs={10}>
+     {load && profileSettings !== undefined && <Grid container item xs={10}>
         <Grid style={{ height: "30%", width: "100%" }}>
           <Grid style={{ height: "30%", width: "100%" }}>
             <p style={{ fontSize: 25, textAlign: "left" }}>Account Privacy</p>
@@ -75,7 +82,7 @@ const ProfilePrivacy = ({user}) => {
           <Grid style={{ height: "30%", width: "100%" }}>
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox name="checkedF" checked={accountPrivacy} onChange={HandleOnChangeAccountPrivacy} />}
+                control={<Checkbox name="checkedF" checked={profileSettings.Public === true} onChange={HandleOnChangeAccountPrivacy} />}
                 label="Private Account"
                 style={{ fontSize: 15, fontWeight: "bold" }}
               />
@@ -97,7 +104,7 @@ const ProfilePrivacy = ({user}) => {
           <Grid style={{ height: "30%", width: "100%" }}>
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox name="checkedF" checked={messageRequest} onChange={HandleOnChangeMessageRequest} />}
+                control={<Checkbox name="checkedF" checked={profileSettings.MessageRequest === true} onChange={HandleOnChangeMessageRequest} />}
                 label="Allow message request"
                 style={{ fontSize: 15, fontWeight: "bold" }}
               />
@@ -117,7 +124,7 @@ const ProfilePrivacy = ({user}) => {
           <Grid style={{ height: "30%", width: "100%" }}>
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox name="checkedF" checked={allowTags} onChange={HandleOnChangeAllowTags}/>}
+                control={<Checkbox name="checkedF" checked={profileSettings.AllowTags === true} onChange={HandleOnChangeAllowTags}/>}
                 label="Allow tags"
                 style={{ fontSize: 15, fontWeight: "bold" }}
               />
@@ -130,8 +137,28 @@ const ProfilePrivacy = ({user}) => {
           </Grid>
           <Divider />
         </Grid>
+        <Grid style={{ height: "30%", width: "100%" }}>
+          <Grid style={{ height: "30%", width: "100%" }}>
+            <p style={{ fontSize: 25, textAlign: "left" }}>Connections</p>
+          </Grid>
+          <Grid container style={{ height: "30%", width: "100%" }}>
+            <Grid container style={{ height: "50%", width: "100%" }}>
+              <Grid item xs={3}>All blocked users</Grid>
+              <Grid item xs={3}><Button onClick={handleClickViewAllBlock}>View all</Button></Grid>
+            </Grid>
+            <Grid container style={{ height: "50%", width: "100%" }}>
+              <Grid item xs={3}>All muted users</Grid>
+              <Grid item xs={3}><Button onClick={handleClickViewAllMute}>View all</Button></Grid>
+            </Grid>
+
+          </Grid>
+          <Divider />
+        </Grid>
       </Grid>}
       <Grid item xs={1}></Grid>
+      {openDialogForListBlockUsers && <DialogForListBlockUser loggedUserId={loggedUserId} open={openDialogForListBlockUsers} setOpen={setOpenDialogForListBlockUsers}></DialogForListBlockUser>}
+      {openDialogForListMuteUsers && <DialogForListMuteUser loggedUserId={loggedUserId} open={openDialogForListMuteUsers} setOpen={setOpenDialogForListMuteUsers}></DialogForListMuteUser>}
+
     </Grid>
   );
 };

@@ -47,18 +47,23 @@ const Settings = () => {
   const [user, setUser] = useState({});
   const username = localStorage.getItem("username");
 
-  useEffect(() => {
-    axios.get("/api/user/" + username).then((res) => {
-      setUser(res.data);
-    });
-  }, [username]);
-
   const [tabs] = useState(tabList);
   const [value, setValue] = useState(0);
 
 
   const [open, setOpen] = useState(false)
   const [message,setMessage] = useState('')
+
+  const [selectedValue, setSelectedValue] = useState("male");
+  const [load, setLoad] = useState(false);
+  const [userCopy, setUserCopy] = useState({});
+
+  const [accountPrivacy,setAccountPrivacy] = useState(false)
+  const [messageRequest,setMessageRequest] = useState(false)
+  const [allowTags,setAllowTags] = useState(false)
+  const [profileSettings,setProfileSettings] = useState({})
+  const [pushNotification, setPushNotification] = useState({})
+
 
   const handleClick = () => {
     setOpen(true);
@@ -79,13 +84,13 @@ const Settings = () => {
 
 const TabChanged = () => {
   if (value === 0) {
-    return <ProfilePage user={user} setUser={setUser}></ProfilePage>
+    return <ProfilePage user={user} setUser={setUser} selectedValue={selectedValue} setSelectedValue={setSelectedValue} userCopy={userCopy} setUserCopy={setUserCopy} load={load}></ProfilePage>
   }else if(value === 1){
     return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
   }else if(value === 2){
-    return <ProfilePrivacy user={user}></ProfilePrivacy>
+    return <ProfilePrivacy profileSettings={profileSettings} setProfileSettings={setProfileSettings} load={load}></ProfilePrivacy>
   }else if(value === 3){
-    return <PushNotificationPage user={user}></PushNotificationPage>
+    return <PushNotificationPage pushNotification={pushNotification} setPushNotification={setPushNotification} load={load}></PushNotificationPage>
   }else if(value === 4){
     return <VerificationRequest user={user} setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
   }
@@ -105,6 +110,7 @@ const handleUrlForTab = (value) => {
     route = '/accounts/verification/'
   }
   history.push(route)
+  
 }
 
 useEffect(() => {
@@ -121,6 +127,16 @@ useEffect(() => {
   }else if(urls[1] === '/verification/'){
     setValue(4)
   }
+  axios.get("/api/user/" + username).then((res) => {
+    setUser(res.data);
+    res.data.Gender === 0 ? setSelectedValue("male") : setSelectedValue("female");
+    setLoad(true);
+    setUserCopy(res.data);
+
+    setProfileSettings(res.data.ProfileSettings)
+    setPushNotification(res.data.NotificationSettings)
+
+  });
 
 }, []);
 

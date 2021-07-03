@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type PostService struct {
@@ -85,7 +86,7 @@ func (service *PostService) RemovePostFromFavourites(favourite *DTO.FavouriteDTO
 }
 
 func (service *PostService) RemovePostFromCollection(favourite *DTO.FavouriteDTO) error {
-	err := service.Repo.RemovePostFromFavourites(favourite)
+	err := service.Repo.RemovePostFromCollection(favourite)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -355,11 +356,82 @@ func (service *PostService) ReportContent(reportedContentDTO *DTO.ReportedConten
 	return nil
 }
 
-/*func (service *PostService) GetAllLikesForPost(postid string) error {
-	err := service.Repo.GetAllLikesForPost(postid)
+func (service *PostService) GetCollectionsForUser(userid string) (*[]string,error) {
+	collections, err := service.Repo.GetCollectionsForUser(userid)
+
 	if err != nil{
 		fmt.Println(err)
-		return  err
+		return  nil, err
 	}
-	return nil
-}*/
+
+	return collections, err
+}
+
+func (service *PostService) CheckIfPostExistsInFavourites(userid string, postid gocql.UUID) bool {
+	exist := service.Repo.CheckIfPostIsInFavourites(userid,postid)
+	return exist
+}
+
+func (service *PostService) GetAllCollectionsForPostByUser(userid string, postuuid gocql.UUID) (*[]string,error) {
+	collections, err := service.Repo.GetAllCollectionsForPostByUser(userid,postuuid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return collections, err
+}
+
+func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
+
+	var postsByAllNotMutedFollowedUsers []Model.Post
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allNotMutedFollows/" + userid)
+
+	resp, err := http.Get(reqUrl)
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var notMutedFollowedUsers []string
+	err = json.Unmarshal(body, &notMutedFollowedUsers)
+	if err != nil{
+		return nil, err
+	}
+
+	for _,userId := range notMutedFollowedUsers {
+
+		postsByOneUser,err := service.Repo.FindPostsByUserId(userId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+	}
+
+	var feedSlice FeedSlice
+	feedSlice = postsByAllNotMutedFollowedUsers
+	sort.Sort(feedSlice)
+	postsByAllNotMutedFollowedUsers = feedSlice
+
+	return &postsByAllNotMutedFollowedUsers,nil
+
+}
+
+
+//for sorting post feeds by created time
+type FeedSlice []Model.Post
+
+func (f FeedSlice) Len() int {
+	return len(f)
+}
+
+func (f FeedSlice) Less(i, j int) bool {
+	return f[i].CreatedAt.After(f[j].CreatedAt)
+}
+
+func (f FeedSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}

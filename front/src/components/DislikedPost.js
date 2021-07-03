@@ -124,12 +124,27 @@ const LikedPost = () => {
                 }}
                 onClick={() => handleClickImage(image)}
               >
-                <span
-                  className={classes.imageSrc}
-                  style={{
-                    backgroundImage: `url("http://localhost:8080/api/post/get-image/${image.Image}") `,
-                  }}
-                />
+                      {image.Image.substring(
+                  image.Image.length - 3,
+                  image.Image.length
+                ) === "jpg" && (
+                  <img
+                    width="100%"
+                    height="100%"
+                    src={`http://localhost:8080/api/post/get-image/${image.Image}`}
+                  />
+                )}
+                {image.Image.substring(
+                  image.Image.length - 3,
+                  image.Image.length
+                ) !== "jpg" && (
+                  <video width="100%" height="100%" controls>
+                    <source
+                      src={`http://localhost:8080/api/post/video-get/${image.Image}`}
+                      type="video/mp4"
+                    />
+                  </video>
+                )}
                 <span className={classes.imageBackdrop} />
                 <span className={classes.imageButton}>
                   <Typography

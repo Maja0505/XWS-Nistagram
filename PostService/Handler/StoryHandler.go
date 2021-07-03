@@ -140,6 +140,27 @@ func (handler *StoryHandler) GetAllHighlightsStoriesByUser(w http.ResponseWriter
 
 }
 
+func (handler *StoryHandler) GetAllFollowsWithStories(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllFollowsWithStories(userId)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
 func (handler *StoryHandler) UploadVideo(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	imagePath := vars["videoId"]

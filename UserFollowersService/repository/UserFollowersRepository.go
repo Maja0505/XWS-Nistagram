@@ -217,6 +217,43 @@ func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) 
 	return &followedUsers,nil
 }
 
+func (repository *UserFollowersRepository) GetAllNotMutedFollowedUsersByUser(userId string) (*[]interface{}, error){
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u1.userId = $userId and r.mute=FALSE RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
+
+func (repository *UserFollowersRepository) GetAllFollowsWhomUserIsCloseFriend(userId string) (*[]interface{}, error){
+	var follows []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u2.userId = $userId and r.close_friend=TRUE RETURN u1.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		follows = append(follows, user)
+	}
+
+	return &follows,nil
+}
 
 func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}
@@ -322,4 +359,39 @@ func (repository *UserFollowersRepository) DeleteAll(){
 		fmt.Println(err)
 		return
 	}
+}
+
+func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId string) (*interface{}, error ){
+
+	result,err := repository.Session.Run("match(:User{userId:$userId1}) -[r:follow]->(:User{userId:$userId2}) return r.mute", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : mutedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
+}
+
+func (repository *UserFollowersRepository) CheckClosed(userId string, closedUserId string) (*interface{}, error) {
+	result,err := repository.Session.Run("match(:User{userId:$userId1}) -[r:follow]->(:User{userId:$userId2}) return r.close_friend", map[string]interface{}{
+		"userId1" : userId,
+		"userId2" : closedUserId,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	if result.Next(){
+		return &result.Record().Values[0], nil
+	}
+
+	return nil, nil
 }
