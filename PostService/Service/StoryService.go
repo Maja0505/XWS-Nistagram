@@ -4,6 +4,7 @@ import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Mapper"
 	"XWS-Nistagram/PostService/Repository"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gocql/gocql"
@@ -74,7 +75,7 @@ func (service *StoryService) GetAllHighlightsStoriesByUser(userId string) (*[]DT
 	return storiesDtos, nil
 }
 
-func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]string,error){
+func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]DTO.UserByUsernameDTO,error){
 
 	var followsWithStories []string
 
@@ -116,6 +117,38 @@ func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]string,
 		}
 	}
 
-	return &followsWithStories,nil
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(&followsWithStories)
 
+	if err != nil{
+		return nil, err
+	}
+
+	return usernamesDTOList,nil
+
+
+}
+
+func GetUsernamesByUserIdsFromUserService (users *[]string) (*[]DTO.UserByUsernameDTO,error){
+
+	reqUrl := fmt.Sprintf("http://" +os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT")+ "/convert-user-ids")
+
+	type UserIdsDTO struct {
+		UserIds []string
+	}
+
+	userIdsDto := UserIdsDTO{}
+	userIdsDto.UserIds = *users
+	jsonUserids,_ := json.Marshal(userIdsDto)
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
 }
