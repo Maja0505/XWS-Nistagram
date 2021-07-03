@@ -59,7 +59,7 @@ func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Mo
 	var stories []Model.Story
 	m := map[string]interface{}{}
 	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and expiredat > ?  allow filtering;"
+	query := "select * from postkeyspace.stories where userid=? and for_close_friends=False and expiredat > ?  allow filtering;"
 	iter := repo.Session.Query(query,userId,now).Iter()
 
 	for iter.MapScan(m){
@@ -83,7 +83,7 @@ func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (
 	var stories []Model.Story
 	m := map[string]interface{}{}
 	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and for_close_friends=True  and expiredat > ?  allow filtering;"
+	query := "select * from postkeyspace.stories where userid=? and expiredat > ?  allow filtering;"
 	iter := repo.Session.Query(query,userId,now).Iter()
 
 	for iter.MapScan(m){
@@ -124,6 +124,26 @@ func (repo *StoryRepository) GetAllHighlightsStoriesByUser(userId string) (*[]Mo
 
 	return &stories,nil
 
+}
+
+func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStory(userId string) bool{
+	now := time.Now()
+	query := "select * from postkeyspace.stories where userid=? and for_close_friends=False and expiredat > ? allow filtering;"
+	iter := repo.Session.Query(query,userId,now).Iter()
+	for iter.MapScan(map[string]interface{}{}){
+		return true
+	}
+	return false
+}
+
+func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStoryForCloseFriends(userId string) bool{
+	now := time.Now()
+	query := "select * from postkeyspace.stories where userid=? and expiredat > ? allow filtering;;"
+	iter := repo.Session.Query(query,userId,now).Iter()
+	for iter.MapScan(map[string]interface{}{}){
+		return true
+	}
+	return false
 }
 
 
