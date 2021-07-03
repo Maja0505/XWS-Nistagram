@@ -3,6 +3,7 @@ package Repository
 import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
+	_ "debug/elf"
 	"fmt"
 	"github.com/gocql/gocql"
 	"image"
@@ -16,7 +17,7 @@ type PostRepository struct {
 }
 
 func (repo *PostRepository) CreateTables() error{
-	/*if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
 		fmt.Println("Error while dropping tables!")
 		fmt.Println(err)
 		return err
@@ -25,7 +26,7 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println("Error while dropping tables!")
 		fmt.Println(err)
 		return err
-	}
+	}/*
 	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.comments;").Exec(); err != nil {
 		fmt.Println("Error while dropping tables!")
 		fmt.Println(err)
@@ -60,18 +61,18 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println("Error while dropping tables!")
 		fmt.Println(err)
 		return err
-	}
+	}*/
 
-	*/if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, media counter, PRIMARY KEY(postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
-	}
+	}/*
 	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
@@ -106,7 +107,7 @@ func (repo *PostRepository) CreateTables() error{
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
-	}
+	}*/
 
 	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.reported_contents(id uuid, description text, contentid text, userid text, adminid text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
@@ -119,13 +120,22 @@ func (repo *PostRepository) CreateTables() error{
 }
 
 func (repo *PostRepository) Create(post *Model.Post) error {
+	var isAlbum = false
+	if len(post.Media) == 1{
+		isAlbum = false
+	}else{
+		isAlbum = true
+	}
 	ID, _ := gocql.RandomUUID()
-	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, image, userid) VALUES(?, ?, ?, ?, ?)",
-		ID, post.CreatedAt, post.Description, post.Image, post.UserID).Exec(); err != nil {
+	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, media, userid, album) VALUES(?, ?, ?, ?, ?, ?)",
+		ID, time.Now(), post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return err
 	}
+	fmt.Println(post.ID)
+
+	repo.SetMediaCounter(int64(len(post.Media)), ID)
 	fmt.Println("Successfully created post!!")
 	return nil
 }
@@ -133,7 +143,7 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 func (repo *PostRepository) AddComment(comment *Model.Comment) error {
 	ID, _ := gocql.RandomUUID()
 	if err := repo.Session.Query("INSERT INTO postkeyspace.comments(id, postid, userid, createdat, content) VALUES(?, ?, ?, ?, ?)",
-		ID, comment.PostID, comment.UserID, comment.CreatedAt, comment.Content).Exec(); err != nil {
+		ID, comment.PostID, comment.UserID, time.Now(), comment.Content).Exec(); err != nil {
 		fmt.Println("Error while creating comment!")
 		fmt.Println(err)
 		return err
@@ -377,6 +387,18 @@ func (repo *PostRepository) DecrementComments(comment *Model.Comment) error {
 	return nil
 }
 
+func (repo *PostRepository) SetMediaCounter(counter int64, uuid gocql.UUID) error{
+	for i:=0; i<int(counter); i++{
+		if err := repo.Session.Query("UPDATE postkeyspace.postcounters SET media = media + 1 WHERE postid = ?",
+			uuid).Exec(); err != nil {
+			fmt.Println("Error updating media counter!")
+			fmt.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
 func (repo *PostRepository) CheckIfLikeExists(like *Model.Like) bool {
 	var likes int
 	repo.Session.Query("SELECT COUNT(*) FROM postkeyspace.likes WHERE postid = ? AND userid = ? LIMIT 1",
@@ -447,15 +469,18 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 			var a int64 = m2["likes"].(int64)
 			var b int64 = m2["dislikes"].(int64)
 			var c int64 = m2["comments"].(int64)
+			var d int64 = m2["media"].(int64)
 			var post = Model.Post{
 				ID:        m["id"].(gocql.UUID),
 				CreatedAt: m["createdat"].(time.Time),
 				Description:  m["description"].(string),
 				UserID:       m["userid"].(string),
-				Image: m["image"].(string),
+				Media: m["media"].([]string),
+				Album: m["album"].(bool),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
+				MediaCount: d,
 			}
 			posts = append(posts, post)
 			m = map[string]interface{}{}
@@ -466,7 +491,8 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 				CreatedAt:   m["createdat"].(time.Time),
 				Description: m["description"].(string),
 				UserID:      m["userid"].(string),
-				Image:       m["image"].(string),
+				Media:       m["media"].([]string),
+				Album: 		 m["album"].(bool),
 			}
 
 			posts = append(posts, post)
@@ -497,15 +523,18 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 			var a int64 = m2["likes"].(int64)
 			var b int64 = m2["dislikes"].(int64)
 			var c int64 = m2["comments"].(int64)
+			var d int64 = m2["media"].(int64)
 			var post = Model.Post{
 				ID:        m["id"].(gocql.UUID),
 				CreatedAt: m["createdat"].(time.Time),
 				Description:  m["description"].(string),
 				UserID:       m["userid"].(string),
-				Image: m["image"].(string),
+				Media: m["media"].([]string),
+				Album: m["album"].(bool),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
+				MediaCount: d,
 			}
 			posts = append(posts, post)
 			m = map[string]interface{}{}
@@ -516,7 +545,8 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 				CreatedAt:   m["createdat"].(time.Time),
 				Description: m["description"].(string),
 				UserID:      m["userid"].(string),
-				Image:       m["image"].(string),
+				Media:       m["media"].([]string),
+				Album: 		 m["album"].(bool),
 			}
 			posts = append(posts, post)
 			m = map[string]interface{}{}
