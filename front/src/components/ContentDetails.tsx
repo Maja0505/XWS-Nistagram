@@ -171,8 +171,13 @@ export default function ContentDetails() {
     </Popper>
   );
 
-  const showStoryBar=(  <div>
-                          <Grid style={{ backgroundColor: "white",width:"70%",height: "5%",overflowX: "auto",display:"flex" ,margin:"auto",marginTop:"2%" }} >
+  const showStoryBar=(  <div> 
+                          <Grid style={{ backgroundColor: "white",overflowX: "auto",display:"flex" ,margin:"auto", border:"0.5px solid",borderColor: "#b9b9b9",}} >
+                          <div>
+                              <div   style={{width:"20px"}}>
+                              </div>
+                              
+                            </div>
                             <div>
                               <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
                                 <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} />
