@@ -13,7 +13,6 @@ import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
-import Stories from "./components/Stories";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
