@@ -176,6 +176,7 @@ func main(){
 	postRepo := initPostRepo(Session)
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
+	//postRepo.CreateTables()
 
 
 	storyRepo := initStoryRepo(Session)
