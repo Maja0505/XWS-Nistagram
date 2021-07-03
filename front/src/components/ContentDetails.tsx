@@ -173,13 +173,20 @@ export default function ContentDetails() {
 
   const showStoryBar=(  <div>
                           <Grid style={{ backgroundColor: "white",width:"70%",height: "5%",overflowX: "auto",display:"flex" ,margin:"auto",marginTop:"2%" }} >
+                            <div>
                               <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
-                                <img src={myPic} />
+                                <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} />
                               </div>
+                              {"My story"}
+                            </div>
                               {dropDowMenuForPost}
-                            {users.map((user, index) => (
-                              <div  onClick={ () => openStories(user)} className="cover-image-box">
-                                <img src={avatar} onClick={ () => storyClicked(user)} />
+                            {users.map((user:any, index) => (
+                              <div>
+                              <div  onClick={ () => openStories(user.IdString)} className="cover-image-box">
+                                <img src= {"http://localhost:8080/api/user/get-image/" + user.IdString + ".jpg"} />
+                               
+                              </div>
+                              {user.Username}
                               </div>
                             ))}
                           </Grid>

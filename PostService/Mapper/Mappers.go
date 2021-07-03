@@ -3,6 +3,7 @@ package Mapper
 import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
+	"math"
 	"strconv"
 	"time"
 )
@@ -82,9 +83,9 @@ func calculateMinutes(createdAt time.Time) string {
 	now := time.Now()
 	duration := now.Minute() - createdAt.Minute()
 	if duration/60 >= 1{
-		stringDuration = strconv.Itoa(duration/60) + "h"
+		stringDuration = strconv.Itoa(int(math.Abs(float64(duration/60)))) + "h"
 	}else{
-		stringDuration = strconv.Itoa(duration) + "min"
+		stringDuration = strconv.Itoa(int(math.Abs(float64(duration)))) + "min"
 	}
 
 	return stringDuration
