@@ -49,6 +49,8 @@ const AddStoryDialog = ({open,setOpen}) => {
     const [close,setClose] = useState(false);
     const [highlights,setHighLights] = useState(false)
     const loggedUserId = localStorage.getItem("id");
+    const [isVideo, setIsVideo] = useState(false);
+
 
     
     const HandleOnChangeCloseFriends = () => {
@@ -74,23 +76,53 @@ const AddStoryDialog = ({open,setOpen}) => {
     };
 
     const HandleClickOnSend = () => {
-        var story = {
-            UserID: loggedUserId,
-            Image: "" + loggedUserId + "-" + uuid(),
-            Highlights: highlights,
-            ForCloseFriends: close,
-        };
-
-        axios.post("/api/post/story/image-upload/" + story.Image)
-            .then((res) => 
-            {
+        if(!isVideo){
+            var imageString = "" + loggedUserId + "-" + uuid()
+            var story = {
+                UserID: loggedUserId,
+                Image: imageString + ".jpg",
+                Highlights: highlights,
+                ForCloseFriends: close,
+            };
+    
+            axios.post("/api/post/story/image-upload/" + imageString,image,
+             {
+                headers: { "Content-Type": "multipart/form-data" },
+              })
+    
+                .then((res) => 
+                {
+                    axios.post("/api/post/story/create", story)
+                        .then((res)=> 
+                        {
+                            console.log("uspesno")
+                            setOpen(false)
+                        })
+                })
+     
+        }else{
+            var imageString = "" + loggedUserId + "-" + uuid()
+            var story = {
+                UserID: loggedUserId,
+                Image: imageString + ".mp4",
+                Highlights: highlights,
+                ForCloseFriends: close,
+            };
+    
+            axios.post(
+                "/api/post/story/video-upload/" + imageString,image,
+                
+                {
+                  headers: { "Content-Type": "multipart/form-data" },
+                }
+              ).then((res) => {
                 axios.post("/api/post/story/create", story)
-                    .then((res)=> 
-                    {
-                        console.log("uspesno")
-                    })
-            })
- 
+                .then((res)=> 
+                {
+                    console.log("uspesno")
+                })
+              })
+            }
       };
     
 
@@ -98,6 +130,11 @@ const AddStoryDialog = ({open,setOpen}) => {
         var formData = new FormData();
         console.log(event.target.files[0]);
         var file = event.target.files[0];
+        if (event.target.files[0].type === "video/mp4") {
+            setIsVideo(true);
+          } else {
+            setIsVideo(false);
+          }
         formData.append("myFile", file);
         const reader = new FileReader();
         var url = reader.readAsDataURL(file);
@@ -184,7 +221,12 @@ const AddStoryDialog = ({open,setOpen}) => {
                <Grid item xs={1}></Grid>
 
                    <Grid item xs={10}> 
-                   <img width="100%"  src={selectedFile} />
+                   {!isVideo && <img width="100%" src={selectedFile} />}
+                    {isVideo && (
+                        <video width="100%" controls>
+                        <source src={selectedFile} type="video/mp4" />
+                        </video>
+                    )}
                     </Grid>
                    <Grid item xs={1}></Grid>
 

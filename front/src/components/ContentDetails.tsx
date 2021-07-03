@@ -19,68 +19,37 @@ import {
   MenuList,
   } from "@material-ui/core";
   import AddStory from "../components/AddStoryDialog"
-
+import axios from "axios";
+import { User as UserModel } from "../models/User";
 
 
 
 
 
 export default function ContentDetails() {
-  const users = [
-    {
-      username:"Jeremy"
-    },
-    {
-      username:"Riko"
-    }
-  ]
+  const [username,setUsername] =  useState("")
+  const [users,setUsers] = useState([])
+  const loggedUserId = localStorage.getItem("id");
+
+  useEffect(() => {
+    axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId)
+    .then((res) => {
+      if(res.data){
+        setUsers(res.data)
+      }
+    })
+   axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
+    .then((res) => {
+      console.log(res.data)
+      setStories(res.data)
+    })
+  }, [])
   const [open, setOpen] = useState(false);
   const [openDialog,setOpenDialog] = useState(false)
 
   const anchorRef = useRef(null);
   const [myStories,setMyStories] = useState([])
-  const [stories,setStories] = useState([
-    {
-      "profile_name": "Jeremy",
-      "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-      "duration": 7,
-      "type":"video",
-      "subheading": 'Posted 30m ago',
-			"profile_image": 'https://picsum.photos/100/100',
-    },
-    {
-      "profile_name": "Jeremy",
-      "video_url": 'https://picsum.photos/432/768',
-      "duration": 7,
-      "type":"image",
-      "subheading": 'Posted 30m ago',
-			"profile_image": 'https://picsum.photos/100/100',
-    },
-    {
-      "profile_name": "Jeremy",
-      "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-      "duration": 7,
-      "type":"video",
-      "subheading": 'Posted 30m ago',
-			"profile_image": 'https://picsum.photos/100/100',
-    },
-    {
-      "profile_name": "Jeremy",
-      "video_url": "https://picsum.photos/432/768",
-      "duration": 7,
-      "type":"image",
-      "subheading": 'Posted 30m ago',
-			"profile_image": 'https://picsum.photos/100/100',
-    },
-    {
-      "profile_name": "Jeremy",
-      "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-      "duration": 7,
-      "type":"video",
-      "subheading": 'Posted 30m ago',
-			"profile_image": 'https://picsum.photos/100/100',
-    }
-  ])
+  const [stories,setStories] = useState([])
 
   const storyClicked = (story:any) => {
     console.log(story)
@@ -92,72 +61,30 @@ export default function ContentDetails() {
 
 
   const openStories = (username:any) => {
-    if(username === "Jeremy"){
-      setStories(
-        [
-          {
-            "profile_name": "Jeremy",
-            "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-            "duration": 7,
-            "type":"video",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          }
-        ]
-      )
-      setStoriesOpen(true);
-    }
-
-    if(username === "Riko"){
-      setStories(
-        [
-          {
-            "profile_name": "Riko",
-            "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-            "duration": 7,
-            "type":"video",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          },
-          {
-            "profile_name": "Riko",
-            "video_url": 'https://picsum.photos/432/768',
-            "duration": 7,
-            "type":"image",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          },
-          {
-            "profile_name": "Riko",
-            "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-            "duration": 7,
-            "type":"video",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          },
-          {
-            "profile_name": "Riko",
-            "video_url": "https://picsum.photos/432/768",
-            "duration": 7,
-            "type":"image",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          },
-          {
-            "profile_name": "Riko",
-            "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-            "duration": 7,
-            "type":"video",
-            "subheading": 'Posted 30m ago',
-            "profile_image": 'https://picsum.photos/100/100',
-          }
-        ]
-      )
-      setStoriesOpen(true);
-
-    }
-    if(username === "MyStory"){
+   
+    setUsername(username)
+    
+    if(username === loggedUserId){
       setOpen((prevOpen) => !prevOpen);
+ 
+    }else{
+      axios.get("/api/user-follow/checkClosed/"+loggedUserId+"/" + username)
+        .then((res) => {
+          if(res.data){
+            axios.get("/story/all-for-close-friends/" + username)
+              .then((res) => {
+                setStories(res.data)
+                setStoriesOpen(true)
+              })
+          }else{
+            axios.get("/api/post/story/all-not-expired/" + username)
+            .then((res) => {
+              setStories(res.data)
+              setStoriesOpen(true)
+
+            })
+          }
+        })
     }
   };
 
@@ -182,52 +109,14 @@ export default function ContentDetails() {
   };
 
   const handleClickOpenMyStories = () => {
-    setStories(
-      [
-        {
-          "profile_name": "My story",
-          "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-          "duration": 7,
-          "type":"video",
-          "subheading": 'Posted 30m ago',
-          "profile_image": 'https://picsum.photos/100/100',
-        },
-        {
-          "profile_name": "My story",
-          "video_url": 'https://picsum.photos/432/768',
-          "duration": 7,
-          "type":"image",
-          "subheading": 'Posted 30m ago',
-          "profile_image": 'https://picsum.photos/100/100',
-        },
-        {
-          "profile_name": "My story",
-          "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-          "duration": 7,
-          "type":"video",
-          "subheading": 'Posted 30m ago',
-          "profile_image": 'https://picsum.photos/100/100',
-        },
-        {
-          "profile_name": "My story",
-          "video_url": "https://picsum.photos/432/768",
-          "duration": 7,
-          "type":"image",
-          "subheading": 'Posted 30m ago',
-          "profile_image": 'https://picsum.photos/100/100',
-        },
-        {
-          "profile_name": "My story",
-          "video_url": "http://techslides.com/demos/sample-videos/small.ogv",
-          "duration": 7,
-          "type":"video",
-          "subheading": 'Posted 30m ago',
-          "profile_image": 'https://picsum.photos/100/100',
-        }
-      ]
-    )
-    setStoriesOpen(true);
-    setOpen((prevOpen) => !prevOpen);
+    axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
+    .then((res) => {
+      console.log(res.data)
+      setStories(res.data)
+      setStoriesOpen(true);
+      setOpen((prevOpen) => !prevOpen);
+    })
+   
     }
 
   const dropDowMenuForPost = (
@@ -284,12 +173,12 @@ export default function ContentDetails() {
 
   const showStoryBar=(  <div>
                           <Grid style={{ backgroundColor: "white",width:"70%",height: "5%",overflowX: "auto",display:"flex" ,margin:"auto",marginTop:"2%" }} >
-                              <div  ref={anchorRef} onClick={ () => openStories("MyStory")} className="cover-image-box">
+                              <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
                                 <img src={myPic} />
                               </div>
                               {dropDowMenuForPost}
                             {users.map((user, index) => (
-                              <div  onClick={ () => openStories(user.username)} className="cover-image-box">
+                              <div  onClick={ () => openStories(user)} className="cover-image-box">
                                 <img src={avatar} onClick={ () => storyClicked(user)} />
                               </div>
                             ))}
@@ -297,7 +186,7 @@ export default function ContentDetails() {
                           <AddStory open={openDialog} setOpen={setOpenDialog}></AddStory>
                         </div>)
         
-  const showStories=(<div><Story stories={stories} onClose={closeStory}></Story></div>)
+  const showStories=(<div>{stories !== undefined && stories !== null && stories.length !== 0 &&  <Story stories={stories} onClose={closeStory} user={username}></Story>}</div>)
 
 
 
