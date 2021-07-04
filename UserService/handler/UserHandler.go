@@ -113,6 +113,25 @@ func (handler *UserHandler) FindUserByUserId(w http.ResponseWriter, r *http.Requ
 	json.NewEncoder(w).Encode(user)
 }
 
+func (handler *UserHandler) FindUsernameAndProfilePicture(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user,_ := handler.Service.FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId)
+
+	if user == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
 func (handler *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)

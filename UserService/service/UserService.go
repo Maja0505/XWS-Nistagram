@@ -74,6 +74,17 @@ func (service *UserService) FindUserByUserId(userId string) (*model.RegisteredUs
 	return user, nil
 }
 
+func (service *UserService) FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId string) (*dto.UsernameAndProfilePictureDTO,error){
+	user,err := service.Repo.FindUserByUserId(userId)
+	if err != nil{
+	return nil, err
+	}
+	var usernameAndProfilePictureDTO dto.UsernameAndProfilePictureDTO
+	usernameAndProfilePictureDTO.Username = user.Username
+	usernameAndProfilePictureDTO.ProfilePicture = user.ProfilePicture
+	return &usernameAndProfilePictureDTO, nil
+}
+
 func (service *UserService) SearchUser(username string,searchContent string) (*[]dto.UserFromSearchDTO,error){
 	users,err := service.Repo.FindAllUsersBySearchingContent(username,searchContent)
 	if err != nil{

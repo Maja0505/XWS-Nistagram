@@ -1,11 +1,7 @@
 import ContentDetails from "./ContentDetails";
 
 const StoryFeeds = () => {
-  return (
-    <div>
-      <ContentDetails />
-    </div>
-  );
+  return <ContentDetails />;
 };
 
 export default StoryFeeds;

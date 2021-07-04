@@ -30,6 +30,7 @@ export default function ContentDetails() {
   const [username,setUsername] =  useState("")
   const [users,setUsers] = useState([])
   const loggedUserId = localStorage.getItem("id");
+  const [haveProfileImage,setHaveProfileImage] = useState(false)
 
   useEffect(() => {
     axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId)
@@ -43,6 +44,13 @@ export default function ContentDetails() {
       console.log(res.data)
       setStories(res.data)
     })
+
+    axios.get("api/user/get-image/" + loggedUserId + ".jpg").then((res) => {
+      setHaveProfileImage(true)
+    }).catch(error =>{
+     
+    })
+
   }, [])
   const [open, setOpen] = useState(false);
   const [openDialog,setOpenDialog] = useState(false)
@@ -119,6 +127,7 @@ export default function ContentDetails() {
    
     }
 
+
   const dropDowMenuForPost = (
     <Popper
       open={open}
@@ -171,25 +180,33 @@ export default function ContentDetails() {
     </Popper>
   );
 
-  const showStoryBar=(  <div>
-                          <Grid style={{ backgroundColor: "white",width:"70%",height: "5%",overflowX: "auto",display:"flex" ,margin:"auto",marginTop:"2%" }} >
-                            <div>
+  const showStoryBar=(  <div> 
+                          <Grid style={{ backgroundColor: "white",overflowX: "auto",display:"flex" ,margin:"auto", border:"0.5px solid",borderColor: "#b9b9b9",}} >
+                          <div>
+                              <div   style={{width:"20px"}}>
+                              </div>
+                              
+                            </div>
+                            <div style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
-                                <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} />
+                                {haveProfileImage && <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} style={{cursor:"pointer"}}/>}
+                                {!haveProfileImage && <img src= {avatar} style={{cursor:"pointer"}}/>}
+                                
                               </div>
                               {"My story"}
                             </div>
                               {dropDowMenuForPost}
                             {users.map((user:any, index) => (
-                              <div>
+                              <div key={index} style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  onClick={ () => openStories(user.IdString)} className="cover-image-box">
-                                <img src= {"http://localhost:8080/api/user/get-image/" + user.IdString + ".jpg"} />
+                                <img src= {"http://localhost:8080/api/user/get-image/" + user.IdString + ".jpg"} style={{cursor:"pointer"}}/>
                                
                               </div>
                               {user.Username}
                               </div>
                             ))}
                           </Grid>
+                          
                           <AddStory open={openDialog} setOpen={setOpenDialog}></AddStory>
                         </div>)
         

@@ -316,14 +316,17 @@ const NavBar = () => {
         <Grid item xs={8} container style={{ textAlign: "right" }}>
           {searchBar}
           <Grid item xs={2} style={{ margin: "auto" }}>
-            <HomeOutlined
-              style={{
-                color: "gray",
-                width: "33px",
-                height: "33px",
-                marginRight: "5%",
-              }}
-            />
+            <Link to="/">
+              <HomeOutlined
+                style={{
+                  color: "gray",
+                  width: "33px",
+                  height: "33px",
+                  marginRight: "5%",
+                  cursor: "pointer",
+                }}
+              />
+            </Link>
             <EmailOutlined
               style={{
                 color: "gray",
