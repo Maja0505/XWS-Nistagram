@@ -35,6 +35,8 @@ const AddPost = ({ setTabValue }) => {
 
 
   const createPost = () => {
+    console.log(image)
+
     for (let index = 0; index < image.length; index++) {
       if (!isVideo[index]) {
         uploadImage(image[index],index);
@@ -67,45 +69,27 @@ const AddPost = ({ setTabValue }) => {
     }
   };
 
-  const uploadVideo = () => {
+  const uploadVideo = (imageForUpload,index) => {
     var imageId =  uuidv4().toString() + "A" + loggedUserId.toString() + ".mp4"
-    setImagesIdsForSave((prevState) => [...prevState,imageId])
+    var array = imagesIdsForSave
+    array.push(imageId)
+    setImagesIdsForSave(array)
 
     axios
       .post(
         "/api/post/video-upload/" +
-          imageId.substring(0, imageId.length - 4),
-        image,
+        imageId.substring(0, imageId.length - 4) + "/" + "image" + index,
+        imageForUpload,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       )
       .then((res) => {
-        if(imagesIdsForSave.length === image.length){
-          var postDTO = {
-            ID: uuidv4(),
-            Description: description,
-            Media: imagesIdsForSave,
-            MediaCount: imagesIdsForSave.length,
-            Album: imagesIdsForSave.length === 0 ? false : true,
-            UserID: loggedUserId,
-          };
-          console.log("Uspesno upload-ovao video");
-          axios
-            .post("/api/post/create", postDTO)
-            .then((res1) => {
-              addTags(postDTO);
-              setTabValue(0);
-              
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        }
 
       })
       .catch((error) => {
         alert(error);
+        setPuklaSlika(true)
       });
   };
 
@@ -118,14 +102,13 @@ const AddPost = ({ setTabValue }) => {
     axios
       .post(
         "/api/post/upload-image/" +
-        imageId.substring(0, imageId.length - 4),
+        imageId.substring(0, imageId.length - 4) + "/" + "image" + index,
           imageForUpload,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       )
       .then((res) => {
-       
       })
       .catch((error) => {
         alert(error);
@@ -152,10 +135,11 @@ const AddPost = ({ setTabValue }) => {
           console.log("Uspesno kreirao post");
           addTags(postDTO);
           setTabValue(0);
-
+          setPuklaSlika(false)
         })
         .catch((error) => {
           console.log(error);
+          setPuklaSlika(false)
         });
     }
   }
@@ -167,26 +151,34 @@ const AddPost = ({ setTabValue }) => {
 
     var formData = new FormData();
     for (let index = 0; index < event.target.files.length; index++) {
-      var file = event.target.files[index];
+
+
+
     if (event.target.files[index].type === "video/mp4") {
- 
-      setIsVideo((prevState) => [...prevState,true])
+      var array = isVideo
+      array.push(true)
+      setIsVideo(array)
 
     } else {
 
-      setIsVideo((prevState) => [...prevState,false])
+      var array = isVideo
+      array.push(false)
+      setIsVideo(array)
     }
-    formData.append("myFile", file);
+
+    var file = event.target.files[index];
+    formData.append("image" + index, file);
     const reader = new FileReader();
     var url = reader.readAsDataURL(file);
     reader.onloadend = function (e) {
-
-        
      setSelectedFile((prevState) => [...prevState,reader.result]);
     }.bind(this);
       setImage((prevState) => [...prevState,formData]);  
+      console.log(formData)
+
     }
-    
+    console.log(isVideo)
+
   };
 
   function SampleNextArrow(props) {
@@ -281,11 +273,11 @@ const AddPost = ({ setTabValue }) => {
             <Grid item xs={2} />
             <Grid item xs={8}>
             <div>
-        <h2> Single Item</h2>
         <Slider {...settings}>
           {selectedFile.map((media,index) => (
             <div>
-            {!isVideo[index] && <img width="100%" height="500" src={selectedFile[index]} />}
+            {!isVideo[index] && 
+            <img width="100%" height="500" src={selectedFile[index]} />}
                 {isVideo[index] && (
                   <video width="100%" controls>
                     <source src={selectedFile[index]} type="video/mp4" />
