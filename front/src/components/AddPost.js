@@ -7,19 +7,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-
 const useStyles = makeStyles((theme) => ({
-  settings : {
+  settings: {
     dots: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-
   },
-  rtl:{
-    rtl: true
-  }
+  rtl: {
+    rtl: true,
+  },
 }));
 
 const AddPost = ({ setTabValue }) => {
@@ -30,23 +28,20 @@ const AddPost = ({ setTabValue }) => {
   const [description, setDescription] = useState("");
   const loggedUserId = localStorage.getItem("id");
   const [isVideo, setIsVideo] = useState([]);
-  const [imagesIdsForSave,setImagesIdsForSave] = useState([])
-  const [puklaSlika,setPuklaSlika] = useState(false)
-
+  const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
+  const [puklaSlika, setPuklaSlika] = useState(false);
 
   const createPost = () => {
-    console.log(image)
+    console.log(image);
 
     for (let index = 0; index < image.length; index++) {
       if (!isVideo[index]) {
-        uploadImage(image[index],index);
+        uploadImage(image[index], index);
       } else {
-        uploadVideo(image[index],index);
+        uploadVideo(image[index], index);
       }
-      
     }
-    savePost()
-    
+    savePost();
   };
 
   const addTags = (postDTO) => {
@@ -69,57 +64,59 @@ const AddPost = ({ setTabValue }) => {
     }
   };
 
-  const uploadVideo = (imageForUpload,index) => {
-    var imageId =  uuidv4().toString() + "A" + loggedUserId.toString() + ".mp4"
-    var array = imagesIdsForSave
-    array.push(imageId)
-    setImagesIdsForSave(array)
+  const uploadVideo = (imageForUpload, index) => {
+    var imageId = uuidv4().toString() + "A" + loggedUserId.toString() + ".mp4";
+    var array = imagesIdsForSave;
+    array.push(imageId);
+    setImagesIdsForSave(array);
 
     axios
       .post(
-        "/api/post/video-upload/" +
-        imageId.substring(0, imageId.length - 4) + "/" + "image" + index,
+        "/api/media/upload-video/" +
+          imageId.substring(0, imageId.length - 4) +
+          "/" +
+          "image" +
+          index,
         imageForUpload,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       )
-      .then((res) => {
-
-      })
+      .then((res) => {})
       .catch((error) => {
         alert(error);
-        setPuklaSlika(true)
+        setPuklaSlika(true);
       });
   };
 
-  const uploadImage = (imageForUpload,index) => {
-
-    var imageId = uuidv4().toString() + "A" + loggedUserId.toString() + ".jpg"
-    var array = imagesIdsForSave
-    array.push(imageId)
-    setImagesIdsForSave(array)
+  const uploadImage = (imageForUpload, index) => {
+    var imageId = uuidv4().toString() + "A" + loggedUserId.toString() + ".jpg";
+    var array = imagesIdsForSave;
+    array.push(imageId);
+    setImagesIdsForSave(array);
     axios
       .post(
-        "/api/post/upload-image/" +
-        imageId.substring(0, imageId.length - 4) + "/" + "image" + index,
-          imageForUpload,
+        "/api/media/upload-media-image/" +
+          imageId.substring(0, imageId.length - 4) +
+          "/" +
+          "image" +
+          index,
+        imageForUpload,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       )
-      .then((res) => {
-      })
+      .then((res) => {})
       .catch((error) => {
         alert(error);
-        setPuklaSlika(true)
+        setPuklaSlika(true);
       });
   };
 
   const savePost = () => {
-    console.log(puklaSlika)
-    console.log(imagesIdsForSave)
-    if(!puklaSlika){
+    console.log(puklaSlika);
+    console.log(imagesIdsForSave);
+    if (!puklaSlika) {
       var postDTO = {
         ID: uuidv4(),
         Description: description,
@@ -135,50 +132,43 @@ const AddPost = ({ setTabValue }) => {
           console.log("Uspesno kreirao post");
           addTags(postDTO);
           setTabValue(0);
-          setPuklaSlika(false)
+          setPuklaSlika(false);
         })
         .catch((error) => {
           console.log(error);
-          setPuklaSlika(false)
+          setPuklaSlika(false);
         });
     }
-  }
+  };
 
   const HandleUploadMedia = (event) => {
-      setSelectedFile([])
-      setIsVideo([])
-      setImage([])
+    setSelectedFile([]);
+    setIsVideo([]);
+    setImage([]);
 
     var formData = new FormData();
     for (let index = 0; index < event.target.files.length; index++) {
+      if (event.target.files[index].type === "video/mp4") {
+        var array = isVideo;
+        array.push(true);
+        setIsVideo(array);
+      } else {
+        var array = isVideo;
+        array.push(false);
+        setIsVideo(array);
+      }
 
-
-
-    if (event.target.files[index].type === "video/mp4") {
-      var array = isVideo
-      array.push(true)
-      setIsVideo(array)
-
-    } else {
-
-      var array = isVideo
-      array.push(false)
-      setIsVideo(array)
+      var file = event.target.files[index];
+      formData.append("image" + index, file);
+      const reader = new FileReader();
+      var url = reader.readAsDataURL(file);
+      reader.onloadend = function (e) {
+        setSelectedFile((prevState) => [...prevState, reader.result]);
+      }.bind(this);
+      setImage((prevState) => [...prevState, formData]);
+      console.log(formData);
     }
-
-    var file = event.target.files[index];
-    formData.append("image" + index, file);
-    const reader = new FileReader();
-    var url = reader.readAsDataURL(file);
-    reader.onloadend = function (e) {
-     setSelectedFile((prevState) => [...prevState,reader.result]);
-    }.bind(this);
-      setImage((prevState) => [...prevState,formData]);  
-      console.log(formData)
-
-    }
-    console.log(isVideo)
-
+    console.log(isVideo);
   };
 
   function SampleNextArrow(props) {
@@ -186,18 +176,18 @@ const AddPost = ({ setTabValue }) => {
     return (
       <div
         className={className}
-        style={{ ...style,zIndex: 1,right: 0, width:30,height:30 }}
+        style={{ ...style, zIndex: 1, right: 0, width: 30, height: 30 }}
         onClick={onClick}
       />
     );
   }
-  
+
   function SamplePrevArrow(props) {
     const { className, style, onClick } = props;
     return (
       <div
         className={className}
-        style={{ ...style,zIndex: 1, left: 0}}
+        style={{ ...style, zIndex: 1, left: 0 }}
         onClick={onClick}
       />
     );
@@ -210,13 +200,10 @@ const AddPost = ({ setTabValue }) => {
     slidesToShow: 1,
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
-    prevArrow: <SamplePrevArrow />
+    prevArrow: <SamplePrevArrow />,
   };
 
- 
-
   return (
-    
     <div>
       <Grid container style={{ marginTop: "2%" }}>
         <Grid item xs={2} />
@@ -272,23 +259,26 @@ const AddPost = ({ setTabValue }) => {
           <Grid container style={{ marginTop: "3%" }}>
             <Grid item xs={2} />
             <Grid item xs={8}>
-            <div>
-        <Slider {...settings}>
-          {selectedFile.map((media,index) => (
-            <div>
-            {!isVideo[index] && 
-            <img width="100%" height="500" src={selectedFile[index]} />}
-                {isVideo[index] && (
-                  <video width="100%" controls>
-                    <source src={selectedFile[index]} type="video/mp4" />
-                  </video>
-                )}
-          </div>
-          ))}
-    
-        </Slider>
-      </div>
-             
+              <div>
+                <Slider {...settings}>
+                  {selectedFile.map((media, index) => (
+                    <div>
+                      {!isVideo[index] && (
+                        <img
+                          width="100%"
+                          height="500"
+                          src={selectedFile[index]}
+                        />
+                      )}
+                      {isVideo[index] && (
+                        <video width="100%" controls>
+                          <source src={selectedFile[index]} type="video/mp4" />
+                        </video>
+                      )}
+                    </div>
+                  ))}
+                </Slider>
+              </div>
             </Grid>
             <Grid item xs={2} />
           </Grid>

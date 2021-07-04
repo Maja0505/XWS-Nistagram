@@ -45,7 +45,7 @@ export default function ContentDetails() {
       setStories(res.data)
     })
 
-    axios.get("api/user/get-image/" + loggedUserId + ".jpg").then((res) => {
+    axios.get("api/media/get-profile-picture/" + loggedUserId + ".jpg").then((res) => {
       setHaveProfileImage(true)
     }).catch(error =>{
      
@@ -189,7 +189,7 @@ export default function ContentDetails() {
                             </div>
                             <div style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
-                                {haveProfileImage && <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} style={{cursor:"pointer"}}/>}
+                                {haveProfileImage && <img src= {"http://localhost:8080/api/media/get-profile-picture/" + loggedUserId + ".jpg"} style={{cursor:"pointer"}}/>}
                                 {!haveProfileImage && <img src= {avatar} style={{cursor:"pointer"}}/>}
                                 
                               </div>
@@ -199,7 +199,7 @@ export default function ContentDetails() {
                             {users.map((user:any, index) => (
                               <div key={index} style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  onClick={ () => openStories(user.IdString)} className="cover-image-box">
-                                <img src= {"http://localhost:8080/api/user/get-image/" + user.IdString + ".jpg"} style={{cursor:"pointer"}}/>
+                                <img src= {"http://localhost:8080/api/media/get-profile-picture/" + user.IdString + ".jpg"} style={{cursor:"pointer"}}/>
                                
                               </div>
                               {user.Username}

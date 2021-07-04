@@ -110,7 +110,7 @@ const PostFeed = ({ feed }) => {
                     src={
                       profileImage === ""
                         ? avatar
-                        : "http://localhost:8080/api/user/get-image/" +
+                        : "http://localhost:8080/api/media/get-profile-picture/" +
                           profileImage
                     }
                     style={{
@@ -147,40 +147,41 @@ const PostFeed = ({ feed }) => {
               borderBottom: "0px",
             }}
           >
-            <div>
-              <Slider {...settings}>
-                {feed.Media.map((media, index) => (
-                  <div style={{ width: "100%", height: "100%" }} key={index}>
-                    {media.substring(media.length - 3, media.length) ===
-                      "jpg" && (
-                      <img
+            <Slider {...settings}>
+              {feed.Media.map((media, index) => (
+                <div style={{ width: "100%", height: "100%" }} key={index}>
+                  {media.substring(media.length - 3, media.length) ===
+                    "jpg" && (
+                    <img
+                      src={
+                        "http://localhost:8080/api/media/get-media-image/" +
+                        media
+                      }
+                      style={{
+                        width: "100%",
+                        height: feed.Media.length > 1 ? "470px" : "100%",
+                      }}
+                    />
+                  )}
+                  {media.substring(media.length - 3, media.length) !==
+                    "jpg" && (
+                    <video width="100%" height="100%" controls>
+                      <source
                         src={
-                          "http://localhost:8080/api/post/get-image/" + media
+                          "http://localhost:8080/api/media/get-video/" + media
                         }
-                        style={{ width: "100%", height: "100%" }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          margin: "auto",
+                        }}
+                        type="video/mp4"
                       />
-                    )}
-                    {media.substring(media.length - 3, media.length) !==
-                      "jpg" && (
-                      <video
-                        width="100%"
-                        height="100%"
-                        style={{ marginTop: "25%" }}
-                        controls
-                      >
-                        <source
-                          src={
-                            "http://localhost:8080/api/post/get-image/" + media
-                          }
-                          style={{ width: "100%", height: "100%" }}
-                          type="video/mp4"
-                        />
-                      </video>
-                    )}
-                  </div>
-                ))}
-              </Slider>
-            </div>
+                    </video>
+                  )}
+                </div>
+              ))}
+            </Slider>
           </Box>
 
           <Paper
