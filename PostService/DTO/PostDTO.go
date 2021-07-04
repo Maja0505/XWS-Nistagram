@@ -1,10 +1,10 @@
 package DTO
 
+import "github.com/gocql/gocql"
 
 type PostDTO struct{
+	ID 				gocql.UUID		`json:"ID"`
 	Description  	string 			`json:"Description"`
-	DislikesCount 	int64 			`json:"DislikesCount"`
-	LikesCount		int64			`json:"LikesCount"`
 	MediaCount		int64			`json:"MediaCount"`
 	Media 			[]string 		`json:"Media"`
 	UserID 			string			`json:"UserID"`

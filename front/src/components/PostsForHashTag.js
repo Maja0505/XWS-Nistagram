@@ -6,6 +6,7 @@ import ModeCommentIcon from "@material-ui/icons/ModeComment";
 import { Redirect } from "react-router-dom";
 import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
+import PhotoLibraryOutlinedIcon from "@material-ui/icons/PhotoLibraryOutlined";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,6 +71,17 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     display: "none",
   },
+  imageButton2: {
+    position: "absolute",
+    top: 0,
+    marginTop: "5%",
+    marginLeft: "70%",
+    color: theme.palette.common.white,
+  },
+  imageTitle2: {
+    position: "relative",
+    display: "flex",
+  },
 }));
 
 const PostsForHashTag = ({ posts }) => {
@@ -110,29 +122,50 @@ const PostsForHashTag = ({ posts }) => {
                     }}
                     onClick={() => handleClickImage(post)}
                   >
-                    {post.Image.substring(
-                      post.Image.length - 3,
-                      post.Image.length
+                    {post.Media[0].substring(
+                      post.Media[0].length - 3,
+                      post.Media[0].length
                     ) === "jpg" && (
                       <img
                         width="100%"
                         height="100%"
-                        src={`http://localhost:8080/api/post/get-image/${post.Image}`}
+                        src={`http://localhost:8080/api/post/get-image/${post.Media[0]}`}
                       />
                     )}
-                    {post.Image.substring(
-                      post.Image.length - 3,
-                      post.Image.length
+                    {post.Media[0].substring(
+                      post.Media[0].length - 3,
+                      post.Media[0].length
                     ) !== "jpg" && (
                       <video width="100%" height="100%" controls>
                         <source
-                          src={`http://localhost:8080/api/post/video-get/${post.Image}`}
+                          src={`http://localhost:8080/api/post/video-get/${post.Media[0]}`}
                           type="video/mp4"
                         />
                       </video>
                     )}
 
                     <span className={classes.imageBackdrop} />
+
+                    {post.Media.length !== 1 && (
+                      <span className={classes.imageButton2}>
+                        <Typography
+                          component="span"
+                          variant="subtitle1"
+                          color="inherit"
+                          className={classes.imageTitle2}
+                          width="100%"
+                          height="30%"
+                        >
+                          <Grid container style={{ margin: "auto" }}>
+                            <Grid item xs={10}></Grid>
+                            <Grid item xs={2}>
+                              <PhotoLibraryOutlinedIcon></PhotoLibraryOutlinedIcon>
+                            </Grid>
+                          </Grid>
+                        </Typography>
+                      </span>
+                    )}
+
                     <span className={classes.imageButton}>
                       <Typography
                         component="span"

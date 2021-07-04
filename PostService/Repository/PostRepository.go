@@ -126,16 +126,15 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 	}else{
 		isAlbum = true
 	}
-	ID, _ := gocql.RandomUUID()
 	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, media, userid, album) VALUES(?, ?, ?, ?, ?, ?)",
-		ID, time.Now(), post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
+		post.ID, time.Now(), post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return err
 	}
 	fmt.Println(post.ID)
 
-	repo.SetMediaCounter(int64(len(post.Media)), ID)
+	repo.SetMediaCounter(int64(len(post.Media)), post.ID)
 	fmt.Println("Successfully created post!!")
 	return nil
 }
@@ -523,7 +522,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 
 	iter := repo.Session.Query("SELECT * FROM postkeyspace.posts WHERE userid=? ALLOW FILTERING", userid).Iter()
 	if iter.NumRows() == 0{
-		return nil, gocql.Error{Message: "No post found"}
+		return nil, nil
 	}
 	for iter.MapScan(m) {
 		iter2 := repo.Session.Query("SELECT * FROM postkeyspace.postcounters WHERE postid=?", m["id"].(gocql.UUID)).Iter()

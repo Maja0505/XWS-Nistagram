@@ -178,7 +178,7 @@ export default function ContentDetails() {
                               </div>
                               
                             </div>
-                            <div>
+                            <div style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  ref={anchorRef} onClick={ () => openStories(loggedUserId)} className="cover-image-box">
                                 <img src= {"http://localhost:8080/api/user/get-image/" + loggedUserId + ".jpg"} />
                               </div>
@@ -186,7 +186,7 @@ export default function ContentDetails() {
                             </div>
                               {dropDowMenuForPost}
                             {users.map((user:any, index) => (
-                              <div>
+                              <div  style={{fontSize:"13px",marginTop:"1.2%",marginBottom:"1.2%"}}>
                               <div  onClick={ () => openStories(user.IdString)} className="cover-image-box">
                                 <img src= {"http://localhost:8080/api/user/get-image/" + user.IdString + ".jpg"} />
                                
@@ -195,6 +195,7 @@ export default function ContentDetails() {
                               </div>
                             ))}
                           </Grid>
+                          
                           <AddStory open={openDialog} setOpen={setOpenDialog}></AddStory>
                         </div>)
         

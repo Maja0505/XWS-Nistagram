@@ -407,8 +407,9 @@ func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Pos
 		if err != nil {
 			return nil, err
 		}
-
-		postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+		if postsByOneUser != nil {
+			postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+		}
 	}
 
 	var feedSlice FeedSlice
