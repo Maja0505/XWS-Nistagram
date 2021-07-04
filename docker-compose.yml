@@ -72,6 +72,19 @@ services:
     volumes:
       - micro_services:/go/app/files
 
+  media-storage-service:
+    image: media-storage-service:compose_build
+    build:
+      context: ./MediaStorageService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      MEDIA_STORAGE_SERVICE_PORT: 8080
+    restart: on-failure
+    volumes:
+      - micro_services:/go/app/files
+
   mongo:
     image: mongo
     ports:

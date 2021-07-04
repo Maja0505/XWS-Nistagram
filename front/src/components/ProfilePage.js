@@ -66,7 +66,7 @@ const ProfilePage = ({
   const handleClickSubmit = () => {
     if (user.ProfilePicture !== userCopy.ProfilePicture) {
       axios
-        .post("/api/user/upload-profile-doc/" + loggedUserId, image, {
+        .post("/api/media/upload-profile-picture/" + loggedUserId, image, {
           headers: { "Content-Type": "multipart/form-data" },
         })
         .then((res) => {
@@ -123,7 +123,7 @@ const ProfilePage = ({
                     <Avatar
                       alt="N"
                       src={
-                        "http://localhost:8080/api/user/get-image/" +
+                        "http://localhost:8080/api/media/get-profile-picture/" +
                         userCopy.ProfilePicture
                       }
                       style={{ marginLeft: "auto" }}

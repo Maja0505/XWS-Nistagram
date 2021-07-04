@@ -30,7 +30,7 @@ const HashTagPost = () => {
                 ) === "jpg" && (
                   <img
                     src={
-                      "http://localhost:8080/api/post/get-image/" +
+                      "http://localhost:8080/api/media/get-media-image/" +
                       posts[0].Media[0]
                     }
                     alt="Not founded"
@@ -56,7 +56,7 @@ const HashTagPost = () => {
                     }}
                   >
                     <source
-                      src={`http://localhost:8080/api/post/video-get/${posts[0].Media[0]}`}
+                      src={`http://localhost:8080/api/media/get-video/${posts[0].Media[0]}`}
                       type="video/mp4"
                     />
                   </video>

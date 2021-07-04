@@ -83,16 +83,16 @@ export default function Story({ onClose, stories, user }: Props ){
 
   const storyVideo = (
 
-<video onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/post/story/video-get/" + stories[storyIndex].Media} autoPlay  width="100%" style={{marginTop:"30%"}} ></video>  )
+<video onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/media/get-video/" + stories[storyIndex].Media} autoPlay  width="100%" style={{marginTop:"30%"}} ></video>  )
 
-  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/post/story/image-get/" + stories[storyIndex].Media} style={{height:"90%",width:"100%"}} ></img>
+  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/media/get-media-image/" + stories[storyIndex].Media} style={{height:"90%",width:"100%"}} ></img>
   )
 
   return (
     <div onClick={(e) => onClickStory(e.target)} className="story-container">
       <div className="story">
         <div className="title">
-          {(imageProfile !== null && imageProfile !== undefined && imageProfile !== "") ? <img src= {"http://localhost:8080/api/user/get-image/" + imageProfile} /> : <img src= {avatar} />}
+          {(imageProfile !== null && imageProfile !== undefined && imageProfile !== "") ? <img src= {"http://localhost:8080/api/media/get-profile-picture/" + imageProfile} /> : <img src= {avatar} />}
           
           <div className="details">
             <span>{username}</span>

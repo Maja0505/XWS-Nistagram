@@ -9,7 +9,7 @@ import PostDialog from "./PostDialog";
 import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axios from "axios";
-import PhotoLibraryOutlinedIcon from '@material-ui/icons/PhotoLibraryOutlined';
+import PhotoLibraryOutlinedIcon from "@material-ui/icons/PhotoLibraryOutlined";
 
 const images = [
   {
@@ -71,11 +71,11 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.common.white,
   },
   imageButton2: {
-   position: "absolute",
-   top: 0,
-   marginTop: "5%",
-   marginLeft: "70%",
-  color: theme.palette.common.white,
+    position: "absolute",
+    top: 0,
+    marginTop: "5%",
+    marginLeft: "70%",
+    color: theme.palette.common.white,
   },
   imageSrc: {
     position: "absolute",
@@ -115,12 +115,11 @@ const useStyles = makeStyles((theme) => ({
   },*/
 }));
 
-const Posts = ({ userForProfile,username}) => {
+const Posts = ({ userForProfile, username }) => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [postID, setPostID] = useState({});
   const [posts, setPosts] = useState([]);
-
 
   const id = localStorage.getItem("id");
 
@@ -133,9 +132,9 @@ const Posts = ({ userForProfile,username}) => {
     axios
       .get("/api/post/get-all-by-userid/" + userForProfile.ID)
       .then((res) => {
-        if (res.data){
+        if (res.data) {
           setPosts(res.data);
-        }else{
+        } else {
           setPosts([]);
         }
       })
@@ -145,16 +144,19 @@ const Posts = ({ userForProfile,username}) => {
   }, [userForProfile]);
 
   const getImage = (image) => {
-    axios.get("/api/post/get-image/" + image).then((res) => {
+    axios.get("/api/media/get-media-image/" + image).then((res) => {
       return res.data;
     });
   };
 
   return (
     <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>}
+      {redirection === true && (
+        <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>
+      )}
       <Grid container>
-        {posts !== null && posts !== undefined &&
+        {posts !== null &&
+          posts !== undefined &&
           posts.map((post) => (
             <Grid
               item
@@ -179,7 +181,7 @@ const Posts = ({ userForProfile,username}) => {
                   <img
                     width="100%"
                     height="100%"
-                    src={`http://localhost:8080/api/post/get-image/${post.Media[0]}`}
+                    src={`http://localhost:8080/api/media/get-media-image/${post.Media[0]}`}
                   />
                 )}
                 {post.Media[0].substring(
@@ -188,35 +190,34 @@ const Posts = ({ userForProfile,username}) => {
                 ) !== "jpg" && (
                   <video width="100%" height="100%" controls>
                     <source
-                      src={`http://localhost:8080/api/post/video-get/${post.Media[0]}`}
+                      src={`http://localhost:8080/api/media/get-video/${post.Media[0]}`}
                       type="video/mp4"
                     />
                   </video>
                 )}
 
                 <span className={classes.imageBackdrop} />
-                {post.Media.length !== 1 && 
+                {post.Media.length !== 1 && (
                   <span className={classes.imageButton2}>
                     <Typography
-                        component="span"
-                        variant="subtitle1"
-                        color="inherit"
-                        className={classes.imageTitle2}
-                        width="100%"
-                        height="30%"
-                      >
-                          <Grid container style={{margin:"auto"}}>
-                          <Grid item xs={10}></Grid>
-                          <Grid item xs={2}><PhotoLibraryOutlinedIcon></PhotoLibraryOutlinedIcon></Grid>
-                          
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle2}
+                      width="100%"
+                      height="30%"
+                    >
+                      <Grid container style={{ margin: "auto" }}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                          <PhotoLibraryOutlinedIcon></PhotoLibraryOutlinedIcon>
                         </Grid>
-    
+                      </Grid>
                     </Typography>
                   </span>
-                }
-   
+                )}
+
                 <span className={classes.imageButton}>
-                
                   <Typography
                     component="span"
                     variant="subtitle1"
@@ -225,8 +226,7 @@ const Posts = ({ userForProfile,username}) => {
                     style={{ padding: 0, width: "50%" }}
                     width="50%"
                   >
-                    
-                    <Grid container style={{margin:"auto"}}>
+                    <Grid container style={{ margin: "auto" }}>
                       <Grid item xs={1}>
                         <ThumbUpAltIcon></ThumbUpAltIcon>
                       </Grid>
@@ -251,21 +251,17 @@ const Posts = ({ userForProfile,username}) => {
               </ButtonBase>
             </Grid>
           ))}
-        {(posts === null || posts === undefined || posts.length === 0) &&
+        {(posts === null || posts === undefined || posts.length === 0) && (
           <Grid container>
-              <Grid item xs={3}></Grid>
-              <Grid item xs={6}>
-                <Typography variant="h5" color="textSecondary">
+            <Grid item xs={3}></Grid>
+            <Grid item xs={6}>
+              <Typography variant="h5" color="textSecondary">
                 No Posts Yet
               </Typography>
-               </Grid>
-              <Grid item xs={3}></Grid>
-
+            </Grid>
+            <Grid item xs={3}></Grid>
           </Grid>
-
-        
-        
-        }
+        )}
         {images.length % 3 === 1 && (
           <>
             <Grid item xs={4} /> <Grid item xs={4} />
