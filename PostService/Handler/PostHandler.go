@@ -355,6 +355,27 @@ func (handler *PostHandler) FindPostsByTag(w http.ResponseWriter, r *http.Reques
 
 }
 
+func (handler *PostHandler) FindPostsByLocation(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	location := vars["location"]
+	if location == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	posts,_ := handler.Service.FindPostsByLocation(location)
+
+	if posts == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(posts)
+
+}
+
 func (handler *PostHandler) GetTagsForPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -805,7 +826,74 @@ func (handler *PostHandler) GetAllPostFeedsForUser(w http.ResponseWriter, r *htt
 
 }
 
-func ParseUUID(input string) (gocql.UUID, error) {
+func (handler *PostHandler) GetLocationForPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	postId := mux.Vars(r)["postId"]
+
+	if postId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	postuuid, err := ParseUUID(postId)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	location,err := handler.Service.GetLocationForPost(postuuid)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(location)
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *PostHandler) GetTagSuggestions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	tag := mux.Vars(r)["tag"]
+
+	if tag == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tags, err := handler.Service.GetTagSuggestions(tag)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(tags)
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *PostHandler) GetLocationSuggestions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	location := mux.Vars(r)["location"]
+
+	if location == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	locations, err := handler.Service.GetLocationSuggestions(location)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	json.NewEncoder(w).Encode(locations)
+	w.WriteHeader(http.StatusOK)
+
+}
+
+	func ParseUUID(input string) (gocql.UUID, error) {
 	var u gocql.UUID
 	j := 0
 	for _, r := range input {

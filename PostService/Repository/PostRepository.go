@@ -2,6 +2,7 @@ package Repository
 
 import (
 	"XWS-Nistagram/PostService/DTO"
+	"XWS-Nistagram/PostService/DataStructures"
 	"XWS-Nistagram/PostService/Model"
 	_ "debug/elf"
 	"fmt"
@@ -14,7 +15,10 @@ import (
 
 type PostRepository struct {
 	Session gocql.Session
+	Trie *DataStructures.Trie
+	LocationsTrie *DataStructures.Trie
 }
+
 
 func (repo *PostRepository) CreateTables() error{
 	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
@@ -23,6 +27,11 @@ func (repo *PostRepository) CreateTables() error{
 		return err
 	}
 	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.postcounters;").Exec(); err != nil {
+		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.locations;").Exec(); err != nil {
 		fmt.Println("Error while dropping tables!")
 		fmt.Println(err)
 		return err
@@ -63,12 +72,17 @@ func (repo *PostRepository) CreateTables() error{
 		return err
 	}*/
 
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, PRIMARY KEY((userid, id)));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
 	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, media counter, PRIMARY KEY(postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		return err
+	}
+	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.locations(postid uuid, location text, PRIMARY KEY((location), postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -134,9 +148,29 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 		return err
 	}
 	fmt.Println(post.ID)
+	var location = Model.Location{Location: post.Location, PostID: ID}
+	if err := repo.AddLocation(&location); err != nil{
+		fmt.Println("Error while adding location during post creation!")
+		fmt.Println(err)
+	}
 
 	repo.SetMediaCounter(int64(len(post.Media)), ID)
+
+
 	fmt.Println("Successfully created post!!")
+	return nil
+}
+
+func (repo *PostRepository) AddLocation(location *Model.Location) error {
+	fmt.Println("Lokacija: ", location.Location)
+	if err := repo.Session.Query("INSERT INTO postkeyspace.locations(location, postid) VALUES(?, ?)",
+		location.Location, location.PostID).Exec(); err != nil {
+		fmt.Println("Error while creating location!")
+		fmt.Println(err)
+		return err
+	}
+	repo.AddLocationToTrie(location.Location)
+	fmt.Println("Successfully created location!!")
 	return nil
 }
 
@@ -193,6 +227,7 @@ func (repo *PostRepository) AddTag(tag *Model.Tag) error {
 		fmt.Println(err)
 		return err
 	}
+	repo.AddTagToTrie(tag.Tag)
 	fmt.Println("Successfully created tag!!")
 	return nil
 }
@@ -594,6 +629,32 @@ func (repo *PostRepository) FindPostsByTag(tag string) ( *[]Model.Post, error){
 	return &posts, nil
 }
 
+func (repo *PostRepository) FindPostsByLocation(location string) ( *[]Model.Post, error){
+	var locations []Model.Location
+	var posts []Model.Post
+	m := map[string]interface{}{}
+
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.locations WHERE location=?", location).Iter()
+	for iter.MapScan(m) {
+		var location = Model.Location{
+			PostID:      m["postid"].(gocql.UUID),
+			Location:    m["location"].(string),
+		}
+		locations = append(locations, location)
+		m = map[string]interface{}{}
+	}
+	for i:=0; i< len(locations); i++{
+		var post,err = repo.FindPostById(locations[i].PostID)
+		if err != nil{
+			continue
+		}
+		if post != nil {
+			posts = append(posts, *post)
+		}
+	}
+	return &posts, nil
+}
+
 func (repo *PostRepository) GetFavouritePosts(userid string) ( *[]Model.Post, error){
 	var postids []gocql.UUID
 	var posts []Model.Post
@@ -654,6 +715,18 @@ func (repo *PostRepository) GetTagsForPost(postid gocql.UUID) ( *[]Model.Tag, er
 			m = map[string]interface{}{}
 	}
 	return &tags,nil
+}
+
+func (repo *PostRepository) GetLocationForPost(postid gocql.UUID) ( *Model.Location, error) {
+	var id gocql.UUID
+	var loc string
+	err := repo.Session.Query("SELECT * FROM postkeyspace.locations WHERE postid=? ALLOW FILTERING", postid).Scan(&loc, &id)
+	if err != nil{
+		fmt.Println(err)
+		return nil, err
+	}
+	var location = Model.Location{Location: loc, PostID: id}
+	return &location,nil
 }
 
 func (repo *PostRepository) GetPureTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
@@ -852,6 +925,75 @@ func (repo *PostRepository) GetAllCollectionsForPostByUser(userid string, postuu
 	return &collections, nil
 }
 
+func (repo *PostRepository) GetAllTags() ( *[]string, error) {
+	var tags []string
+	var tag string
+	iter := repo.Session.Query("SELECT tag FROM postkeyspace.tags").Iter()
+	for iter.Scan(&tag){
+		tags = append(tags, tag)
+	}
+
+	return &tags, nil
+}
+
+func (repo *PostRepository) GetAllLocations() ( *[]string, error) {
+	var locations []string
+	var location string
+	iter := repo.Session.Query("SELECT location FROM postkeyspace.locations").Iter()
+	for iter.Scan(&location){
+		locations = append(locations, location)
+	}
+
+	return &locations, nil
+}
+
+func (repo *PostRepository) InitTrie() error{
+	repo.Trie = DataStructures.New()
+	tags, err := repo.GetAllTags()
+	if err != nil{
+		fmt.Println("Greska prilikom vracanja tagova!!!")
+		return err
+	}
+	for _, s := range *tags{
+		fmt.Println(s)
+		repo.Trie.Add(s, s)
+	}
+	return nil
+}
+
+func (repo *PostRepository) AddTagToTrie(tag string){
+	repo.Trie.Add(tag, tag)
+}
+func (repo *PostRepository) AddLocationToTrie(location string){
+	repo.LocationsTrie.Add(location, location)
+}
+
+
+func (repo *PostRepository) InitLocationsTrie() error{
+	repo.LocationsTrie = DataStructures.New()
+	locations, err := repo.GetAllLocations()
+	if err != nil{
+		fmt.Println("Greska prilikom vracanja lokacija!!!")
+		return err
+	}
+	for _, s := range *locations{
+		fmt.Println(s)
+		repo.LocationsTrie.Add(s, s)
+	}
+	return nil
+}
+
+func (repo *PostRepository) GetTagSuggestions(s string) (*[]string, error){
+	ret := repo.Trie.GetSuggestion(s, 10)
+	fmt.Println(ret)
+	return &ret, nil
+}
+
+func (repo *PostRepository) GetLocationSuggestions(s string) (*[]string, error){
+	ret := repo.LocationsTrie.GetSuggestion(s, 10)
+	fmt.Println(ret)
+	return &ret, nil
+}
 
 
 
