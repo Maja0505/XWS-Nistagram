@@ -18,11 +18,50 @@ import {
   BookmarkBorderRounded,
   SentimentSatisfiedRounded,
 } from "@material-ui/icons";
+
+import Slider from "react-slick";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 import axios from "axios";
+
 const PostFeed = ({ feed }) => {
   const [username, setUsername] = useState();
   const [profileImage, setProfileImage] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+  };
+
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, right: 0, width: 30, height: 30 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, left: 0 }}
+        onClick={onClick}
+      />
+    );
+  }
 
   const makeDescriptionFromPost = (text) => {
     var resultDescription = [];
@@ -108,14 +147,40 @@ const PostFeed = ({ feed }) => {
               borderBottom: "0px",
             }}
           >
-            <img
-              src={
-                profileImage === ""
-                  ? avatar
-                  : "http://localhost:8080/api/user/get-image/" + profileImage
-              }
-              style={{ width: "100%", height: "100%" }}
-            />
+            <div>
+              <Slider {...settings}>
+                {feed.Media.map((media, index) => (
+                  <div style={{ width: "100%", height: "100%" }} key={index}>
+                    {media.substring(media.length - 3, media.length) ===
+                      "jpg" && (
+                      <img
+                        src={
+                          "http://localhost:8080/api/post/get-image/" + media
+                        }
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    )}
+                    {media.substring(media.length - 3, media.length) !==
+                      "jpg" && (
+                      <video
+                        width="100%"
+                        height="100%"
+                        style={{ marginTop: "25%" }}
+                        controls
+                      >
+                        <source
+                          src={
+                            "http://localhost:8080/api/post/get-image/" + media
+                          }
+                          style={{ width: "100%", height: "100%" }}
+                          type="video/mp4"
+                        />
+                      </video>
+                    )}
+                  </div>
+                ))}
+              </Slider>
+            </div>
           </Box>
 
           <Paper

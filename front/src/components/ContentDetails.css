@@ -33,6 +33,7 @@
   height: 65px;
   object-fit: cover;
   border-radius: 50%;
+  border: solid 1px gray;
 }
 
 .content-details .details {

@@ -92,7 +92,8 @@ export default function Story({ onClose, stories, user }: Props ){
     <div onClick={(e) => onClickStory(e.target)} className="story-container">
       <div className="story">
         <div className="title">
-          <img src= {"http://localhost:8080/api/user/get-image/" + imageProfile} />
+          {(imageProfile !== null && imageProfile !== undefined && imageProfile !== "") ? <img src= {"http://localhost:8080/api/user/get-image/" + imageProfile} /> : <img src= {avatar} />}
+          
           <div className="details">
             <span>{username}</span>
             <span>{stories[storyIndex].Subheading}</span>

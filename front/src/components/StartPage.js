@@ -22,32 +22,33 @@ const StartPage = () => {
 
   return (
     <div>
-      {loggedUserId !== null &&
-        loggedUserId !== undefined &&
-        feeds !== null &&
-        feeds !== undefined && (
-          <div>
-            <Grid container style={{ marginTop: "1%" }}>
-              <Grid item xs={3} />
-              <Grid item xs={6}>
-                <StoryFeeds />
-              </Grid>
-              <Grid item xs={3} />
+      {loggedUserId !== null && loggedUserId !== undefined && (
+        <div>
+          <Grid container style={{ marginTop: "1%" }}>
+            <Grid item xs={3} />
+            <Grid item xs={6}>
+              <StoryFeeds />
             </Grid>
-
-            <Grid container style={{ marginTop: "1%" }}></Grid>
-            {feeds.map((f, index) => (
-              <Grid container style={{ marginTop: "3%" }} key={index}>
-                <Grid item xs={3} />
-                <Grid item xs={6}>
-                  <PostFeed feed={f} />
+            <Grid item xs={3} />
+          </Grid>
+          {feeds !== null && feeds !== undefined && (
+            <>
+              <Grid container style={{ marginTop: "1%" }}></Grid>
+              {feeds.map((f, index) => (
+                <Grid container style={{ marginTop: "3%" }} key={index}>
+                  <Grid item xs={3} />
+                  <Grid item xs={6}>
+                    <PostFeed feed={f} />
+                  </Grid>
+                  <Grid item xs={3} />
                 </Grid>
-                <Grid item xs={3} />
-              </Grid>
-            ))}
-            <Grid container style={{ marginTop: "5%" }}></Grid>
-          </div>
-        )}
+              ))}
+            </>
+          )}
+
+          <Grid container style={{ marginTop: "5%" }}></Grid>
+        </div>
+      )}
     </div>
   );
 };

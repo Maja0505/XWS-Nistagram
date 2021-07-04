@@ -3,7 +3,6 @@ package Mapper
 import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Model"
-	"math"
 	"strconv"
 	"time"
 )
@@ -82,11 +81,12 @@ func convertStoryToStoryDTO(s *Model.Story) *DTO.StoryDTO {
 func calculateMinutes(createdAt time.Time) string {
 	var stringDuration string
 	now := time.Now()
-	duration := now.Minute() - createdAt.Minute()
-	if duration/60 >= 1{
-		stringDuration = strconv.Itoa(int(math.Abs(float64(duration/60)))) + "h"
+	durationMinutes := now.Minute() - createdAt.Minute()
+	durationHours := now.Hour() - createdAt.Hour()
+	if durationHours > 0{
+		stringDuration = strconv.Itoa(durationHours) + "h"
 	}else{
-		stringDuration = strconv.Itoa(int(math.Abs(float64(duration)))) + "min"
+		stringDuration = strconv.Itoa(durationMinutes) + "min"
 	}
 
 	return stringDuration
