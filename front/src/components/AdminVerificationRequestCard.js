@@ -19,39 +19,42 @@ const AdminVerificationRequestCard = () => {
   const classes = useStyles();
   const [allRequests, setAllRequests] = useState([]);
 
-    const HandleOnClickApprove = (request) => {
-        axios.put("/api/user/verification-request/approve/" + request.User,{}).then((res) => {
-                console.log('uspesno') 
-                var array = [...allRequests]; // make a separate copy of the array
-                var index = array.indexOf(request)
-                if (index !== -1) {
-                  array.splice(index, 1);
-                  setAllRequests(array)
-                }         
-          });
-    }
-
-    const HandleOnClickDelete = (request) => {
-        axios.put("/api/user/verification-request/delete/" + request.User,{}).then((res) => {
-            console.log('uspesno') 
-            var array = [...allRequests]; // make a separate copy of the array
-            var index = array.indexOf(request)
-            if (index !== -1) {
-              array.splice(index, 1);
-              setAllRequests(array)
-            }         
+  const HandleOnClickApprove = (request) => {
+    axios
+      .put("/api/user/verification-request/approve/" + request.User, {})
+      .then((res) => {
+        console.log("uspesno");
+        var array = [...allRequests]; // make a separate copy of the array
+        var index = array.indexOf(request);
+        if (index !== -1) {
+          array.splice(index, 1);
+          setAllRequests(array);
+        }
       });
-    }
+  };
+
+  const HandleOnClickDelete = (request) => {
+    axios
+      .put("/api/user/verification-request/delete/" + request.User, {})
+      .then((res) => {
+        console.log("uspesno");
+        var array = [...allRequests]; // make a separate copy of the array
+        var index = array.indexOf(request);
+        if (index !== -1) {
+          array.splice(index, 1);
+          setAllRequests(array);
+        }
+      });
+  };
 
   useEffect(() => {
     axios.get("/api/user/verification-request/all").then((res) => {
-    if(res.data){
+      if (res.data) {
         console.log(res.data);
         setAllRequests(res.data);
-    }
-   
+      }
     });
-  },[]);
+  }, []);
 
   return (
     <div>
@@ -64,7 +67,7 @@ const AdminVerificationRequestCard = () => {
                 alt="Contemplative Reptile"
                 height="200"
                 image={
-                  "http://localhost:8080/api/user/verification-request/get-image/" +
+                  "http://localhost:8080/api/media/get-verification-doc/" +
                   request.User +
                   ".jpg"
                 }
@@ -119,10 +122,18 @@ const AdminVerificationRequestCard = () => {
               <Grid item xs={6}></Grid>
               <Grid item xs={6}>
                 <CardActions>
-                  <Button size="small" color="primary" onClick={() => HandleOnClickApprove(request)}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => HandleOnClickApprove(request)}
+                  >
                     Approve
                   </Button>
-                  <Button size="small" color="primary" onClick={() => HandleOnClickDelete(request)}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => HandleOnClickDelete(request)}
+                  >
                     Delete
                   </Button>
                 </CardActions>

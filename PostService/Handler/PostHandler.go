@@ -582,8 +582,9 @@ func (handler *PostHandler) GetImageOld(w http.ResponseWriter, r *http.Request) 
 func (handler *PostHandler) UploadImage(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	imagePath := vars["id"]
+	formKey := vars["formKey"]
 	r.ParseMultipartForm(10 << 20)
-	file, _, err := r.FormFile("myFile")
+	file, _, err := r.FormFile(formKey)
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
 		fmt.Println(err)
@@ -633,8 +634,9 @@ func (handler *PostHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 func (handler *PostHandler) UploadVideo(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	imagePath := vars["videoId"]
+	formKey := vars["formKey"]
 	r.ParseMultipartForm(10 << 20)
-	file, _, err := r.FormFile("myFile")
+	file, _, err := r.FormFile(formKey)
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
 		fmt.Println(err)

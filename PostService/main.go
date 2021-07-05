@@ -36,11 +36,15 @@ func init() {
 		fmt.Println("Error while inserting postkeyspace")
 		fmt.Println(err)
 	}
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, image text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.locations(postid uuid, location text, PRIMARY KEY((location), postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, PRIMARY KEY(postid));").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, media counter, PRIMARY KEY(postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
@@ -138,13 +142,13 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-all-by-location/{location}", handler.FindPostsByLocation).Methods("GET")
 	router.HandleFunc("/get-favourite-posts/{id}", handler.GetFavouritePosts).Methods("GET")
 	router.HandleFunc("/get-posts-from-collection/{id}/{collection}", handler.GetPostsFromCollection).Methods("GET")
-	router.HandleFunc("/upload-image/{id}",handler.UploadImage).Methods("POST")
+	router.HandleFunc("/upload-image/{id}/{formKey}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/like-exists", handler.CheckIfLikeExists).Methods("PUT")
 	router.HandleFunc("/dislike-exists", handler.CheckIfDislikeExists).Methods("PUT")
 	router.HandleFunc("/get-liked-posts-for-user/{id}", handler.GetLikedPostsForUser).Methods("GET")
 	router.HandleFunc("/get-disliked-posts-for-user/{id}", handler.GetDislikedPostsForUser).Methods("GET")
 	router.HandleFunc("/report-content", handler.ReportContent).Methods("POST")
-	router.HandleFunc("/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
+	router.HandleFunc("/video-upload/{videoId}/{formKey}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/video-get/{videoId}", handler.GetVideo).Methods("GET")
 	router.HandleFunc("/get-collections-for-user/{id}", handler.GetCollectionsForUser).Methods("GET")
 	router.HandleFunc("/post-exists-in-favourites/{id}/{post}", handler.CheckIfPostExistsInFavourites).Methods("GET")
@@ -170,8 +174,8 @@ func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
 
 	router.HandleFunc("/story/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/story/video-get/{videoId}", handler.GetVideo).Methods("GET")
-	router.HandleFunc("/story/image-upload/{imageId}", handler.UploadVideo).Methods("POST")
-	router.HandleFunc("/story/image-get/{imageId}", handler.GetVideo).Methods("GET")
+	router.HandleFunc("/story/image-upload/{imageId}", handler.UploadImage).Methods("POST")
+	
 
 
 }
@@ -196,7 +200,6 @@ func main(){
 	postRepo.InitLocationsTrie()
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
-	//postRepo.CreateTables()
 
 
 	storyRepo := initStoryRepo(Session)

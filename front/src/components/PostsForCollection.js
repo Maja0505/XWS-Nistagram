@@ -142,7 +142,7 @@ const PostsForCollection = () => {
   }, []);
 
   const getImage = (image) => {
-    axios.get("/api/post/get-image/" + image).then((res) => {
+    axios.get("/api/media/get-media-image/" + image).then((res) => {
       return res.data;
     });
   };
@@ -152,19 +152,14 @@ const PostsForCollection = () => {
       <Grid item xs={2}></Grid>
       <Grid item xs={8}>
         {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
-        <Grid container style={{ margin: "auto"}}>
+        <Grid container style={{ margin: "auto" }}>
           {collection === "allPosts" && <h3>All Posts</h3>}
           {collection !== "allPosts" && <h3>{collection}</h3>}
         </Grid>
         <Grid container>
           {posts !== null &&
             posts.map((post) => (
-              <Grid
-                item
-                xs={4}
-                style={{ margin: "auto"}}
-                key={post.ID}
-              >
+              <Grid item xs={4} style={{ margin: "auto" }} key={post.ID}>
                 <ButtonBase
                   focusRipple
                   key={post.ID}
@@ -175,27 +170,27 @@ const PostsForCollection = () => {
                   }}
                   onClick={() => handleClickImage(post)}
                 >
-                 {post.Image.substring(
-                  post.Image.length - 3,
-                  post.Image.length
-                ) === "jpg" && (
-                  <img
-                    width="100%"
-                    height="100%"
-                    src={`http://localhost:8080/api/post/get-image/${post.Image}`}
-                  />
-                )}
-                {post.Image.substring(
-                  post.Image.length - 3,
-                  post.Image.length
-                ) !== "jpg" && (
-                  <video width="100%" height="100%" controls>
-                    <source
-                      src={`http://localhost:8080/api/post/video-get/${post.Image}`}
-                      type="video/mp4"
+                  {post.Image.substring(
+                    post.Image.length - 3,
+                    post.Image.length
+                  ) === "jpg" && (
+                    <img
+                      width="100%"
+                      height="100%"
+                      src={`http://localhost:8080/api/media/get-media-image/${post.Image}`}
                     />
-                  </video>
-                )}
+                  )}
+                  {post.Image.substring(
+                    post.Image.length - 3,
+                    post.Image.length
+                  ) !== "jpg" && (
+                    <video width="100%" height="100%" controls>
+                      <source
+                        src={`http://localhost:8080/api/media/get-video/${post.Image}`}
+                        type="video/mp4"
+                      />
+                    </video>
+                  )}
                   <span className={classes.imageBackdrop} />
                   <span className={classes.imageButton}>
                     <Typography

@@ -32,9 +32,10 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import DialogForReport from "./DialogForReport";
 import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 import UsersList from "./UsersList";
-import Picker from 'emoji-picker-react';
-
-
+import Picker from "emoji-picker-react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const useStyles = makeStyles((theme) => ({
   orange: {
@@ -65,13 +66,11 @@ const PostDialog = () => {
   const anchorRef = useRef(null);
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
   const [postSavedToFavourites, setPostSavedToFavourites] = useState(false);
-  const [openDialogForLikes,setOpenDialogForLikes] = useState(false)
-  const [openDialogForDislikes,setOpenDialogForDislikes] = useState(false)
-  const [likers,setLikers] = useState([])
-  const [dislikers,setDislikers] = useState([])
-  const [openPicker,setOpenPicker] = useState(false);
-
-
+  const [openDialogForLikes, setOpenDialogForLikes] = useState(false);
+  const [openDialogForDislikes, setOpenDialogForDislikes] = useState(false);
+  const [likers, setLikers] = useState([]);
+  const [dislikers, setDislikers] = useState([]);
+  const [openPicker, setOpenPicker] = useState(false);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -192,16 +191,15 @@ const PostDialog = () => {
 
   const handleClickAllLikes = () => {
     axios.get("/api/post/get-users-who-liked-post/" + post).then((res) => {
-      setLikers(res.data)
-      setOpenDialogForLikes(true)
+      setLikers(res.data);
+      setOpenDialogForLikes(true);
     });
   };
 
   const handleClickAllDislikes = () => {
     axios.get("/api/post/get-users-who-disliked-post/" + post).then((res) => {
-      setDislikers(res.data)
-      setOpenDialogForDislikes(true)
-
+      setDislikers(res.data);
+      setOpenDialogForDislikes(true);
     });
   };
 
@@ -274,32 +272,62 @@ const PostDialog = () => {
     </Popper>
   );
 
-
-
   const addToComment = (event, emojiObject) => {
-    setNewComment(newComment + emojiObject.emoji)
+    setNewComment(newComment + emojiObject.emoji);
   };
 
   const Emojis = (
     <>
-    {openPicker &&
-    <Grid container>
-      <Grid item xs={7}></Grid>
-      <Grid item xs={5}><Picker onEmojiClick={addToComment} /></Grid>
-
-		</Grid>
-    }
+      {openPicker && (
+        <Grid container>
+          <Grid item xs={7}></Grid>
+          <Grid item xs={5}>
+            <Picker onEmojiClick={addToComment} />
+          </Grid>
+        </Grid>
+      )}
     </>
-  )
+  );
 
   const handleClickOpenPicker = () => {
-    if(openPicker){
-      setOpenPicker(false)
-    }else{
-      setOpenPicker(true)
-
+    if (openPicker) {
+      setOpenPicker(false);
+    } else {
+      setOpenPicker(true);
     }
+  };
+
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, right: 0, width: 30, height: 30 }}
+        onClick={onClick}
+      />
+    );
   }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, left: 0 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+  };
 
   return (
     <div>
@@ -317,33 +345,43 @@ const PostDialog = () => {
             <Grid container style={{ width: "100%", height: "100%" }}>
               {imagePost !== undefined && imagePost !== null && (
                 <Grid item xs={7}>
-                  {imagePost.Image.substring(
-                    imagePost.Image.length - 3,
-                    imagePost.Image.length
-                  ) === "jpg" && (
-                    <img
-                      src={
-                        "http://localhost:8080/api/post/get-image/" +
-                        imagePost.Image
-                      }
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  )}
-                  {imagePost.Image.substring(
-                    imagePost.Image.length - 3,
-                    imagePost.Image.length
-                  ) !== "jpg" && (
-                    <video width="100%" height="100%" controls>
-                      <source
-                        src={
-                          "http://localhost:8080/api/post/get-image/" +
-                          imagePost.Image
-                        }
+                  <Slider {...settings}>
+                    {imagePost.Media.map((media, index) => (
+                      <div
                         style={{ width: "100%", height: "100%" }}
-                        type="video/mp4"
-                      />
-                    </video>
-                  )}
+                        key={index}
+                      >
+                        {media.substring(media.length - 3, media.length) ===
+                          "jpg" && (
+                          <img
+                            src={
+                              "http://localhost:8080/api/media/get-media-image/" +
+                              media
+                            }
+                            style={{ width: "100%", height: "600px" }}
+                          />
+                        )}
+                        {media.substring(media.length - 3, media.length) !==
+                          "jpg" && (
+                          <video
+                            width="100%"
+                            height="100%"
+                            style={{ marginTop: "25%" }}
+                            controls
+                          >
+                            <source
+                              src={
+                                "http://localhost:8080/api/media/get-video/" +
+                                media
+                              }
+                              style={{ width: "100%", height: "100%" }}
+                              type="video/mp4"
+                            />
+                          </video>
+                        )}
+                      </div>
+                    ))}
+                  </Slider>
                 </Grid>
               )}
 
@@ -363,19 +401,19 @@ const PostDialog = () => {
                     </h4>
                   </Grid>
                   <Grid item xs={2}>
-                    {imagePost && loggedUserId !== imagePost.UserID && 
-                    <MoreHorizIcon
-                      style={{
-                        marginTop: "50%",
-                        textAlign: "right",
-                        cursor: "pointer",
-                      }}
-                      aria-controls={open ? "menu-list-grow" : undefined}
-                      aria-haspopup="true"
-                      ref={anchorRef}
-                      onClick={handleToggle}
-                    ></MoreHorizIcon>
-                    }
+                    {imagePost && loggedUserId !== imagePost.UserID && (
+                      <MoreHorizIcon
+                        style={{
+                          marginTop: "50%",
+                          textAlign: "right",
+                          cursor: "pointer",
+                        }}
+                        aria-controls={open ? "menu-list-grow" : undefined}
+                        aria-haspopup="true"
+                        ref={anchorRef}
+                        onClick={handleToggle}
+                      ></MoreHorizIcon>
+                    )}
                     {dropDowMenuForPost}
                   </Grid>
                 </Grid>
@@ -438,52 +476,51 @@ const PostDialog = () => {
                         )}
                       </Grid>
 
-                  <Grid item xs={2}>
-                      <Divider />
-                    <SendOutlinedIcon
-                      fontSize="large"
-                      style={{ cursor: "pointer" }}
-                    ></SendOutlinedIcon>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Divider />
+                      <Grid item xs={2}>
+                        <Divider />
+                        <SendOutlinedIcon
+                          fontSize="large"
+                          style={{ cursor: "pointer" }}
+                        ></SendOutlinedIcon>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Divider />
 
-                    {postSavedToFavourites ? (
-                      <BookmarkSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkSharpIcon>
-                    ) : (
-                      <BookmarkBorderSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkBorderSharpIcon>
-                    )}
-                  </Grid>
+                        {postSavedToFavourites ? (
+                          <BookmarkSharpIcon
+                            onClick={openSaveToFavoritesDialog}
+                            style={{ marginLeft: "80%", cursor: "pointer" }}
+                            fontSize="large"
+                          ></BookmarkSharpIcon>
+                        ) : (
+                          <BookmarkBorderSharpIcon
+                            onClick={openSaveToFavoritesDialog}
+                            style={{ marginLeft: "80%", cursor: "pointer" }}
+                            fontSize="large"
+                          ></BookmarkBorderSharpIcon>
+                        )}
+                      </Grid>
                     </Grid>
                     <Grid container style={{ height: "70%" }}>
                       <Grid item xs={5}>
-                      {imagePost !== undefined && imagePost !== null &&
-                        <h5
-                          onClick={handleClickAllLikes}
-                          style={{ cursor: "pointer" }}
-                        >
-                        {imagePost.LikesCount}{" "} Likes
-                        </h5>
-                        }
+                        {imagePost !== undefined && imagePost !== null && (
+                          <h5
+                            onClick={handleClickAllLikes}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {imagePost.LikesCount} Likes
+                          </h5>
+                        )}
                       </Grid>
                       <Grid item xs={5}>
-                      {imagePost !== undefined && imagePost !== null &&
-
-                        <h5
-                          onClick={handleClickAllDislikes}
-                          style={{ cursor: "pointer" }}
-                        >
-                        {imagePost.DislikesCount}{" "}  Dislikes
-                        </h5>
-                        }
+                        {imagePost !== undefined && imagePost !== null && (
+                          <h5
+                            onClick={handleClickAllDislikes}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {imagePost.DislikesCount} Dislikes
+                          </h5>
+                        )}
                       </Grid>
                       <Grid item xs={2}></Grid>
                     </Grid>
@@ -525,18 +562,13 @@ const PostDialog = () => {
                       </Button>
                     </Grid>
                   </Grid>
-
                 </Grid>
-
               </Grid>
-
             </Grid>
           </Paper>
           {Emojis}
-
         </Grid>
         <Grid item xs={2}></Grid>
-
       </Grid>
       <DialogForReport
         loggedUserId={loggedUserId}
@@ -565,16 +597,16 @@ const PostDialog = () => {
 
       {openDialogForLikes && (
         <UsersList
-        label = "People who like post"
+          label="People who like post"
           users={likers}
           open={openDialogForLikes}
           setOpen={setOpenDialogForLikes}
         ></UsersList>
-      )}  
+      )}
 
-    {openDialogForDislikes && (
+      {openDialogForDislikes && (
         <UsersList
-        label = "People who dislike post"
+          label="People who dislike post"
           users={dislikers}
           open={openDialogForDislikes}
           setOpen={setOpenDialogForDislikes}

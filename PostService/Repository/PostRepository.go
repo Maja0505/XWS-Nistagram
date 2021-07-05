@@ -20,6 +20,7 @@ type PostRepository struct {
 }
 
 
+
 func (repo *PostRepository) CreateTables() error{
 
 	/*if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
@@ -152,15 +153,13 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 		return err
 	}
 	fmt.Println(post.ID)
-	var location = Model.Location{Location: post.Location, PostID: ID}
+	var location = Model.Location{Location: post.Location, PostID: post.ID}
 	if err := repo.AddLocation(&location); err != nil{
 		fmt.Println("Error while adding location during post creation!")
 		fmt.Println(err)
 	}
 
-	repo.SetMediaCounter(int64(len(post.Media)), ID)
-
-
+	repo.SetMediaCounter(int64(len(post.Media)), post.ID)
 	fmt.Println("Successfully created post!!")
 	return nil
 }
@@ -566,7 +565,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 
 	iter := repo.Session.Query("SELECT * FROM postkeyspace.posts WHERE userid=?", userid).Iter()
 	if iter.NumRows() == 0{
-		return nil, gocql.Error{Message: "No post found"}
+		return nil, nil
 	}
 	for iter.MapScan(m) {
 		iter2 := repo.Session.Query("SELECT * FROM postkeyspace.postcounters WHERE postid=?", m["id"].(gocql.UUID)).Iter()
