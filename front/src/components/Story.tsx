@@ -8,6 +8,7 @@ import Close from "@material-ui/icons/Close";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import { Story as StoryModel } from "../models/Story";
 import { User as UserModel } from "../models/User";
+import StarIcon from '@material-ui/icons/Star';
 
 import avatar from "../images/nistagramAvatar.jpg";
 import axios from "axios";
@@ -85,7 +86,7 @@ export default function Story({ onClose, stories, user }: Props ){
 
 <video onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/media/get-video/" + stories[storyIndex].Media} autoPlay  width="100%" style={{marginTop:"30%"}} ></video>  )
 
-  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/media/get-media-image/" + stories[storyIndex].Media} style={{height:"90%",width:"100%"}} ></img>
+  const storyImage = (<img onMouseDown={(e) => setStoryPaused(true)} onMouseUp={(e) => setStoryPaused(false)} id="video" src= {"http://localhost:8080/api/media/get-media-image/" + stories[storyIndex].Media} style={{height:"600px",width:"100%"}} ></img>
   )
 
   return (
@@ -97,10 +98,15 @@ export default function Story({ onClose, stories, user }: Props ){
           <div className="details">
             <span>{username}</span>
             <span>{stories[storyIndex].Subheading}</span>
+
           </div>
+
+          <div>
+          {stories[storyIndex].ForCloseFriends === true && <StarIcon style={{color:"green"}}>For Close</StarIcon>}
           {storyPaused && <span className="pause">PAUSED</span>}
           <MoreHoriz style={{marginLeft: storyPaused==true ? "10px" : "300px"}} />
           <Close style={{marginLeft:"20px"}} onClick={(e) => onClose()}/>
+          </div>
         </div>
         <div className="progress-bars">
           {stories.map((story, index) => (
