@@ -18,6 +18,7 @@ import (
 var Session *gocql.Session
 
 func init() {
+	fmt.Println("Initialization of cassandra...")
 	err := godotenv.Load(".env")
 
 	if err != nil {
@@ -77,7 +78,7 @@ func init() {
 		fmt.Println(err)
 	}
 
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id uuid, userid text, createdat timestamp, expiredat timestamp, image text,highlights boolean,for_close_friends boolean, PRIMARY KEY((userid, id)) );").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id timeuuid, userid text, available boolean, image text, highlights boolean, for_close_friends boolean, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
@@ -189,7 +190,7 @@ func loadTrie(trie *DataStructures.Trie, repository Repository.PostRepository){
 
 
 func main(){
-	fmt.Println("Main")
+	fmt.Println("\n----------------MAIN----------------\n")
 	postRepo := initPostRepo(Session)
 	postRepo.InitTrie()
 	postRepo.InitLocationsTrie()
@@ -210,16 +211,7 @@ func main(){
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 
-	trie :=  DataStructures.New()
-	loadTrie(trie, *postRepo)
-	tt, ttt := trie.Search("nekitag")
-	fmt.Println(tt, ttt)
-	aaa := trie.GetSuggestion("nekitag", 10)
-	fmt.Println(aaa)
-
-
-
-	fmt.Println("server running ")
+	fmt.Println("\nServer running...")
 	log.Fatal(http.ListenAndServe(":" + os.Getenv("POST_SERVICE_PORT"), handlers.CORS(headers, methods, origins)(router)))
 
 }
