@@ -28,7 +28,7 @@ services:
     links: 
       - mongo
     volumes:
-      - micro_services:/go/app/files
+      - micro_services:/app
 
   post-service:
     image: post-service:compose_build
@@ -46,7 +46,7 @@ services:
       USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
     restart: on-failure
     volumes:
-      - micro_services:/go/app/files
+      - micro_services:/app
     depends_on:
       - cass
     links: 
@@ -70,7 +70,7 @@ services:
     links: 
       - neo4j
     volumes:
-      - micro_services:/go/app/files
+      - micro_services:/app
 
   media-storage-service:
     image: media-storage-service:compose_build
@@ -83,7 +83,7 @@ services:
       MEDIA_STORAGE_SERVICE_PORT: 8080
     restart: on-failure
     volumes:
-      - micro_services:/go/app/files
+      - micro_services:/app
 
   mongo:
     image: mongo
