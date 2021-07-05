@@ -146,7 +146,7 @@ const UserHomePage = () => {
               setLoad1(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -162,7 +162,7 @@ const UserHomePage = () => {
               setLoad2(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -178,7 +178,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -194,7 +194,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -210,7 +210,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -224,7 +224,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -238,7 +238,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error.response.status);
+              alert(error);
             });
         } else {
           axios
@@ -252,7 +252,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -266,7 +266,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error.response.status);
+              alert(error);
             });
           setLoad1(true);
           setLoad2(true);
@@ -370,6 +370,8 @@ const UserHomePage = () => {
     };
     axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
       console.log("uspesno");
+      //setUser({...user,allFollowers: user.allFollowers - 1})
+
     });
     setFollowing(false);
   };
@@ -631,7 +633,7 @@ const UserHomePage = () => {
                     </>
                   )}
 
-                  {loggedUsername === username && (
+                  {loggedUsername === username && user.ProfileSettings.Public  && (
                     <>
                       <Button onClick={clickShowFollowRequests}>
                         View follow request

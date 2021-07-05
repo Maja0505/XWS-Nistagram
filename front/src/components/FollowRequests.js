@@ -141,11 +141,16 @@ export default function FollowRequest({loggedUserId,open, setOpen }) {
           id="customized-dialog-title"
           onClose={handleClose}
           style={{ textAlign: "center" }}
+          style={{width:400}}
+
         >
         <h3>Follow Requests</h3>
         </DialogTitle>
-        <DialogContent dividers>
-        {allRequests !== null && allRequests.map((request) => (
+        <DialogContent 
+          style={{width:400,height:400}}
+        dividers>
+        {allRequests === undefined || allRequests === null || (allRequests !== null && allRequests.length === 0) && <p>No follow requests</p>}
+        {allRequests !== null && allRequests.length !== 0 && allRequests.map((request) => (
 
             <Grid container>
                <Grid item xs={4}>

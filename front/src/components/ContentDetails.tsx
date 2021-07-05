@@ -31,6 +31,7 @@ export default function ContentDetails() {
   const [users,setUsers] = useState([])
   const loggedUserId = localStorage.getItem("id");
   const [haveProfileImage,setHaveProfileImage] = useState(false)
+  const [haveStory,setHaveStory] = useState(false)
 
   useEffect(() => {
     axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId)
@@ -41,8 +42,12 @@ export default function ContentDetails() {
     })
    axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
     .then((res) => {
-      console.log(res.data)
-      setStories(res.data)
+      if(res.data){
+        console.log(res.data)
+        setStories(res.data)
+        setHaveStory(true)
+      }
+     
     })
 
     axios.get("api/media/get-profile-picture/" + loggedUserId + ".jpg").then((res) => {
@@ -152,6 +157,7 @@ export default function ContentDetails() {
                 id="menu-list-grow"
                 onKeyDown={handleListKeyDown}
               >
+                {haveStory &&
                 <MenuItem onClick={handleClickOpenMyStories}>
                   <Grid container>
                     <Grid item xs={3}></Grid>
@@ -161,7 +167,7 @@ export default function ContentDetails() {
                       </div>
                     </Grid>
                   </Grid>
-                </MenuItem>
+                </MenuItem>}
                 <MenuItem onClick={handleClickAddStory}>
                   <Grid container>
                     <Grid item xs={3}></Grid>
@@ -207,7 +213,7 @@ export default function ContentDetails() {
                             ))}
                           </Grid>
                           
-                          <AddStory open={openDialog} setOpen={setOpenDialog}></AddStory>
+                          <AddStory open={openDialog} setOpen={setOpenDialog} setHaveStory={setHaveStory}></AddStory>
                         </div>)
         
   const showStories=(<div>{stories !== undefined && stories !== null && stories.length !== 0 &&  <Story stories={stories} onClose={closeStory} user={username}></Story>}</div>)

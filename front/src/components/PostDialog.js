@@ -54,7 +54,7 @@ const PostDialog = () => {
   const [newComment, setNewComment] = useState("");
 
   const { post } = useParams();
-  const { username } = useParams();
+  const [user,setUser] = useState()
 
   const [imagePost, setImagePost] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
@@ -120,6 +120,10 @@ const PostDialog = () => {
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
       makeDescriptionFromPost(res.data.Description);
+      axios.get("/api/user/userid/" + res.data.UserID).
+        then((res1)=> {
+          setUser(res1.data)
+        })
 
       console.log(res.data);
     });
@@ -388,17 +392,22 @@ const PostDialog = () => {
               <Grid item xs={5}>
                 <Grid container style={{ height: "15%" }}>
                   <Grid item xs={3}>
+                    {user !== undefined && user !== null &&
                     <Avatar
-                      className={classes.orange}
                       style={{ margin: "auto", marginTop: "25%" }}
+                      src={
+                        "http://localhost:8080/api/media/get-profile-picture/" +
+                        user.IdString + ".jpg"
+                      }
                     >
                       N
-                    </Avatar>
+                    </Avatar>}
                   </Grid>
                   <Grid item xs={7}>
+                    {user !== undefined && user !== null && 
                     <h4 style={{ marginTop: "10%", textAlign: "left" }}>
-                      {username}
-                    </h4>
+                      {user.Username}
+                    </h4>}
                   </Grid>
                   <Grid item xs={2}>
                     {imagePost && loggedUserId !== imagePost.UserID && (
