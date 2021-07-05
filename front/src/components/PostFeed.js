@@ -6,20 +6,33 @@ import {
   FormLabel,
   Button,
   InputBase,
+  Grow,
+  Popper,
+  MenuItem,
+  MenuList,
+  ClickAwayListener,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import avatar from "../images/nistagramAvatar.jpg";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MoreHoriz,
   ThumbUpOutlined,
-  ThumbDownAltOutlined,
+  ThumbUp,
+  ThumbDownOutlined,
+  ThumbDown,
   SendRounded,
   BookmarkBorderRounded,
+  BookmarkRounded,
   SentimentSatisfiedRounded,
 } from "@material-ui/icons";
 
+import UsersList from "./UsersList";
+import CommentsForFeeds from "./CommentsForFeeds.js";
+import DialogForReport from "./DialogForReport";
+import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 import Slider from "react-slick";
+import Picker from "emoji-picker-react";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -30,6 +43,52 @@ const PostFeed = ({ feed }) => {
   const [username, setUsername] = useState();
   const [profileImage, setProfileImage] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
+  const loggedUserId = localStorage.getItem("id");
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [copyOfFeed, setCopyOfFeed] = useState();
+  const [newComment, setNewComment] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState([]);
+
+  const [openDialogForLikes, setOpenDialogForLikes] = useState(false);
+  const [likers, setLikers] = useState([]);
+  const [openDialogForDislikes, setOpenDialogForDislikes] = useState(false);
+  const [dislikers, setDislikers] = useState([]);
+
+  const [openPicker, setOpenPicker] = useState(false);
+  const [openDialogForReport, setOpenDialogForReport] = useState(false);
+  const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleOpenDialogForReport = () => {
+    setOpenDialogForReport(true);
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
+
+  const prevOpen = useRef(open);
 
   const settings = {
     dots: true,
@@ -80,6 +139,37 @@ const PostFeed = ({ feed }) => {
   };
 
   useEffect(() => {
+    setCopyOfFeed(feed);
+
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpen.current = open;
+
+    axios
+      .put("/api/post/like-exists", { PostID: feed.ID, UserID: loggedUserId })
+      .then((res) => {
+        setIsLiked(res.data);
+      });
+
+    axios
+      .put("/api/post/dislike-exists", {
+        PostID: feed.ID,
+        UserID: loggedUserId,
+      })
+      .then((res) => {
+        setIsDisliked(res.data);
+      });
+
+    axios
+      .get(
+        "/api/post/post-exists-in-favourites/" + loggedUserId + "/" + feed.ID
+      )
+      .then((res) => {
+        setIsSaved(res.data);
+      });
+
     makeDescriptionFromPost(feed.Description);
     axios
       .get("/api/user/find-username-and-profile-picture/" + feed.UserID)
@@ -89,9 +179,184 @@ const PostFeed = ({ feed }) => {
       });
   }, [feed]);
 
+  const likePost = () => {
+    axios
+      .post("/api/post/like-post", { PostID: feed.ID, UserID: loggedUserId })
+      .then((res) => {
+        if (!isLiked) {
+          if (isDisliked) {
+            setIsDisliked(!isDisliked);
+            setCopyOfFeed({
+              ...copyOfFeed,
+              DislikesCount: Number(copyOfFeed.DislikesCount) - Number(1),
+              LikesCount: Number(copyOfFeed.LikesCount) + Number(1),
+            });
+          } else {
+            setCopyOfFeed({
+              ...copyOfFeed,
+              LikesCount: Number(copyOfFeed.LikesCount) + Number(1),
+            });
+          }
+        } else {
+          if (isDisliked) {
+            setIsDisliked(!isDisliked);
+            setCopyOfFeed({
+              ...copyOfFeed,
+              DislikesCount: Number(copyOfFeed.DislikesCount) - Number(1),
+              LikesCount: Number(copyOfFeed.LikesCount) - Number(1),
+            });
+          } else {
+            setCopyOfFeed({
+              ...copyOfFeed,
+              LikesCount: Number(copyOfFeed.LikesCount) - Number(1),
+            });
+          }
+        }
+        setIsLiked(!isLiked);
+      });
+  };
+
+  const dislikePost = () => {
+    axios
+      .post("/api/post/dislike-post", { PostID: feed.ID, UserID: loggedUserId })
+      .then((res) => {
+        if (!isDisliked) {
+          if (isLiked) {
+            setIsLiked(!isLiked);
+            setCopyOfFeed({
+              ...copyOfFeed,
+              LikesCount: Number(copyOfFeed.LikesCount) - Number(1),
+              DislikesCount: Number(copyOfFeed.DislikesCount) + Number(1),
+            });
+          } else {
+            setCopyOfFeed({
+              ...copyOfFeed,
+              DislikesCount: Number(copyOfFeed.DislikesCount) + Number(1),
+            });
+          }
+        } else {
+          if (isLiked) {
+            setIsLiked(!isLiked);
+            setCopyOfFeed({
+              ...copyOfFeed,
+              LikesCount: Number(copyOfFeed.LikesCount) - Number(1),
+              DislikesCount: Number(copyOfFeed.DislikesCount) - Number(1),
+            });
+          } else {
+            setCopyOfFeed({
+              ...copyOfFeed,
+              DislikesCount: Number(copyOfFeed.DislikesCount) - Number(1),
+            });
+          }
+        }
+        setIsDisliked(!isDisliked);
+      });
+  };
+
+  const addComment = () => {
+    axios
+      .post("/api/post/add-comment", {
+        PostID: feed.ID,
+        UserID: loggedUserId,
+        Content: newComment,
+      })
+      .then((res) => {
+        axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
+          setComments(res.data);
+        });
+        setCopyOfFeed({
+          ...copyOfFeed,
+          CommentsCount: Number(copyOfFeed.CommentsCount) + Number(1),
+        });
+        setNewComment("");
+      });
+  };
+
+  const viewComments = () => {
+    axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
+      setComments(res.data);
+      setShowComments(true);
+    });
+  };
+
+  const addToComment = (event, emojiObject) => {
+    setNewComment(newComment + emojiObject.emoji);
+  };
+
+  const getUsersWhoLikedPost = () => {
+    axios.get("/api/post/get-users-who-liked-post/" + feed.ID).then((res) => {
+      setLikers(res.data);
+      setOpenDialogForLikes(true);
+    });
+  };
+
+  const getUsersWhoDislikedPost = () => {
+    axios
+      .get("/api/post/get-users-who-disliked-post/" + feed.ID)
+      .then((res) => {
+        setDislikers(res.data);
+        setOpenDialogForDislikes(true);
+      });
+  };
+
+  const dropDowMenuForPost = (
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      role={undefined}
+      transition
+      disablePortal
+      style={{ width: "15%", zIndex: "1" }}
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          {...TransitionProps}
+          style={{
+            transformOrigin:
+              placement === "bottom" ? "center top" : "center bottom",
+          }}
+        >
+          <Paper>
+            <ClickAwayListener onClickAway={handleClose}>
+              <MenuList
+                autoFocusItem={open}
+                id="menu-list-grow"
+                onKeyDown={handleListKeyDown}
+              >
+                <MenuItem onClick={handleOpenDialogForReport}>
+                  <Grid container>
+                    <Grid item xs={3}></Grid>
+                    <Grid item xs={9}>
+                      <div style={{ width: "100%" }} style={{ color: "red" }}>
+                        Report
+                      </div>
+                    </Grid>
+                  </Grid>
+                </MenuItem>
+              </MenuList>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  );
+
+  const Emojis = (
+    <>
+      {openPicker && (
+        <Grid container>
+          <Grid item xs={5}>
+            <Picker onEmojiClick={addToComment} />
+          </Grid>
+          <Grid item xs={7}></Grid>
+        </Grid>
+      )}
+    </>
+  );
+
   return (
     <div>
-      {feed !== undefined && feed !== null && (
+      {copyOfFeed !== undefined && copyOfFeed !== null && (
         <>
           <Paper
             style={{
@@ -134,7 +399,14 @@ const PostFeed = ({ feed }) => {
                 {"ovde lokacija ako je ima"}
               </Grid>
               <Grid item xs={2} style={{ margin: "auto" }}>
-                <MoreHoriz />
+                <MoreHoriz
+                  style={{ cursor: "pointer" }}
+                  aria-controls={open ? "menu-list-grow" : undefined}
+                  aria-haspopup="true"
+                  ref={anchorRef}
+                  onClick={handleToggle}
+                />
+                {dropDowMenuForPost}
               </Grid>
             </Grid>
           </Paper>
@@ -148,7 +420,7 @@ const PostFeed = ({ feed }) => {
             }}
           >
             <Slider {...settings}>
-              {feed.Media.map((media, index) => (
+              {copyOfFeed.Media.map((media, index) => (
                 <div style={{ width: "100%", height: "100%" }} key={index}>
                   {media.substring(media.length - 3, media.length) ===
                     "jpg" && (
@@ -159,7 +431,7 @@ const PostFeed = ({ feed }) => {
                       }
                       style={{
                         width: "100%",
-                        height: feed.Media.length > 1 ? "470px" : "100%",
+                        height: copyOfFeed.Media.length > 1 ? "470px" : "100%",
                       }}
                     />
                   )}
@@ -196,19 +468,40 @@ const PostFeed = ({ feed }) => {
               <Grid container item xs={4}>
                 <Grid item xs={1} />
                 <Grid item xs={3}>
-                  <ThumbUpOutlined
-                    fontSize="large"
-                    style={{ margin: "auto" }}
-                  />
+                  {isLiked ? (
+                    <ThumbUp
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={likePost}
+                    />
+                  ) : (
+                    <ThumbUpOutlined
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={likePost}
+                    />
+                  )}
                 </Grid>
                 <Grid item xs={3}>
-                  <ThumbDownAltOutlined
-                    fontSize="large"
-                    style={{ margin: "auto" }}
-                  />
+                  {isDisliked ? (
+                    <ThumbDown
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={dislikePost}
+                    />
+                  ) : (
+                    <ThumbDownOutlined
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={dislikePost}
+                    />
+                  )}
                 </Grid>
                 <Grid item xs={3}>
-                  <SendRounded fontSize="large" style={{ margin: "auto" }} />
+                  <SendRounded
+                    fontSize="large"
+                    style={{ margin: "auto", cursor: "pointer" }}
+                  />
                 </Grid>
               </Grid>
               <Grid item xs={4} />
@@ -217,26 +510,41 @@ const PostFeed = ({ feed }) => {
                 <Grid item xs={3} />
                 <Grid item xs={3} />
                 <Grid item xs={3}>
-                  <BookmarkBorderRounded
-                    fontSize="large"
-                    style={{ margin: "auto" }}
-                  />
+                  {isSaved ? (
+                    <BookmarkRounded
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={() => setSaveToFavoritesDialog(true)}
+                    />
+                  ) : (
+                    <BookmarkBorderRounded
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={() => setSaveToFavoritesDialog(true)}
+                    />
+                  )}
                 </Grid>
               </Grid>
             </Grid>
 
             <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
-              <FormLabel style={{ fontSize: "14px" }}>
-                <b>{feed.LikesCount} likes</b>
+              <FormLabel
+                style={{ fontSize: "14px", cursor: "pointer" }}
+                onClick={getUsersWhoLikedPost}
+              >
+                <b>{copyOfFeed.LikesCount} likes</b>
               </FormLabel>
             </Grid>
             <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
-              <FormLabel style={{ fontSize: "14px" }}>
-                <b>{feed.DislikesCount} dislikes</b>
+              <FormLabel
+                style={{ fontSize: "14px", cursor: "pointer" }}
+                onClick={getUsersWhoDislikedPost}
+              >
+                <b>{copyOfFeed.DislikesCount} dislikes</b>
               </FormLabel>
             </Grid>
             <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
-              {feed.Description.length !== 0 && (
+              {copyOfFeed.Description.length !== 0 && (
                 <label style={{ textAlign: "left" }}>
                   <Link
                     to={"/homePage/" + username}
@@ -261,22 +569,29 @@ const PostFeed = ({ feed }) => {
                 </label>
               )}
             </Grid>
-            {feed.CommentsCount > 0 && (
-              <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
-                <FormLabel style={{ fontSize: "13px" }}>
-                  View all {feed.CommentsCount} comments
-                </FormLabel>
-              </Grid>
+            {copyOfFeed.CommentsCount > 0 && (
+              <div>
+                <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
+                  <FormLabel
+                    style={{ fontSize: "13px" }}
+                    style={{ cursor: "pointer" }}
+                    onClick={viewComments}
+                  >
+                    View all {copyOfFeed.CommentsCount} comments
+                  </FormLabel>
+                </Grid>
+                <>{showComments && <CommentsForFeeds comments={comments} />}</>
+              </div>
             )}
             <Grid container style={{ marginTop: "1%", marginLeft: "4.4%" }}>
               <FormLabel style={{ fontSize: "13px" }}>
-                POSTED {feed.CreatedAt.split("-")[2].substring(0, 2)}
+                POSTED {copyOfFeed.CreatedAt.split("-")[2].substring(0, 2)}
                 {"."}
-                {feed.CreatedAt.split("-")[1]}
+                {copyOfFeed.CreatedAt.split("-")[1]}
                 {"."}
-                {feed.CreatedAt.split("-")[0]}
+                {copyOfFeed.CreatedAt.split("-")[0]}
                 {". AT "}
-                {feed.CreatedAt.split("T")[1].substring(0, 5)}
+                {copyOfFeed.CreatedAt.split("T")[1].substring(0, 5)}
                 {" H"}
               </FormLabel>
             </Grid>
@@ -299,6 +614,7 @@ const PostFeed = ({ feed }) => {
                     cursor: "pointer",
                   }}
                   fontSize="large"
+                  onClick={() => setOpenPicker(!openPicker)}
                 />
               </Grid>
               <Grid item xs={9} style={{ margin: "auto" }}>
@@ -306,16 +622,62 @@ const PostFeed = ({ feed }) => {
                   placeholder="Add a comment..."
                   inputProps={{ "aria-label": "naked" }}
                   style={{ width: "100%", textAlign: "left" }}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
                 />
               </Grid>
               <Grid item xs={1} style={{ margin: "auto", textAlign: "right" }}>
-                <Button variant="text" color="primary">
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={addComment}
+                  disabled={newComment !== "" ? false : true}
+                >
                   POST
                 </Button>
               </Grid>
+              {Emojis}
             </Grid>
           </Paper>
         </>
+      )}
+
+      {saveToFavoritesDialog && (
+        <DialogForSaveToFavorites
+          loggedUserId={loggedUserId}
+          post={feed.ID}
+          open={saveToFavoritesDialog}
+          setOpen={setSaveToFavoritesDialog}
+          saved={isSaved}
+          setSaved={setIsSaved}
+        ></DialogForSaveToFavorites>
+      )}
+
+      {openDialogForReport && (
+        <DialogForReport
+          loggedUserId={loggedUserId}
+          post={feed.ID}
+          open={openDialogForReport}
+          setOpen={setOpenDialogForReport}
+        ></DialogForReport>
+      )}
+
+      {openDialogForLikes && (
+        <UsersList
+          label="People who like post"
+          users={likers}
+          open={openDialogForLikes}
+          setOpen={setOpenDialogForLikes}
+        ></UsersList>
+      )}
+
+      {setOpenDialogForDislikes && (
+        <UsersList
+          label="People who dislike post"
+          users={dislikers}
+          open={openDialogForDislikes}
+          setOpen={setOpenDialogForDislikes}
+        ></UsersList>
       )}
     </div>
   );
