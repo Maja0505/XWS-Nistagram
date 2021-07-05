@@ -14,6 +14,10 @@ import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { makeStyles } from "@material-ui/core/styles";
 import uuid from "react-uuid";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+
 import axios from "axios";
 
 const styles = (theme) => ({
@@ -37,15 +41,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AddStoryDialog = ({ open, setOpen }) => {
+const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
-  const [selectedFile, setSelectedFile] = useState();
-  const [image, setImage] = useState();
+  const [selectedFile, setSelectedFile] = useState([]);
+  const [image, setImage] = useState([]);
   const [close, setClose] = useState(false);
   const [highlights, setHighLights] = useState(false);
   const loggedUserId = localStorage.getItem("id");
-  const [isVideo, setIsVideo] = useState(false);
+  const [isVideo, setIsVideo] = useState([]);
 
   const HandleOnChangeCloseFriends = () => {
     if (close) {
@@ -69,70 +73,102 @@ const AddStoryDialog = ({ open, setOpen }) => {
     setOpen(false);
   };
 
-  const HandleClickOnSend = () => {
-    if (!isVideo) {
+  const createPost = () => {
+    console.log(image);
+
+    for (let index = 0; index < image.length; index++) {
+      
+      HandleClickOnSend(image[index], index);
+      
+    }
+
+    setOpen(false);
+  };
+
+  const HandleClickOnSend = (imageForUpload, index) => {
+    if (!isVideo[index]) {
       var imageString = "" + loggedUserId + "-" + uuid();
-      var story = {
-        UserID: loggedUserId,
-        Image: imageString + ".jpg",
-        Highlights: highlights,
-        ForCloseFriends: close,
-      };
+     
 
       axios
-        .post("/api/post/story/image-upload/" + imageString, image, {
+        .post("/api/media/upload-media-image/" + imageString + "/" + "image" + index, imageForUpload, {
           headers: { "Content-Type": "multipart/form-data" },
         })
 
         .then((res) => {
+          var story = {
+            UserID: loggedUserId,
+            Image: imageString + ".jpg",
+            Highlights: highlights,
+            ForCloseFriends: close,
+          };
           axios.post("/api/post/story/create", story).then((res) => {
             console.log("uspesno");
-            setOpen(false);
+            //setOpen(false);
+            setHaveStory(true)
           });
-        });
+        }).catch((error) => {
+          alert(error)
+        });;
     } else {
       var imageString = "" + loggedUserId + "-" + uuid();
-      var story = {
-        UserID: loggedUserId,
-        Image: imageString + ".mp4",
-        Highlights: highlights,
-        ForCloseFriends: close,
-      };
+     
 
       axios
         .post(
-          "/api/media/upload-video/" + imageString,
-          image,
+          "/api/media/upload-video/"  + imageString + "/" + "image" + index,
+          imageForUpload,
 
           {
             headers: { "Content-Type": "multipart/form-data" },
           }
         )
         .then((res) => {
+          var story = {
+            UserID: loggedUserId,
+            Image: imageString + ".mp4",
+            Highlights: highlights,
+            ForCloseFriends: close,
+          };
           axios.post("/api/post/story/create", story).then((res) => {
             console.log("uspesno");
+            //setOpen(false);
+            setHaveStory(true)
           });
+        }).catch((error) => {
+          alert(error)
         });
     }
   };
 
   const HandleUploadClick = (event) => {
-    var formData = new FormData();
-    console.log(event.target.files[0]);
-    var file = event.target.files[0];
-    if (event.target.files[0].type === "video/mp4") {
-      setIsVideo(true);
-    } else {
-      setIsVideo(false);
-    }
-    formData.append("myFile", file);
-    const reader = new FileReader();
-    var url = reader.readAsDataURL(file);
-    reader.onloadend = function (e) {
-      setSelectedFile(reader.result);
-    }.bind(this);
+    setSelectedFile([]);
+    setIsVideo([]);
+    setImage([]);
 
-    setImage(formData);
+    var formData = new FormData();
+    for (let index = 0; index < event.target.files.length; index++) {
+      if (event.target.files[index].type === "video/mp4") {
+        var array = isVideo;
+        array.push(true);
+        setIsVideo(array);
+      } else {
+        var array = isVideo;
+        array.push(false);
+        setIsVideo(array);
+      }
+
+      var file = event.target.files[index];
+      formData.append("image" + index, file);
+      const reader = new FileReader();
+      var url = reader.readAsDataURL(file);
+      reader.onloadend = function (e) {
+        setSelectedFile((prevState) => [...prevState, reader.result]);
+      }.bind(this);
+      setImage((prevState) => [...prevState, formData]);
+      console.log(formData);
+    }
+    console.log(isVideo);
   };
 
   const DialogContent = withStyles((theme) => ({
@@ -166,6 +202,40 @@ const AddStoryDialog = ({ open, setOpen }) => {
       </MuiDialogTitle>
     );
   });
+
+
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, right: 0, width: 30, height: 30 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, left: 0 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+  };
+
 
   return (
     <div>
@@ -205,16 +275,32 @@ const AddStoryDialog = ({ open, setOpen }) => {
             <Grid item xs={1}></Grid>
 
             <Grid item xs={10}>
-              {!isVideo && <img width="100%" src={selectedFile} />}
-              {isVideo && (
-                <video width="100%" controls>
-                  <source src={selectedFile} type="video/mp4" />
-                </video>
-              )}
+            {selectedFile &&
+            <div>
+                <Slider {...settings}>
+                  {selectedFile.map((media, index) => (
+                    <div>
+                      {!isVideo[index] && (
+                        <img
+                          width="100%"
+                          height="500px"
+                          src={selectedFile[index]}
+                        />
+                      )}
+                      {isVideo[index] && (
+                        <video width="100%" controls>
+                          <source src={selectedFile[index]} type="video/mp4" />
+                        </video>
+                      )}
+                    </div>
+                  ))}
+                </Slider>
+              </div>}
             </Grid>
             <Grid item xs={1}></Grid>
           </Grid>
           <Divider />
+          {selectedFile !== undefined && selectedFile !== null && selectedFile.length !== 0 &&
           <Grid container style={{ height: "10%" }}>
             <Grid item xs={5}>
               <FormGroup>
@@ -248,12 +334,13 @@ const AddStoryDialog = ({ open, setOpen }) => {
               <Button
                 style={{ alignItems: "end" }}
                 variant="contained"
-                onClick={HandleClickOnSend}
+                onClick={createPost}
+                
               >
                 Add
               </Button>
             </Grid>
-          </Grid>
+          </Grid>}
         </DialogContent>
       </Dialog>
     </div>

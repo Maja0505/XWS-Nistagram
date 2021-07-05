@@ -122,11 +122,13 @@ export default function DialogForListMuteUser({loggedUserId,open, setOpen }) {
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center" }}
+          style={{ textAlign: "center",width:400  }}
         >
         <h3>Muted users</h3>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent
+        style={{width:400,height:400}}
+        dividers>
         {allMuted !== null && allMuted.map((muted) => (
 
             <Grid container>

@@ -152,8 +152,8 @@ const Posts = ({ userForProfile, username }) => {
   return (
     <div className={classes.root}>
       {redirection === true && (
-        <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>
-      )}
+            <Redirect to={"/dialog/" + postID}></Redirect>
+            )}
       <Grid container>
         {posts !== null &&
           posts !== undefined &&
