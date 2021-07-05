@@ -154,6 +154,7 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-all-collections-for-post-by-user/{id}/{post}", handler.GetAllCollectionsForPostByUser).Methods("GET")
 	router.HandleFunc("/get-all-post-feeds-for-user/{userId}", handler.GetAllPostFeedsForUser).Methods("GET")
 	router.HandleFunc("/get-tag-suggestions/{tag}", handler.GetTagSuggestions).Methods("GET")
+	router.HandleFunc("/get-all-tags", handler.GetAllTags).Methods("GET")
 	router.HandleFunc("/get-location-for-post/{postId}", handler.GetLocationForPost).Methods("GET")
 	router.HandleFunc("/get-location-suggestions/{location}", handler.GetLocationSuggestions).Methods("GET")
 
