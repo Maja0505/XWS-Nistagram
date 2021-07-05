@@ -12,6 +12,8 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
+import highlights from "../images/highlights.jpg";
+
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
@@ -32,7 +34,7 @@ import {
 } from "@material-ui/icons";
 import UsersList from "./UsersList";
 import AddPost from "./AddPost";
-
+import Story from "./Story";
 const UserHomePage = () => {
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
@@ -59,6 +61,8 @@ const UserHomePage = () => {
   const [openDialogForFollowers, setOpenDialogForFollowers] = useState(false);
   const [openDialogForFollowRequests, setOpenDialogForFollowRequests] =
     useState(false);
+  const [openHighlightsDialog, setOpenHighlightsDialog] = useState(false);
+  const [highlightStories, setHighlightStories] = useState([]);
 
   const loggedUserId = localStorage.getItem("id");
 
@@ -268,6 +272,13 @@ const UserHomePage = () => {
           setLoad2(true);
           setLoad3(true);
         }
+        axios
+          .get("/api/post/story/all-highlights/" + res.data.IdString)
+          .then((res) => {
+            if (res.data) {
+              setHighlightStories(res.data);
+            }
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -419,6 +430,9 @@ const UserHomePage = () => {
       </Link>
     </Button>
   );
+  function closeStory() {
+    setOpenHighlightsDialog(false);
+  }
 
   const dropDowMenuForProfile = (
     <Popper
@@ -510,155 +524,189 @@ const UserHomePage = () => {
     </Popper>
   );
 
+  const handleClickOpen = () => {
+    setOpenHighlightsDialog(true);
+  };
+
   const userDetails = (
     <Grid container style={{ marginTop: "3%" }}>
-      <Grid item xs={2}></Grid>
-      <Grid container item xs={8}>
-        <Grid item xs={4}>
-          {user !== undefined && user.ProfilePicture !== "" && (
-            <img
-              src={
-                "http://localhost:8080/api/user/get-image/" +
-                user.ProfilePicture
-              }
-              alt="Not founded"
-              style={{
-                borderRadius: "50%",
-                border: "1px solid",
-                width: "150px",
-                height: "150px",
-              }}
-            />
-          )}
-          {user !== undefined && user.ProfilePicture === "" && (
-            <img
-              src={avatar}
-              alt="Not founded"
-              style={{
-                borderRadius: "50%",
-                border: "1px solid",
-                width: "150px",
-                height: "150px",
-              }}
-            />
+      <Grid container style={{ margin: "auto" }}>
+        <Grid item xs={2}></Grid>
+        <Grid container item xs={8}>
+          <Grid item xs={4}>
+            {user !== undefined && user.ProfilePicture !== "" && (
+              <img
+                src={
+                  "http://localhost:8080/api/media/get-profile-picture/" +
+                  user.ProfilePicture
+                }
+                alt="Not founded"
+                style={{
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  width: "150px",
+                  height: "150px",
+                }}
+              />
+            )}
+            {user !== undefined && user.ProfilePicture === "" && (
+              <img
+                src={avatar}
+                alt="Not founded"
+                style={{
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  width: "150px",
+                  height: "150px",
+                }}
+              />
+            )}
+          </Grid>
+          {user !== undefined && (
+            <Grid item xs={7}>
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <Grid
+                      item
+                      xs={3}
+                      style={{
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography variant="h6" style={{ margin: "auto" }}>
+                        {user.Username} {"  "}
+                        {user.VerificationSettings.Verified && (
+                          <img
+                            src={verification}
+                            style={{
+                              height: "20px",
+                              width: "20px",
+                              marginTop: "2%",
+                            }}
+                          ></img>
+                        )}
+                      </Typography>
+                    </Grid>
+                  </>
+                )}
+
+                <Grid item xs={3}>
+                  {loggedUsername === username && buttonForEditProfile}
+                  {requested &&
+                    loggedUsername !== username &&
+                    buttonForRequested}
+                  {following &&
+                    loggedUsername !== username &&
+                    !requested &&
+                    buttonForUnfollow}
+                  {!following &&
+                    loggedUsername !== username &&
+                    !requested &&
+                    buttonForFollow}
+                </Grid>
+
+                <Grid item xs={2}></Grid>
+
+                <Grid
+                  item
+                  xs={4}
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  {loggedUsername !== username && (
+                    <>
+                      <MoreHorizIcon
+                        style={{
+                          textAlign: "right",
+                          cursor: "pointer",
+                        }}
+                        aria-controls={open ? "menu-list-grow" : undefined}
+                        aria-haspopup="true"
+                        ref={anchorRef}
+                        onClick={handleToggle}
+                      ></MoreHorizIcon>
+                      {dropDowMenuForProfile}
+                    </>
+                  )}
+
+                  {loggedUsername === username && (
+                    <>
+                      <Button onClick={clickShowFollowRequests}>
+                        View follow request
+                      </Button>
+                    </>
+                  )}
+                </Grid>
+              </Grid>
+              <br></br>
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <FormLabel>0 posts</FormLabel>
+                    <FormLabel
+                      style={{ marginLeft: "auto", cursor: "pointer" }}
+                      onClick={handleClickOnFollowers}
+                    >
+                      {allFollowers.length} followers
+                    </FormLabel>
+                    <FormLabel
+                      style={{ marginLeft: "auto", cursor: "pointer" }}
+                      onClick={handleClickOnFollows}
+                    >
+                      {allFollows.length} following
+                    </FormLabel>{" "}
+                  </>
+                )}
+              </Grid>
+              {user !== undefined && (
+                <Grid container style={{ marginTop: "1%" }}>
+                  <Typography variant="inherit" align="left">
+                    {user.FirstName} {user.LastName}
+                  </Typography>
+                </Grid>
+              )}
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <Typography style={{ textAlign: "left" }}>
+                      {user.Biography}
+                    </Typography>
+                  </>
+                )}
+              </Grid>
+            </Grid>
           )}
         </Grid>
-        {user !== undefined && (
-          <Grid item xs={7}>
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <Grid
-                    item
-                    xs={3}
-                    style={{
-                      textAlign: "left",
-                    }}
-                  >
-                    <Typography variant="h6" style={{ margin: "auto" }}>
-                      {user.Username} {"  "}
-                      {user.VerificationSettings.Verified && (
-                        <img
-                          src={verification}
-                          style={{
-                            height: "20px",
-                            width: "20px",
-                            marginTop: "2%",
-                          }}
-                        ></img>
-                      )}
-                    </Typography>
-                  </Grid>
-                </>
-              )}
-
-              <Grid item xs={3}>
-                {loggedUsername === username && buttonForEditProfile}
-                {requested && loggedUsername !== username && buttonForRequested}
-                {following &&
-                  loggedUsername !== username &&
-                  !requested &&
-                  buttonForUnfollow}
-                {!following &&
-                  loggedUsername !== username &&
-                  !requested &&
-                  buttonForFollow}
-              </Grid>
-
-              <Grid item xs={2}></Grid>
-
-              <Grid
-                item
-                xs={4}
-                style={{
-                  textAlign: "right",
-                }}
-              >
-                {loggedUsername !== username && (
-                  <>
-                    <MoreHorizIcon
-                      style={{
-                        textAlign: "right",
-                        cursor: "pointer",
-                      }}
-                      aria-controls={open ? "menu-list-grow" : undefined}
-                      aria-haspopup="true"
-                      ref={anchorRef}
-                      onClick={handleToggle}
-                    ></MoreHorizIcon>
-                    {dropDowMenuForProfile}
-                  </>
-                )}
-
-                {loggedUsername === username && (
-                  <>
-                    <Button onClick={clickShowFollowRequests}>
-                      View follow request
-                    </Button>
-                  </>
-                )}
-              </Grid>
-            </Grid>
-            <br></br>
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <FormLabel>0 posts</FormLabel>
-                  <FormLabel
-                    style={{ marginLeft: "auto", cursor: "pointer" }}
-                    onClick={handleClickOnFollowers}
-                  >
-                    {allFollowers.length} followers
-                  </FormLabel>
-                  <FormLabel
-                    style={{ marginLeft: "auto", cursor: "pointer" }}
-                    onClick={handleClickOnFollows}
-                  >
-                    {allFollows.length} following
-                  </FormLabel>{" "}
-                </>
-              )}
-            </Grid>
-            {user !== undefined && (
-              <Grid container style={{ marginTop: "1%" }}>
-                <Typography variant="inherit" align="left">
-                  {user.FirstName} {user.LastName}
-                </Typography>
-              </Grid>
-            )}
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <Typography style={{ textAlign: "left" }}>
-                    {user.Biography}
-                  </Typography>
-                </>
-              )}
-            </Grid>
-          </Grid>
-        )}
+        <Grid item xs={2}></Grid>
       </Grid>
-      <Grid item xs={2}></Grid>
+      <Grid container style={{ marginTop: "1%" }}></Grid>
+      {highlightStories.length !== 0 && !privateProfile && (
+        <Grid container style={{ margin: "auto" }}>
+          <Grid item xs={2}></Grid>
+          <Grid container item xs={8}>
+            <Grid item xs={4}>
+              <div onClick={handleClickOpen}>
+                <div>
+                  <img
+                    src={highlights}
+                    style={{
+                      borderRadius: "50%",
+                      border: "1px solid",
+                      width: "50px",
+                      height: "50px",
+                    }}
+                  />
+                </div>
+                <div>{"Highlights"}</div>
+              </div>
+            </Grid>
+            <Grid item xs={7}></Grid>
+          </Grid>
+          <Grid item xs={2}></Grid>
+        </Grid>
+      )}
     </Grid>
   );
 
@@ -827,6 +875,18 @@ const UserHomePage = () => {
           )}
         </div>
       )}
+      <div>
+        {openHighlightsDialog &&
+          highlightStories !== undefined &&
+          highlightStories !== null &&
+          highlightStories.length !== 0 && (
+            <Story
+              stories={highlightStories}
+              onClose={closeStory}
+              user={user.IdString}
+            ></Story>
+          )}
+      </div>
     </>
   );
 };

@@ -12,7 +12,6 @@ const HashTagPost = () => {
 
   useEffect(() => {
     axios.get("/api/post/get-all-by-tag/" + tag).then((res) => {
-      console.log(res.data);
       setPosts(res.data);
     });
   }, []);
@@ -25,14 +24,14 @@ const HashTagPost = () => {
           <Grid item xs={3}>
             {posts !== undefined && posts !== null && (
               <>
-                {posts[0].Image.substring(
-                  posts[0].Image.length - 3,
-                  posts[0].Image.length
+                {posts[0].Media[0].substring(
+                  posts[0].Media[0].length - 3,
+                  posts[0].Media[0].length
                 ) === "jpg" && (
                   <img
                     src={
-                      "http://localhost:8080/api/post/get-image/" +
-                      posts[0].Image
+                      "http://localhost:8080/api/media/get-media-image/" +
+                      posts[0].Media[0]
                     }
                     alt="Not founded"
                     style={{
@@ -43,9 +42,9 @@ const HashTagPost = () => {
                     }}
                   />
                 )}
-                {posts[0].Image.substring(
-                  posts[0].Image.length - 3,
-                  posts[0].Image.length
+                {posts[0].Media[0].substring(
+                  posts[0].Media[0].length - 3,
+                  posts[0].Media[0].length
                 ) === "mp4" && (
                   <video
                     controls
@@ -57,7 +56,7 @@ const HashTagPost = () => {
                     }}
                   >
                     <source
-                      src={`http://localhost:8080/api/post/video-get/${posts[0].Image}`}
+                      src={`http://localhost:8080/api/media/get-video/${posts[0].Media[0]}`}
                       type="video/mp4"
                     />
                   </video>

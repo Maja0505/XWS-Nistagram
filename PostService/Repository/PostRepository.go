@@ -20,119 +20,6 @@ type PostRepository struct {
 }
 
 
-func (repo *PostRepository) CreateTables() error{
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.posts;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.postcounters;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.locations;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}/*
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.comments;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.likes;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.dislikes;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.tags;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.tagsDK;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.favourites;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("DROP TABLE IF EXISTS postkeyspace.collections;").Exec(); err != nil {
-		fmt.Println("Error while dropping tables!")
-		fmt.Println(err)
-		return err
-	}*/
-
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, PRIMARY KEY((userid, id)));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, media counter, PRIMARY KEY(postid));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.locations(postid uuid, location text, PRIMARY KEY((location), postid));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}/*
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.likes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.dislikes(postid uuid, userid text, PRIMARY KEY((postid, userid)));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.tags(postid uuid, tag text, PRIMARY KEY((postid), tag));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.tagsDK(postid uuid, tag text, PRIMARY KEY((tag), postid));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.favourites(userid text, postid uuid, PRIMARY KEY((userid), postid));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.collections(userid text, postid uuid, collection text, PRIMARY KEY((userid), collection, postid));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}*/
-
-	if err := repo.Session.Query("CREATE TABLE if not exists postkeyspace.reported_contents(id uuid, description text, contentid text, userid text, adminid text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-		return err
-	}
-	fmt.Println("Successfully dropped and created tables!!")
-
-	return nil
-}
-
 func (repo *PostRepository) Create(post *Model.Post) error {
 	var isAlbum = false
 	if len(post.Media) == 1{
@@ -140,23 +27,20 @@ func (repo *PostRepository) Create(post *Model.Post) error {
 	}else{
 		isAlbum = true
 	}
-	ID, _ := gocql.RandomUUID()
 	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, createdat, description, media, userid, album) VALUES(?, ?, ?, ?, ?, ?)",
-		ID, time.Now(), post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
+		post.ID, time.Now(), post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return err
 	}
 	fmt.Println(post.ID)
-	var location = Model.Location{Location: post.Location, PostID: ID}
+	var location = Model.Location{Location: post.Location, PostID: post.ID}
 	if err := repo.AddLocation(&location); err != nil{
 		fmt.Println("Error while adding location during post creation!")
 		fmt.Println(err)
 	}
 
-	repo.SetMediaCounter(int64(len(post.Media)), ID)
-
-
+	repo.SetMediaCounter(int64(len(post.Media)), post.ID)
 	fmt.Println("Successfully created post!!")
 	return nil
 }
@@ -558,7 +442,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 
 	iter := repo.Session.Query("SELECT * FROM postkeyspace.posts WHERE userid=? ALLOW FILTERING", userid).Iter()
 	if iter.NumRows() == 0{
-		return nil, gocql.Error{Message: "No post found"}
+		return nil, nil
 	}
 	for iter.MapScan(m) {
 		iter2 := repo.Session.Query("SELECT * FROM postkeyspace.postcounters WHERE postid=?", m["id"].(gocql.UUID)).Iter()

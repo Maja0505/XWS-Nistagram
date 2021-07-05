@@ -85,6 +85,18 @@ func (repo *UserRepository) FindUserByUsername(username string) ( *model.Registe
 
 }
 
+func (repo *UserRepository) FindUserByUserId(userId string) ( *model.RegisteredUser, error){
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	var user model.RegisteredUser
+	err := coll.FindOne(context.TODO(),bson.M{"id_string" : userId}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
+
+}
+
 func (repo *UserRepository) FindAllUsersBySearchingContent(username string,searchContent string) (*[]model.RegisteredUser,error) {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")

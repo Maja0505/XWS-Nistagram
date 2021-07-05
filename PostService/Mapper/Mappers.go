@@ -11,12 +11,13 @@ func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	var post Model.Post
 	post.CreatedAt = time.Now()
 	post.Description = postDTO.Description
-	post.DislikesCount = postDTO.DislikesCount
-	post.LikesCount = postDTO.LikesCount
+	post.DislikesCount = 0
+	post.LikesCount = 0
 	post.Media = postDTO.Media
 	post.UserID = postDTO.UserID
 	post.CommentsCount = 0
 	post.Location = postDTO.Location
+	post.ID = postDTO.ID
 	return &post
 }
 
@@ -81,11 +82,12 @@ func convertStoryToStoryDTO(s *Model.Story) *DTO.StoryDTO {
 func calculateMinutes(createdAt time.Time) string {
 	var stringDuration string
 	now := time.Now()
-	duration := now.Minute() - createdAt.Minute()
-	if duration/60 >= 1{
-		stringDuration = strconv.Itoa(duration/60) + "h"
+	durationMinutes := now.Minute() - createdAt.Minute()
+	durationHours := now.Hour() - createdAt.Hour()
+	if durationHours > 0{
+		stringDuration = strconv.Itoa(durationHours) + "h"
 	}else{
-		stringDuration = strconv.Itoa(duration) + "min"
+		stringDuration = strconv.Itoa(durationMinutes) + "min"
 	}
 
 	return stringDuration

@@ -86,14 +86,9 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
         )
         .then((res) => {
           axios
-            .post(
-              "/api/user/verification-request/upload-verification-doc/" +
-                loggedUserId,
-              image,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
-            )
+            .post("/api/media/upload-verification-doc/" + loggedUserId, image, {
+              headers: { "Content-Type": "multipart/form-data" },
+            })
             .then((res) => {
               setOpen(true);
               setMessage("Successfully update verification request");
@@ -106,8 +101,7 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
         .then((res) => {
           axios
             .post(
-              "/api/user/verification-request/upload-verification-doc/" +
-                loggedUserId,
+              "/api/user/media/upload-verification-doc/" + loggedUserId,
               image,
               {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -252,7 +246,7 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
                           <img
                             width="100%"
                             src={
-                              "http://localhost:8080/api/user/verification-request/get-image/" +
+                              "http://localhost:8080/api/media/get-verification-doc/" +
                               loggedUserId +
                               ".jpg"
                             }
