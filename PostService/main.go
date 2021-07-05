@@ -1,6 +1,7 @@
 package main
 
 import (
+	"XWS-Nistagram/PostService/DataStructures"
 	"XWS-Nistagram/PostService/Handler"
 	"XWS-Nistagram/PostService/Repository"
 	"XWS-Nistagram/PostService/Service"
@@ -32,6 +33,10 @@ func init() {
 	}
 	if err := Session.Query("create keyspace  if not exists postkeyspace with replication = {'class':'SimpleStrategy','replication_factor':1};").Exec(); err != nil {
 		fmt.Println("Error while inserting postkeyspace")
+		fmt.Println(err)
+	}
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.locations(postid uuid, location text, PRIMARY KEY((location), postid));").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
 	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
@@ -133,6 +138,7 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-tags-for-post/{id}", handler.GetTagsForPost).Methods("GET")
 	router.HandleFunc("/get-pure-tags-for-post/{id}", handler.GetPureTagsForPost).Methods("GET")
 	router.HandleFunc("/get-all-by-tag/{tag}", handler.FindPostsByTag).Methods("GET")
+	router.HandleFunc("/get-all-by-location/{location}", handler.FindPostsByLocation).Methods("GET")
 	router.HandleFunc("/get-favourite-posts/{id}", handler.GetFavouritePosts).Methods("GET")
 	router.HandleFunc("/get-posts-from-collection/{id}/{collection}", handler.GetPostsFromCollection).Methods("GET")
 	router.HandleFunc("/upload-image/{id}/{formKey}",handler.UploadImage).Methods("POST")
@@ -147,6 +153,9 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/post-exists-in-favourites/{id}/{post}", handler.CheckIfPostExistsInFavourites).Methods("GET")
 	router.HandleFunc("/get-all-collections-for-post-by-user/{id}/{post}", handler.GetAllCollectionsForPostByUser).Methods("GET")
 	router.HandleFunc("/get-all-post-feeds-for-user/{userId}", handler.GetAllPostFeedsForUser).Methods("GET")
+	router.HandleFunc("/get-tag-suggestions/{tag}", handler.GetTagSuggestions).Methods("GET")
+	router.HandleFunc("/get-location-for-post/{postId}", handler.GetLocationForPost).Methods("GET")
+	router.HandleFunc("/get-location-suggestions/{location}", handler.GetLocationSuggestions).Methods("GET")
 
 }
 
@@ -170,10 +179,24 @@ func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
 
 }
 
+func loadTrie(trie *DataStructures.Trie, repository Repository.PostRepository){
+	tags, err := repository.GetAllTags()
+	if err != nil{
+		fmt.Println("Greska prilikom vracanja tagova!!!")
+	}
+	for _, s := range *tags{
+		fmt.Println(s)
+		trie.Add(s, s)
+	}
+
+}
+
 
 func main(){
 	fmt.Println("Main")
 	postRepo := initPostRepo(Session)
+	postRepo.InitTrie()
+	postRepo.InitLocationsTrie()
 	postService := initPostService(postRepo)
 	handler := initHandler(postService)
 
@@ -189,6 +212,15 @@ func main(){
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 	origins := handlers.AllowedOrigins([]string{"*"})
+
+	trie :=  DataStructures.New()
+	loadTrie(trie, *postRepo)
+	tt, ttt := trie.Search("nekitag")
+	fmt.Println(tt, ttt)
+	aaa := trie.GetSuggestion("nekitag", 10)
+	fmt.Println(aaa)
+
+
 
 	fmt.Println("server running ")
 	log.Fatal(http.ListenAndServe(":" + os.Getenv("POST_SERVICE_PORT"), handlers.CORS(headers, methods, origins)(router)))

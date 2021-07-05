@@ -16,6 +16,7 @@ func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	post.Media = postDTO.Media
 	post.UserID = postDTO.UserID
 	post.CommentsCount = 0
+	post.Location = postDTO.Location
 	post.ID = postDTO.ID
 	return &post
 }

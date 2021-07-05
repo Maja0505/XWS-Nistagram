@@ -16,5 +16,6 @@ type Post struct {
 	UserID 			string		`json:"UserID"`
 	CommentsCount 	int64		`json:"CommentsCount"`
 	Album			bool		`json:"Album"`
+	Location 		string		`json:"Location"`
 
 }
