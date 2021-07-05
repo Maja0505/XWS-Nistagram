@@ -121,11 +121,13 @@ export default function DialogForListBlockUser({loggedUserId,open, setOpen }) {
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center" }}
+          style={{ textAlign: "center",width:400 }}
         >
         <h3>Blocked users</h3>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent
+        style={{width:400,height:400}}
+         dividers>
         {allBlocked !== null && allBlocked.map((blocked) => (
 
             <Grid container>

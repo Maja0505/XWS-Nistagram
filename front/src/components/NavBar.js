@@ -35,12 +35,15 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 const NavBar = () => {
   const username = localStorage.getItem("username");
 
-  const [searchedUser, setSearchedUser] = useState([]);
-  const [searchedUsername, setSearchedUsername] = useState();
+  const [searchedContent, setSearchedContent] = useState([]);
+  const [redirectionString, setRedirectionString] = useState();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
+  const [isHastag, setIsHastag] = useState(false);
+  const [isUser, setIsUser] = useState(false);
+  const [isLocation, setIsLocation] = useState(false);
 
-  const [redirectToSearchedUser, setRedirection] = useState(false);
+  const [redirection, setRedirection] = useState(false);
 
   const logout = () => {
     clearLocalStorage();
@@ -49,25 +52,52 @@ const NavBar = () => {
   const clearLocalStorage = () => {
     localStorage.clear();
   };
+
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
-      axios
-        .get("/api/user/search/" + username + "/" + text)
-        .then((res) => {
-          setSearchedUser(res.data);
-        })
-        .catch((error) => {
-          setSearchedUser([]);
-        });
+      if (text.substring(0, 1) === "#") {
+        setIsHastag(true);
+        setIsUser(false);
+        if (text.length > 1) {
+          axios
+            .get("/api/post/get-tag-suggestions/" + text.substring(1))
+            .then((res) => {
+              console.log(res.data);
+              setSearchedContent(res.data);
+            });
+        } else {
+          axios.get("/api/post/get-all-tags").then((res) => {
+            console.log(res.data);
+            setSearchedContent(res.data);
+          });
+        }
+      } else {
+        setIsHastag(false);
+        setIsUser(true);
+        axios
+          .get("/api/user/search/" + username + "/" + text)
+          .then((res) => {
+            setSearchedContent(res.data);
+          })
+          .catch((error) => {
+            setSearchedContent([]);
+          });
+      }
     } else {
-      setSearchedUser([]);
+      setSearchedContent([]);
     }
   };
-  const goToUserProfile = (username) => {
-    if (username !== undefined && username !== null) {
-      setSearchedUsername("/homePage/" + username);
-      setRedirection(true);
+
+  const goToSearchContent = (content) => {
+    if (isUser) {
+      setRedirectionString("/homePage/" + content);
     }
+    if (isHastag && content !== null) {
+      setRedirectionString("/explore/tags/" + content.substring(1));
+    }
+    if (isLocation) {
+    }
+    setRedirection(true);
   };
 
   const handleToggle = () => {
@@ -231,28 +261,42 @@ const NavBar = () => {
     <Grid item xs={6} style={{ textAlign: "center" }}>
       <Autocomplete
         freeSolo
-        renderOption={(option, { selected }) => (
-          <React.Fragment>
-            <Grid container>
-              <Grid item xs={2}>
+        renderOption={(option) => (
+          <Grid container>
+            <Grid item xs={2}>
+              {isHastag && (
+                <Avatar
+                  alt="#"
+                  style={{
+                    backgroundColor: "#ECECEC",
+                    border: "1px solid black",
+                    color: "black",
+                  }}
+                >
+                  #
+                </Avatar>
+              )}
+              {isUser && (
                 <Avatar
                   alt="N"
                   src={avatar}
                   style={{ border: "1px solid" }}
                 ></Avatar>
-              </Grid>
-              <Grid item xs={10} style={{ marginTop: "3%" }}>
-                {option}
-              </Grid>
+              )}
             </Grid>
-          </React.Fragment>
+            <Grid item xs={10} style={{ marginTop: "3%" }}>
+              {option}
+            </Grid>
+          </Grid>
         )}
         options={
-          searchedUser.length !== 0
-            ? searchedUser.map((option) => option.Username)
+          searchedContent !== null && searchedContent.length !== 0
+            ? searchedContent.map((o) =>
+                o.Username !== undefined ? o.Username : o
+              )
             : []
         }
-        onChange={(event, value) => goToUserProfile(value)}
+        onChange={(event, value) => goToSearchContent(value)}
         renderInput={(params) => (
           <>
             <TextField
@@ -384,7 +428,7 @@ const NavBar = () => {
   );
   return (
     <>
-      {redirectToSearchedUser === true && <Redirect to={searchedUsername} />}
+      {redirection === true && <Redirect to={redirectionString} />}
       <AppBar position="static">
         {(username === null || username === undefined) &&
           NavBarForUnregisteredUser}

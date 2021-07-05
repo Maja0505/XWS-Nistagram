@@ -103,12 +103,13 @@ export default function DialogForBlockUser({loggedUserId, blockedUserId ,open, s
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center" }}
+          style={{ textAlign: "center",width:400 }}
         >
         <h3> Block wajwai?</h3>
         <p style={{textAlign:"left"}}>They won't be able to find your profile, posts or story on Instagram. Instagram won't let them know you blocked them.</p>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent
+        dividers>
           
 
           <List
