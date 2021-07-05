@@ -7,6 +7,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+import TagLocationAndUser from "./TagLocationAndUser.js";
+
 const useStyles = makeStyles((theme) => ({
   settings: {
     dots: true,
@@ -31,6 +33,9 @@ const AddPost = ({ setTabValue }) => {
   const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
   const [puklaSlika, setPuklaSlika] = useState(false);
 
+  const [location, setLocation] = useState("");
+  const [taggedUsers, setTaggedUsers] = useState("");
+
   const createPost = () => {
     console.log(image);
 
@@ -51,7 +56,7 @@ const AddPost = ({ setTabValue }) => {
         let tag = listOfTags[i].split(" ")[0];
         axios
           .post("/api/post/add-tag", {
-            Tag: tag,
+            Tag: "#" + tag,
             PostID: postDTO.ID,
           })
           .then((res) => {
@@ -239,14 +244,21 @@ const AddPost = ({ setTabValue }) => {
         </Grid>
         <Grid item xs={2} />
       </Grid>
-      {selectedFile && (
+
+      {selectedFile.length !== 0 && (
         <>
-          <Grid container style={{ marginTop: "2%" }}>
+          <TagLocationAndUser
+            setLocation={setLocation}
+            setTaggedUsers={setTaggedUsers}
+          />
+
+          <Grid container style={{ marginTop: "1%" }}>
             <Grid item xs={3} />
             <Grid item xs={6}>
               <TextField
                 label="Description"
                 fullWidth
+                size="small"
                 variant="outlined"
                 multiline
                 rowsMax={5}

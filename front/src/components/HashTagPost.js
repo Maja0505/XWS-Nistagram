@@ -14,7 +14,7 @@ const HashTagPost = () => {
     axios.get("/api/post/get-all-by-tag/" + tag).then((res) => {
       setPosts(res.data);
     });
-  }, []);
+  }, [tag]);
 
   return (
     <div>

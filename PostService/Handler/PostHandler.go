@@ -342,6 +342,8 @@ func (handler *PostHandler) FindPostsByTag(w http.ResponseWriter, r *http.Reques
 	if tag == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}else{
+		tag = "#" + tag
 	}
 
 	posts,_ := handler.Service.FindPostsByTag(tag)
@@ -860,9 +862,27 @@ func (handler *PostHandler) GetTagSuggestions(w http.ResponseWriter, r *http.Req
 	tag := mux.Vars(r)["tag"]
 
 	if tag == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		tag = "#"
+	}else{
+		tag = "#" + tag
+	}
+
+	tags, err := handler.Service.GetTagSuggestions(tag)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
+
+	json.NewEncoder(w).Encode(tags)
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *PostHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	tag := "#"
 
 	tags, err := handler.Service.GetTagSuggestions(tag)
 	if err != nil {
