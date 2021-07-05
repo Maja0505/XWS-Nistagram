@@ -216,6 +216,15 @@ func (service *PostService) FindPostsByTag(tag string) ( *[]Model.Post, error) {
 	return posts, err
 }
 
+func (service *PostService) FindPostsByLocation(location string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.FindPostsByLocation(location)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+
 func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Comment, error) {
 	comments, err := service.Repo.GetCommentsForPost(postid)
 	if err != nil{
@@ -381,6 +390,36 @@ func (service *PostService) GetAllCollectionsForPostByUser(userid string, postuu
 	}
 
 	return collections, err
+}
+func (service *PostService) GetLocationForPost(postuuid gocql.UUID) (*Model.Location,error) {
+	location, err := service.Repo.GetLocationForPost(postuuid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return location, err
+}
+func (service *PostService) GetTagSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetTagSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
+}
+func (service *PostService) GetLocationSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetLocationSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
 }
 
 func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
