@@ -1,14 +1,17 @@
-import { Grid, TextField, Avatar } from "@material-ui/core";
+import { Grid, TextField, Avatar, Button } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { useState } from "react";
 
 import axios from "axios";
 
 import avatar from "../images/nistagramAvatar.jpg";
+import TaggedUsersList from "./TaggedUsersList.js";
 
-const TagLocationAndUser = ({ setLocation, setTaggedUsers }) => {
+const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers }) => {
   const username = localStorage.getItem("username");
   const [searchedContent, setSearchedContent] = useState([]);
+  const [userForTag, setUserForTag] = useState();
+  const [open, setOpen] = useState(false);
 
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
@@ -23,6 +26,19 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers }) => {
     } else {
       setSearchedContent([]);
     }
+  };
+
+  const addUserInTaggedUsers = () => {
+    var array = [...taggedUsers];
+    var index = array.indexOf("@" + userForTag);
+    if (index === -1) {
+      setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
+    }
+  };
+
+  const viewAllTaggedUsers = () => {
+    console.log(taggedUsers);
+    setOpen(true);
   };
 
   return (
@@ -43,7 +59,7 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers }) => {
 
       <Grid container style={{ marginTop: "1%" }}>
         <Grid item xs={3} />
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <Autocomplete
             freeSolo
             renderOption={(option) => (
@@ -65,7 +81,7 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers }) => {
                 ? searchedContent.map((o) => o.Username)
                 : []
             }
-            //onChange={(event, value) => goToSearchContent(value)}
+            onChange={(event, value) => setUserForTag(value)}
             renderInput={(params) => (
               <>
                 <TextField
@@ -80,8 +96,36 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers }) => {
             )}
           />
         </Grid>
+
+        <Grid item xs={1}>
+          <Button
+            disabled={userForTag === null || userForTag === undefined}
+            onClick={addUserInTaggedUsers}
+          >
+            Add
+          </Button>
+        </Grid>
+
+        <Grid item xs={1}>
+          <Button
+            disabled={taggedUsers.length === 0}
+            onClick={viewAllTaggedUsers}
+          >
+            View All
+          </Button>
+        </Grid>
         <Grid item xs={3} />
       </Grid>
+
+      {open && (
+        <TaggedUsersList
+          label="Tagged users"
+          users={taggedUsers}
+          open={open}
+          setOpen={setOpen}
+          setTaggedUsers={setTaggedUsers}
+        ></TaggedUsersList>
+      )}
     </div>
   );
 };

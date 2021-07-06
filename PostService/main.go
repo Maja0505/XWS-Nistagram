@@ -36,19 +36,23 @@ func init() {
 		fmt.Println("Error while inserting postkeyspace")
 		fmt.Println(err)
 	}
+
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id timeuuid, userid text, description text, media list<text>, album boolean, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+
 	if err := Session.Query("CREATE TABLE if not exists postkeyspace.locations(postid uuid, location text, PRIMARY KEY((location), postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id uuid, userid text, createdat timestamp, description text, media list<text>, album boolean, location text, PRIMARY KEY((userid, id)));").Exec(); err != nil {
-		fmt.Println("Error while creating tables!")
-		fmt.Println(err)
-	}
+
 	if err := Session.Query("CREATE TABLE if not exists postkeyspace.postcounters(postid uuid, likes counter, dislikes counter, comments counter, media counter, PRIMARY KEY(postid));").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.comments(id uuid, postid uuid, userid text, createdat timestamp, content text, PRIMARY KEY((postid), userid, id));").Exec(); err != nil {
+
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.comments(id timeuuid, postid uuid, userid text, content text, PRIMARY KEY((postid), id, userid)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}

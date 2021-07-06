@@ -1,18 +1,13 @@
 import "./ContentDetails.css";
-import Button from "../components/Button";
 import avatar from "../images/nistagramAvatar.jpg";
-import myPic from "../images/background.jpg";
 
-import React, { useState, useEffect,useRef } from "react";
+import  { useState, useEffect,useRef } from "react";
 import Story from "../components/Story";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import {
-	AppBar,
-	Toolbar,
 	Grid,
   Paper,
-
   Grow,
   Popper,
   MenuItem,
@@ -20,8 +15,6 @@ import {
   } from "@material-ui/core";
   import AddStory from "../components/AddStoryDialog"
 import axios from "axios";
-import { User as UserModel } from "../models/User";
-
 
 
 

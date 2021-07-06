@@ -35,6 +35,8 @@ import {
 import UsersList from "./UsersList";
 import AddPost from "./AddPost";
 import Story from "./Story";
+import PostWhereUserTagged from "./PostWhereUserTagged.js";
+
 const UserHomePage = () => {
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
@@ -89,41 +91,9 @@ const UserHomePage = () => {
     }
   }
 
-  const prevOpen = useRef(open);
-
-  const users = [
-    {
-      Username: "Perica",
-      FirstName: "Perica",
-      LastName: "Peric",
-      DateOfBirth: "krdlkjf",
-      Email: "Peric.peric@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Female",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-
-    {
-      Username: "marko",
-      FirstName: "Marko",
-      LastName: "Markovic",
-      DateOfBirth: "krdlkjf",
-      Email: "marko.markovic@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Male",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-  ];
-
   useEffect(() => {
     console.log(username);
     console.log(loggedUsername);
-    //setUser(users.filter(user => user.Username === username)[0])
-
-    //setFollowing(false)
-    //setPrivateProfile(true)
 
     axios
       .get("/api/user/" + username)
@@ -371,7 +341,6 @@ const UserHomePage = () => {
     axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
       console.log("uspesno");
       //setUser({...user,allFollowers: user.allFollowers - 1})
-
     });
     setFollowing(false);
   };
@@ -633,7 +602,7 @@ const UserHomePage = () => {
                     </>
                   )}
 
-                  {loggedUsername === username && user.ProfileSettings.Public  && (
+                  {loggedUsername === username && user.ProfileSettings.Public && (
                     <>
                       <Button onClick={clickShowFollowRequests}>
                         View follow request
@@ -698,6 +667,7 @@ const UserHomePage = () => {
                       border: "1px solid",
                       width: "50px",
                       height: "50px",
+                      cursor: "pointer",
                     }}
                   />
                 </div>
@@ -756,33 +726,34 @@ const UserHomePage = () => {
             </Grid>
           )}
 
-          {loggedUsername !== username && !user.ProfileSettings.Public && (
-            <Grid container style={{ marginTop: "2%" }}>
-              <Grid item xs={2}></Grid>
-              <Grid item xs={8}>
-                <Paper>
-                  <Tabs
-                    value={tabValue}
-                    onChange={handleChangeTab}
-                    indicatorColor="primary"
-                    textColor="inherit"
-                  >
-                    <Tab
-                      label="Posts"
-                      icon={<GridOn />}
-                      style={{ margin: "auto" }}
-                    />
-                    <Tab
-                      label="Tagged"
-                      icon={<AssignmentIndOutlined />}
-                      style={{ margin: "auto" }}
-                    />
-                  </Tabs>
-                </Paper>
+          {loggedUsername !== username &&
+            (!user.ProfileSettings.Public || following) && (
+              <Grid container style={{ marginTop: "2%" }}>
+                <Grid item xs={2}></Grid>
+                <Grid item xs={8}>
+                  <Paper>
+                    <Tabs
+                      value={tabValue}
+                      onChange={handleChangeTab}
+                      indicatorColor="primary"
+                      textColor="inherit"
+                    >
+                      <Tab
+                        label="Posts"
+                        icon={<GridOn />}
+                        style={{ margin: "auto" }}
+                      />
+                      <Tab
+                        label="Tagged"
+                        icon={<AssignmentIndOutlined />}
+                        style={{ margin: "auto" }}
+                      />
+                    </Tabs>
+                  </Paper>
+                </Grid>
+                <Grid item xs={2}></Grid>
               </Grid>
-              <Grid item xs={2}></Grid>
-            </Grid>
-          )}
+            )}
 
           <Grid container>
             <Grid item xs={2}></Grid>
@@ -799,27 +770,33 @@ const UserHomePage = () => {
                   {user !== undefined && user !== null && tabValue === 2 && (
                     <Collections></Collections>
                   )}
+                  {user !== undefined && user !== null && tabValue === 3 && (
+                    <PostWhereUserTagged user={user}></PostWhereUserTagged>
+                  )}
                 </Grid>
               )}
 
-            {(user !== undefined &&
+            {((user !== undefined &&
               user !== null &&
               loggedUsername !== user.Username &&
               !user.ProfileSettings.Public) ||
-              (following && user.ProfileSettings.Public && (
-                <Grid item xs={8}>
-                  {user !== undefined && user !== null && tabValue === 0 && (
-                    <Posts userForProfile={user} username={username}></Posts>
-                  )}
-                </Grid>
-              ))}
+              (following && loggedUsername !== user.Username)) && (
+              <Grid item xs={8}>
+                {user !== undefined && user !== null && tabValue === 0 && (
+                  <Posts userForProfile={user} username={username}></Posts>
+                )}
+                {user !== undefined && user !== null && tabValue === 1 && (
+                  <PostWhereUserTagged user={user}></PostWhereUserTagged>
+                )}
+              </Grid>
+            )}
 
             {user !== undefined &&
               user !== null &&
               loggedUsername !== user.Username &&
               user.ProfileSettings.Public &&
               !following && (
-                <Grid item xs={8}>
+                <Grid item xs={8} style={{ marginTop: "2%" }}>
                   {user !== undefined && user !== null && tabValue === 0 && (
                     <Paper style={{ width: "100%", height: "100%" }}>
                       <Typography variant="h5" color="textSecondary">
