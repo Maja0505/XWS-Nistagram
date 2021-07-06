@@ -68,8 +68,11 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
 	router.HandleFunc("/create",handler.CreateRegisteredUser).Methods("POST")
 	router.HandleFunc("/{username}",handler.FindUserByUsername).Methods("GET")
+	router.HandleFunc("/userid/{userId}",handler.FindUserByUserId).Methods("GET")
+	router.HandleFunc("/find-username-and-profile-picture/{userId}",handler.FindUsernameAndProfilePicture).Methods("GET")
 	router.HandleFunc("/search/{username}/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
+	router.HandleFunc("/convert-usernames",handler.ConvertUsernamesToUsers).Methods("POST")
 	router.HandleFunc("/change-password/{username}",handler.ChangePassword).Methods("PUT")
 	router.HandleFunc("/{username}/public-profile/{setting}",handler.UpdatePublicProfileSetting).Methods("PUT")
 	router.HandleFunc("/{username}/message-request/{setting}",handler.UpdateMessageRequestSetting).Methods("PUT")
@@ -80,6 +83,9 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/{username}/message-notification/{setting}",handler.UpdateMessageNotificationSetting).Methods("PUT")
 	router.HandleFunc("/{username}/follow-request-notification/{setting}",handler.UpdateFollowRequestNotificationSetting).Methods("PUT")
 	router.HandleFunc("/{username}/follow-notification/{setting}",handler.UpdateFollowNotificationSetting).Methods("PUT")
+	router.HandleFunc("/upload-profile-doc/{id}",handler.UploadImage).Methods("POST")
+	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
+
 
 }
 

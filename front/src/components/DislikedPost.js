@@ -84,10 +84,10 @@ const LikedPost = () => {
     axios
       .get("/api/post/get-disliked-posts-for-user/" + loggedUserId)
       .then((res) => {
-        if(res.data){
+        if (res.data) {
           setImages(res.data);
-        }else{
-          setImages([])
+        } else {
+          setImages([]);
         }
       })
       .catch((error) => {
@@ -124,12 +124,27 @@ const LikedPost = () => {
                 }}
                 onClick={() => handleClickImage(image)}
               >
-                <span
-                  className={classes.imageSrc}
-                  style={{
-                    backgroundImage: `url("http://localhost:8080/api/post/get-image/${image.Image}") `,
-                  }}
-                />
+                {image.Image.substring(
+                  image.Image.length - 3,
+                  image.Image.length
+                ) === "jpg" && (
+                  <img
+                    width="100%"
+                    height="100%"
+                    src={`http://localhost:8080/api/media/get-media-image/${image.Image}`}
+                  />
+                )}
+                {image.Image.substring(
+                  image.Image.length - 3,
+                  image.Image.length
+                ) !== "jpg" && (
+                  <video width="100%" height="100%" controls>
+                    <source
+                      src={`http://localhost:8080/api/media/get-video/${image.Image}`}
+                      type="video/mp4"
+                    />
+                  </video>
+                )}
                 <span className={classes.imageBackdrop} />
                 <span className={classes.imageButton}>
                   <Typography
@@ -145,19 +160,19 @@ const LikedPost = () => {
                         <ThumbUpAlt></ThumbUpAlt>
                       </Grid>
                       <Grid item xs={3}>
-                      {image.LikesCount}
+                        {image.LikesCount}
                       </Grid>
                       <Grid item xs={1}>
                         <ThumbDown></ThumbDown>
                       </Grid>
                       <Grid item xs={3}>
-                      {image.DislikesCount}
+                        {image.DislikesCount}
                       </Grid>
                       <Grid item xs={1}>
                         <ModeComment></ModeComment>
                       </Grid>
                       <Grid item xs={3}>
-                      {image.CommentsCount}
+                        {image.CommentsCount}
                       </Grid>
                     </Grid>
                   </Typography>

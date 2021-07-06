@@ -10,6 +10,7 @@ services:
     volumes:
       - ./ApiGateway/nginx.conf:/etc/nginx/nginx.conf
       - ./ApiGateway/api_gateway.conf:/etc/nginx/api_gateway.conf
+    restart: always
 
   user-service:
     image: user-service:compose_build
@@ -26,9 +27,8 @@ services:
       - mongo
     links: 
       - mongo
-    tmpfs:
-      - /var/run
-      - /var/cache/verification-docs/*
+    volumes:
+      - micro_services:/app
 
   post-service:
     image: post-service:compose_build
@@ -42,10 +42,11 @@ services:
       POST_SERVICE_HOST: cass
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      USER_FOLLOWERS_SERVICE_PORT: 8080
+      USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
     restart: on-failure
-    tmpfs:
-      - /var/run
-      - /var/cache/post-documents/*
+    volumes:
+      - micro_services:/app
     depends_on:
       - cass
     links: 
@@ -68,13 +69,28 @@ services:
       - neo4j
     links: 
       - neo4j
+    volumes:
+      - micro_services:/app
+
+  media-storage-service:
+    image: media-storage-service:compose_build
+    build:
+      context: ./MediaStorageService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      MEDIA_STORAGE_SERVICE_PORT: 8080
+    restart: on-failure
+    volumes:
+      - micro_services:/app
 
   mongo:
     image: mongo
     ports:
       - "27017:27017"
     volumes:
-      - /data/db:/data/db
+      - mongo_db:/data/db
     networks:
       - network1
 
@@ -88,7 +104,7 @@ services:
     networks:
       - network1
     volumes:
-      - ./neo4j/plugins:/plugins
+      - neo4j_db:/plugins
     environment:
       - NEO4J_AUTH=neo4j/nistagram
       - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687
@@ -107,7 +123,13 @@ services:
     ports:
       - "9042:9042"
     volumes:
-      - ./cass.yaml:/etc/cassandra/cass.yaml
+      - cass_db:/etc/cassandra/cass.yaml
+
+volumes:
+    cass_db:
+    neo4j_db:
+    mongo_db:
+    micro_services:
 
 networks:
    network1:

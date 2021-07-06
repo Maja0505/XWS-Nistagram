@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type PostService struct {
@@ -48,7 +49,7 @@ func (service *PostService) AddTag(tag *Model.Tag) error {
 	return nil
 }
 func (service *PostService) AddPostToFavourites(favouriteDTO *DTO.FavouriteDTO) error {
-	err := service.Repo.AddPostToFavourites(favouriteDTO.PostID, favouriteDTO.UserID)
+	err := service.Repo.AddPostToFavourites(favouriteDTO)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -57,7 +58,7 @@ func (service *PostService) AddPostToFavourites(favouriteDTO *DTO.FavouriteDTO) 
 }
 
 func (service *PostService) AddPostToCollection(favouriteDTO *DTO.FavouriteDTO) error {
-	err := service.Repo.AddPostToCollection(favouriteDTO.PostID, favouriteDTO.UserID, favouriteDTO.Collection)
+	err := service.Repo.AddPostToCollection(favouriteDTO)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -85,7 +86,7 @@ func (service *PostService) RemovePostFromFavourites(favourite *DTO.FavouriteDTO
 }
 
 func (service *PostService) RemovePostFromCollection(favourite *DTO.FavouriteDTO) error {
-	err := service.Repo.RemovePostFromFavourites(favourite)
+	err := service.Repo.RemovePostFromCollection(favourite)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -130,8 +131,49 @@ func (service *PostService) FindPostById(postid gocql.UUID) ( *Model.Post, error
 	return post, err
 }
 
+func (service *PostService) GetUserWhoPostedComment(commentid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
+	username,err := service.Repo.GetUserWhoPostedComment(commentid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-usernames")
+
+	type UsernamesDTO struct {
+		Usernames []string
+	}
+
+	usernamesDTO := UsernamesDTO{}
+	usernamesDTO.Usernames = append(usernamesDTO.Usernames, *username)
+	fmt.Println(usernamesDTO.Usernames)
+	jsonUserids,_ := json.Marshal(usernamesDTO)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	fmt.Println(data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (service *PostService) GetTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
 	tags,err := service.Repo.GetTagsForPost(postid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return tags, err
+}
+
+func (service *PostService) GetPureTagsForPost(postid gocql.UUID) ( *[]Model.Tag, error) {
+	tags,err := service.Repo.GetPureTagsForPost(postid)
 	if err != nil{
 		fmt.Println(err)
 		return  nil, err
@@ -174,6 +216,15 @@ func (service *PostService) FindPostsByTag(tag string) ( *[]Model.Post, error) {
 	return posts, err
 }
 
+func (service *PostService) FindPostsByLocation(location string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.FindPostsByLocation(location)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+
 func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Comment, error) {
 	comments, err := service.Repo.GetCommentsForPost(postid)
 	if err != nil{
@@ -182,6 +233,38 @@ func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Com
 	}
 	return comments, err
 }
+
+func (service *PostService) GetUsersTaggedOnPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
+	usernames, err := service.Repo.GetUsersTaggedOnPost(postid)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	fmt.Println(usernames)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/convert-usernames")
+
+	type UsernamesDTO struct {
+		Usernames []string
+	}
+
+	usernamesDTO := UsernamesDTO{}
+	usernamesDTO.Usernames = *usernames
+	jsonUserids,_ := json.Marshal(usernamesDTO)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonUserids))
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var data []DTO.UserByUsernameDTO
+	err = json.Unmarshal(body, &data)
+	if err != nil{
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (service *PostService) GetUsersWhoLikedPost(postid gocql.UUID) ( *[]DTO.UserByUsernameDTO, error) {
 	userids, err := service.Repo.GetUsersWhoLikedPost(postid)
 
@@ -282,11 +365,113 @@ func (service *PostService) ReportContent(reportedContentDTO *DTO.ReportedConten
 	return nil
 }
 
-/*func (service *PostService) GetAllLikesForPost(postid string) error {
-	err := service.Repo.GetAllLikesForPost(postid)
+func (service *PostService) GetCollectionsForUser(userid string) (*[]string,error) {
+	collections, err := service.Repo.GetCollectionsForUser(userid)
+
 	if err != nil{
 		fmt.Println(err)
-		return  err
+		return  nil, err
 	}
-	return nil
-}*/
+
+	return collections, err
+}
+
+func (service *PostService) CheckIfPostExistsInFavourites(userid string, postid gocql.UUID) bool {
+	exist := service.Repo.CheckIfPostIsInFavourites(userid,postid)
+	return exist
+}
+
+func (service *PostService) GetAllCollectionsForPostByUser(userid string, postuuid gocql.UUID) (*[]string,error) {
+	collections, err := service.Repo.GetAllCollectionsForPostByUser(userid,postuuid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return collections, err
+}
+func (service *PostService) GetLocationForPost(postuuid gocql.UUID) (*Model.Location,error) {
+	location, err := service.Repo.GetLocationForPost(postuuid)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return location, err
+}
+func (service *PostService) GetTagSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetTagSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
+}
+func (service *PostService) GetLocationSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetLocationSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
+}
+
+func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
+
+	var postsByAllNotMutedFollowedUsers []Model.Post
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allNotMutedFollows/" + userid)
+
+	resp, err := http.Get(reqUrl)
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var notMutedFollowedUsers []string
+	err = json.Unmarshal(body, &notMutedFollowedUsers)
+	if err != nil{
+		return nil, err
+	}
+
+	for _,userId := range notMutedFollowedUsers {
+
+		postsByOneUser,err := service.Repo.FindPostsByUserId(userId)
+
+		if err != nil {
+			return nil, err
+		}
+		if postsByOneUser != nil {
+			postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+		}
+	}
+
+	var feedSlice FeedSlice
+	feedSlice = postsByAllNotMutedFollowedUsers
+	sort.Sort(feedSlice)
+	postsByAllNotMutedFollowedUsers = feedSlice
+
+	return &postsByAllNotMutedFollowedUsers,nil
+
+}
+
+
+//for sorting post feeds by created time
+type FeedSlice []Model.Post
+
+func (f FeedSlice) Len() int {
+	return len(f)
+}
+
+func (f FeedSlice) Less(i, j int) bool {
+	return f[i].CreatedAt.After(f[j].CreatedAt)
+}
+
+func (f FeedSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}

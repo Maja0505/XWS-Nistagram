@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const VerificationRequest = ({user,setOpen, setMessage }) => {
+const VerificationRequest = ({ user, setOpen, setMessage }) => {
   const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
 
@@ -24,8 +24,7 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
   const [updateMode, setUpdateMode] = useState(false);
   const [userHasRequest, setUserHasRequest] = useState(false);
   const [verificationProfile, setVerificationProfile] = useState(false);
-  const [load,setLoad] = useState(false)
-
+  const [load, setLoad] = useState(false);
 
   useEffect(() => {
     axios
@@ -39,21 +38,18 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
           setImage(res.data.Image);
           setUpdateMode(true);
           setUserHasRequest(true);
-          setLoad(true)
-
+          setLoad(true);
         }
       })
       .catch((err) => {
         console.log("null");
       });
-      if(user.VerificationSettings !== undefined){
-        console.log(user)
-        setVerificationProfile(user.VerificationSettings.Verified)
-        setLoad(true)
-
-
-      }
-  }, []);
+    if (user.VerificationSettings !== undefined) {
+      console.log(user);
+      setVerificationProfile(user.VerificationSettings.Verified);
+      setLoad(true);
+    }
+  }, [user]);
 
   const HandleUploadClick = (event) => {
     var formData = new FormData();
@@ -90,14 +86,9 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
         )
         .then((res) => {
           axios
-            .post(
-              "/api/user/verification-request/upload-verification-doc/" +
-                loggedUserId,
-              image,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
-            )
+            .post("/api/media/upload-verification-doc/" + loggedUserId, image, {
+              headers: { "Content-Type": "multipart/form-data" },
+            })
             .then((res) => {
               setOpen(true);
               setMessage("Successfully update verification request");
@@ -110,8 +101,7 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
         .then((res) => {
           axios
             .post(
-              "/api/user/verification-request/upload-verification-doc/" +
-                loggedUserId,
+              "/api/user/media/upload-verification-doc/" + loggedUserId,
               image,
               {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -128,9 +118,9 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
 
   return (
     <>
-      {load &&
-       <Grid container item xs={9} style={{ height: 600 }}>
-          {!verificationProfile ? 
+      {load && (
+        <Grid container item xs={9} style={{ height: 600 }}>
+          {!verificationProfile ? (
             <Grid style={{ height: "100%" }}>
               <Grid container item xs={12} style={{ height: "30%" }}>
                 <Grid item xs={1}></Grid>
@@ -140,11 +130,12 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
                   </Grid>
                   <Grid style={{ height: "95%", textAlign: "left" }}>
                     <p style={{ color: "#868f8b" }}>
-                      A verified badge is check that appears next to an Instagram
-                      account's name to indicatw that the account is the authentic
-                      presence of a notable public figure,celebrity,global brand or
-                      entity it represents. Submitting a request for verification
-                      does not guarantee that your account will be verified.
+                      A verified badge is check that appears next to an
+                      Instagram account's name to indicatw that the account is
+                      the authentic presence of a notable public
+                      figure,celebrity,global brand or entity it represents.
+                      Submitting a request for verification does not guarantee
+                      that your account will be verified.
                     </p>
                     <p></p>
                   </Grid>
@@ -255,7 +246,7 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
                           <img
                             width="100%"
                             src={
-                              "http://localhost:8080/api/user/verification-request/get-image/" +
+                              "http://localhost:8080/api/media/get-verification-doc/" +
                               loggedUserId +
                               ".jpg"
                             }
@@ -283,16 +274,24 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
                         </Button>
                       </Grid>
                     </Grid>
-                    <Grid item xs={12} style={{ height: "30%", textAlign: "left" }}>
+                    <Grid
+                      item
+                      xs={12}
+                      style={{ height: "30%", textAlign: "left" }}
+                    >
                       <p style={{ color: "#868f8b" }}>
-                        We require a government-issued photo ID that shows your name
-                        and date of birth(e.g. driver's license, passport or
-                        national identification card) or official business
+                        We require a government-issued photo ID that shows your
+                        name and date of birth(e.g. driver's license, passport
+                        or national identification card) or official business
                         documents( tax filing, recent utility bill, article of
                         incorporation) in order to review your request.
                       </p>
                     </Grid>
-                    <Grid item xs={12} style={{ height: "12%", textAlign: "left" }}>
+                    <Grid
+                      item
+                      xs={12}
+                      style={{ height: "12%", textAlign: "left" }}
+                    >
                       {updateMode ? (
                         <Button
                           color="primary"
@@ -321,12 +320,12 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
                 </Grid>
               </Grid>
             </Grid>
-            :
+          ) : (
             <Grid container item xs={12}>
               <Grid item xs={1}></Grid>
               <Grid item xs={10}>
                 <Paper style={{ height: "30%" }}>
-                <Grid  container item xs={12} style={{ height: "25%" }} ></Grid>
+                  <Grid container item xs={12} style={{ height: "25%" }}></Grid>
 
                   <Grid container style={{ height: "50%" }}>
                     <Grid item xs={4} style={{}}>
@@ -340,17 +339,15 @@ const VerificationRequest = ({user,setOpen, setMessage }) => {
                       <h2>Your account is verificated!</h2>
                     </Grid>
                   </Grid>
-                  <Grid  container item xs={12} style={{ height: "25%" }} ></Grid>
-
+                  <Grid container item xs={12} style={{ height: "25%" }}></Grid>
                 </Paper>
               </Grid>
               <Grid item xs={1}></Grid>
             </Grid>
-          }
+          )}
         </Grid>
-    }
+      )}
     </>
-
   );
 };
 

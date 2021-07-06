@@ -1,7 +1,10 @@
 export interface Story {
-    opened : boolean;
-    profile_name: string;
-    video_url: string;
-    duration: number;
-    type: string;
+	Media:string
+	Duration:number
+	Type:string
+	Subheading:string
+	UserID:string
+	ID:string
+	ForCloseFriends:boolean
+	Highlights:boolean
 }

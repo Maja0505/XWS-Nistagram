@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"userService/dto"
 	"userService/service"
 )
@@ -91,6 +94,44 @@ func (handler *UserHandler) FindUserByUsername(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(user)
 }
 
+func (handler *UserHandler) FindUserByUserId(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user,_ := handler.Service.FindUserByUserId(userId)
+
+	if user == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
+func (handler *UserHandler) FindUsernameAndProfilePicture(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user,_ := handler.Service.FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId)
+
+	if user == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
 func (handler *UserHandler) SearchUser(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -122,9 +163,29 @@ func (handler *UserHandler) ConvertUserIdsToUsers(w http.ResponseWriter, r *http
 	if err != nil{
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(userIds)
 	users,err := handler.Service.ConvertUserIdsToUsers(userIds)
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
+}
+
+func (handler *UserHandler) ConvertUsernamesToUsers(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	var usernames dto.UsernamesDTO
+	err := json.NewDecoder(r.Body).Decode(&usernames)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("aaaa")
+	}
+	fmt.Println("usernames  ",usernames)
+	fmt.Println(usernames)
+	users,err := handler.Service.ConvertUsernamesToUsers(usernames)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+		fmt.Println("aaaaa")
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
@@ -265,5 +326,58 @@ func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWrite
 		w.WriteHeader(http.StatusExpectationFailed)
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) UploadImage(w http.ResponseWriter,r *http.Request){
+	vars := mux.Vars(r)
+	imagePath := vars["id"]
+	r.ParseMultipartForm(10 << 20)
+	file, _, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+
+	dst, err := os.Create("profile-docs/" + imagePath +".jpg")
+	defer dst.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Successfully Uploaded File\n" + dst.Name())
+
+	w.WriteHeader(http.StatusOK)
+
+
+}
+
+func (handler *UserHandler) GetImage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "image/jpeg")
+	vars := mux.Vars(r)
+	imagepath := vars["id"]
+	if imagepath == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	file,err := ioutil.ReadFile("profile-docs/" + imagepath)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+	w.Write(file)
+
+
 }
 

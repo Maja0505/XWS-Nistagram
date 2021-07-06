@@ -66,6 +66,25 @@ func (service *UserService) FindUserByUsername(username string) (*model.Register
 	return user, nil
 }
 
+func (service *UserService) FindUserByUserId(userId string) (*model.RegisteredUser,error){
+	user,err := service.Repo.FindUserByUserId(userId)
+	if err != nil{
+		return nil, err
+	}
+	return user, nil
+}
+
+func (service *UserService) FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId string) (*dto.UsernameAndProfilePictureDTO,error){
+	user,err := service.Repo.FindUserByUserId(userId)
+	if err != nil{
+	return nil, err
+	}
+	var usernameAndProfilePictureDTO dto.UsernameAndProfilePictureDTO
+	usernameAndProfilePictureDTO.Username = user.Username
+	usernameAndProfilePictureDTO.ProfilePicture = user.ProfilePicture
+	return &usernameAndProfilePictureDTO, nil
+}
+
 func (service *UserService) SearchUser(username string,searchContent string) (*[]dto.UserFromSearchDTO,error){
 	users,err := service.Repo.FindAllUsersBySearchingContent(username,searchContent)
 	if err != nil{
@@ -77,6 +96,14 @@ func (service *UserService) SearchUser(username string,searchContent string) (*[
 
 func (service *UserService) ConvertUserIdsToUsers(userIds dto.UserIdsDTO) (*[]dto.UserByUsernameDTO, error) {
 	users,err := service.Repo.FindUsernameByUserId(userIds)
+	if err != nil{
+		return nil, err
+	}
+	return users,nil
+}
+
+func (service *UserService) ConvertUsernamesToUsers(usernames dto.UsernamesDTO) (*[]dto.UserByUsernameDTO, error) {
+	users,err := service.Repo.FindUserIdByUsername(usernames)
 	if err != nil{
 		return nil, err
 	}

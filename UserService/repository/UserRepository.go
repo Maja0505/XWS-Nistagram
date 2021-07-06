@@ -85,11 +85,23 @@ func (repo *UserRepository) FindUserByUsername(username string) ( *model.Registe
 
 }
 
+func (repo *UserRepository) FindUserByUserId(userId string) ( *model.RegisteredUser, error){
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	var user model.RegisteredUser
+	err := coll.FindOne(context.TODO(),bson.M{"id_string" : userId}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
+
+}
+
 func (repo *UserRepository) FindAllUsersBySearchingContent(username string,searchContent string) (*[]model.RegisteredUser,error) {
 	db := repo.Database.Database("user-service-database")
 	coll := db.Collection("users")
 	var users []model.RegisteredUser
-	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username}}})
+	cursor,err := coll.Find(context.TODO(),bson.M{"username" : bson.D{{"$regex", searchContent + ".*"},{"$ne",username},{"$ne","admin"}}})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -114,6 +126,27 @@ func (repo *UserRepository) FindUsernameByUserId(userIds dto.UserIdsDTO) (*[]dto
 		}
 		}*/
 	query := bson.M{"id_string": bson.M{"$in": userIds.UserIds}}
+	cursor,err := coll.Find(context.TODO(),query)
+	if err != nil{
+		return nil,err
+	}
+	err = cursor.All(context.TODO(),&users)
+	return &users,nil
+}
+
+func (repo *UserRepository) FindUserIdByUsername(usernames dto.UsernamesDTO) (*[]dto.UserByUsernameDTO, error){
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	var users []dto.UserByUsernameDTO
+
+	/*oids := make([]primitive.ObjectID, len(userIds.UserIds))	//konverotvanje stringa u ObjectID
+	for i := range userIds.UserIds {
+		objID, err := primitive.ObjectIDFromHex(userIds.UserIds[i])
+		if err == nil {
+			oids = append(oids, objID)
+		}
+		}*/
+	query := bson.M{"username": bson.M{"$in": usernames.Usernames}}
 	cursor,err := coll.Find(context.TODO(),query)
 	if err != nil{
 		return nil,err
