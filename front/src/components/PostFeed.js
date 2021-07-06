@@ -25,8 +25,8 @@ import {
   BookmarkBorderRounded,
   BookmarkRounded,
   SentimentSatisfiedRounded,
+  PersonRounded,
 } from "@material-ui/icons";
-
 import UsersList from "./UsersList";
 import CommentsForFeeds from "./CommentsForFeeds.js";
 import DialogForReport from "./DialogForReport";
@@ -51,15 +51,19 @@ const PostFeed = ({ feed }) => {
   const [newComment, setNewComment] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
+  const [locationForFeed, setLocationForFeed] = useState();
 
   const [openDialogForLikes, setOpenDialogForLikes] = useState(false);
   const [likers, setLikers] = useState([]);
   const [openDialogForDislikes, setOpenDialogForDislikes] = useState(false);
   const [dislikers, setDislikers] = useState([]);
+  const [taggedUsers, setTaggedUsers] = useState([]);
 
   const [openPicker, setOpenPicker] = useState(false);
   const [openDialogForReport, setOpenDialogForReport] = useState(false);
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
+  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] =
+    useState(false);
 
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -177,6 +181,16 @@ const PostFeed = ({ feed }) => {
         setUsername(res.data.Username);
         setProfileImage(res.data.ProfilePicture);
       });
+
+    axios.get("/api/post/get-location-for-post/" + feed.ID).then((res) => {
+      setLocationForFeed(res.data.Location);
+    });
+
+    axios.get("/api/post/get-users-tagged-on-post/" + feed.ID).then((res) => {
+      if (res.data !== null) {
+        setTaggedUsers(res.data);
+      }
+    });
   }, [feed]);
 
   const likePost = () => {
@@ -396,7 +410,14 @@ const PostFeed = ({ feed }) => {
                   <b>{username}</b>
                   <br />
                 </Link>
-                {"ovde lokacija ako je ima"}
+                {locationForFeed && (
+                  <Link
+                    to={"/explore/locations/" + locationForFeed + "/"}
+                    style={{ textDecoration: "none", color: "black" }}
+                  >
+                    {locationForFeed ? locationForFeed : ""}
+                  </Link>
+                )}
               </Grid>
               <Grid item xs={2} style={{ margin: "auto" }}>
                 <MoreHoriz
@@ -508,7 +529,15 @@ const PostFeed = ({ feed }) => {
               <Grid container item xs={4}>
                 <Grid item xs={2} />
                 <Grid item xs={3} />
-                <Grid item xs={3} />
+                <Grid item xs={3}>
+                  {taggedUsers.length !== 0 && (
+                    <PersonRounded
+                      fontSize="large"
+                      style={{ margin: "auto", cursor: "pointer" }}
+                      onClick={() => setOpenDialogForTaggedUsers(true)}
+                    />
+                  )}
+                </Grid>
                 <Grid item xs={3}>
                   {isSaved ? (
                     <BookmarkRounded
@@ -671,12 +700,21 @@ const PostFeed = ({ feed }) => {
         ></UsersList>
       )}
 
-      {setOpenDialogForDislikes && (
+      {openDialogForDislikes && (
         <UsersList
           label="People who dislike post"
           users={dislikers}
           open={openDialogForDislikes}
           setOpen={setOpenDialogForDislikes}
+        ></UsersList>
+      )}
+
+      {openDialogForTaggedUsers && (
+        <UsersList
+          label="People tagged on post"
+          users={taggedUsers}
+          open={openDialogForTaggedUsers}
+          setOpen={setOpenDialogForTaggedUsers}
         ></UsersList>
       )}
     </div>

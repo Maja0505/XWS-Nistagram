@@ -82,6 +82,7 @@ func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]DTO.Use
 	reqUrl1 := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allAllFollowsWhomUserIsNotCloseFriend/" + userid)
 	reqUrl2 := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allAllFollowsWhomUserIsCloseFriend/" + userid)
 
+	fmt.Println("Usao u metodu")
 
 	resp, err := http.Get(reqUrl1)
 	if err != nil || resp.StatusCode == 404 {
@@ -90,6 +91,7 @@ func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]DTO.Use
 	body, err := ioutil.ReadAll(resp.Body)
 	var followsWhomUserIsNotCloseFriend []string
 	err = json.Unmarshal(body, &followsWhomUserIsNotCloseFriend)
+	fmt.Println(followsWhomUserIsNotCloseFriend)
 	if err != nil{
 		return nil, err
 	}
@@ -101,6 +103,7 @@ func (service *StoryService) GetAllFollowsWithStories(userid string) (*[]DTO.Use
 	body, err = ioutil.ReadAll(resp.Body)
 	var followsWhomUserIsCloseFriend []string
 	err = json.Unmarshal(body, &followsWhomUserIsCloseFriend)
+	fmt.Println(followsWhomUserIsCloseFriend)
 	if err != nil{
 		return nil, err
 	}

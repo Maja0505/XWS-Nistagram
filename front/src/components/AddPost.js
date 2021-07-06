@@ -67,6 +67,20 @@ const AddPost = ({ setTabValue }) => {
           });
       }
     }
+    for (var j = 0; j < taggedUsers.length; j++) {
+      let userTag = taggedUsers[j];
+      axios
+        .post("/api/post/add-tag", {
+          Tag: userTag,
+          PostID: postDTO.ID,
+        })
+        .then((res) => {
+          console.log("Upisan user tag  " + userTag);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   const uploadVideo = (imageForUpload, index) => {
@@ -123,19 +137,20 @@ const AddPost = ({ setTabValue }) => {
     console.log(imagesIdsForSave);
     if (!puklaSlika) {
       var postDTO = {
-        ID: uuidv4(),
         Description: description,
         Media: imagesIdsForSave,
         MediaCount: imagesIdsForSave.length,
         Album: imagesIdsForSave.length === 0 ? false : true,
         UserID: loggedUserId,
+        Location: location,
       };
       console.log("Uspesno upload-ovao sliku");
       axios
         .post("/api/post/create", postDTO)
         .then((res1) => {
           console.log("Uspesno kreirao post");
-          addTags(postDTO);
+          var postDTONew = { ...postDTO, ID: res1.data };
+          addTags(postDTONew);
           setTabValue(0);
           setPuklaSlika(false);
         })
@@ -250,6 +265,7 @@ const AddPost = ({ setTabValue }) => {
           <TagLocationAndUser
             setLocation={setLocation}
             setTaggedUsers={setTaggedUsers}
+            taggedUsers={taggedUsers}
           />
 
           <Grid container style={{ marginTop: "1%" }}>
