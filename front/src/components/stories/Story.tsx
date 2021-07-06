@@ -23,7 +23,7 @@ interface Props {
  
 export default function Story({ onClose, stories, user }: Props ){
   const [storyPaused, setStoryPaused] = useState(false);
-  const [storyIndex, setStoryIndex] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(Number(currentStoryIndex));
   const storyIndexRef = useRef(0);
   const [imageProfile,setImageProfile] = useState("")
   const [username,setUsername] = useState("")
@@ -34,6 +34,15 @@ export default function Story({ onClose, stories, user }: Props ){
 
   useEffect(() => {
     const video = document.getElementById("video") as HTMLVideoElement;
+    const distinct = Array.from(new Set(stories.map(story => story.profile_name))).map(profile_name =>
+      {
+        return {
+          profile_name: stories.find(s=>s.profile_name===profile_name)
+        };
+      });
+    
+    console.log(distinct.length)
+
 
     if (video) {
       video.onended = (e) => {
@@ -47,7 +56,18 @@ export default function Story({ onClose, stories, user }: Props ){
   }, []);
 
   useEffect(() => {
+    const distinct = Array.from(new Set(stories.map(story => story.profile_name))).map(profile_name =>
+      {
+        return {
+          profile_name: stories.find(s=>s.profile_name===profile_name)
+        };
+      });
+      console.log(distinct.length)
     storyIndexRef.current = storyIndex;
+    stories[storyIndex].opened=true
+    console.log(stories[storyIndex].profile_name)
+    setStoriesByUser(stories.filter(story => story.profile_name === stories[storyIndex].profile_name))
+    console.log(stories.filter(story => story.profile_name === stories[storyIndex].profile_name).length)
   }, [storyIndex]);
 
   useEffect(() => {
@@ -108,6 +128,7 @@ export default function Story({ onClose, stories, user }: Props ){
           <Close style={{marginLeft:"20px"}} onClick={(e) => onClose()}/>
           </div>
         </div>
+       
         <div className="progress-bars">
           {stories.map((story, index) => (
             <div className="progress-bar-container" id="progress_bar">

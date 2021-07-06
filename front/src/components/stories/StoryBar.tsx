@@ -8,7 +8,7 @@ import Story from "../components/Story";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import {
-	AppBar,
+	AppBar, 
 	Toolbar,
 	Grid,
   Paper,
@@ -64,8 +64,22 @@ export default function ContentDetails() {
   const [myStories,setMyStories] = useState([])
   const [stories,setStories] = useState([])
 
-  const storyClicked = (story:any) => {
-    console.log(story)
+  const storyClicked = (index:any) => {
+    setStoryIndex(index)
+    const updatedStories = stories.map((item) => {
+      if (item === stories[index]) {
+        const updatedItem = {
+        ...item,
+        opened: true,
+        };
+     
+        return updatedItem;
+      }
+     
+      return item;
+      });
+     
+      setStories(updatedStories);
   }
 
   const [storiesOpen, setStoriesOpen] = useState(false);

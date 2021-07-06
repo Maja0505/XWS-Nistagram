@@ -30,7 +30,7 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 		session neo4j.Session
 		err     error
 	)
-	if driver, err = neo4j.NewDriver("neo4j://neo4j:7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
+	if driver, err = neo4j.NewDriver("neo4j://localhost:7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
 	}
 	if session = driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite}); err != nil {
@@ -104,6 +104,7 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 	router.HandleFunc("/checkMuted/{userId}/{mutedUserId}",handler.CheckMuted).Methods("GET")
 	router.HandleFunc("/checkClosed/{userId}/{closedUserId}",handler.CheckClosed).Methods("GET")
 
+	router.HandleFunc("/followSuggestions/{userId}",handler.GetFollowSuggestions).Methods("GET")
 
 
 

@@ -120,6 +120,9 @@
 .story .video video {
   width: 100%;
 }
+.story .image image {
+  width: 100%;
+}
 
 .story .video svg {
   color: white;
