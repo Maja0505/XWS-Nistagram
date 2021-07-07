@@ -9,7 +9,7 @@ import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import { Story as StoryModel } from "../models/Story";
 import { User as UserModel } from "../models/User";
 import StarIcon from '@material-ui/icons/Star';
-
+import {Grid } from "@material-ui/core"
 import avatar from "../images/nistagramAvatar.jpg";
 import axios from "axios";
 
@@ -101,12 +101,20 @@ export default function Story({ onClose, stories, user }: Props ){
 
           </div>
 
-          <div>
-          {stories[storyIndex].ForCloseFriends === true && <StarIcon style={{color:"green"}}>For Close</StarIcon>}
-          {storyPaused && <span className="pause">PAUSED</span>}
-          <MoreHoriz style={{marginLeft: storyPaused==true ? "10px" : "300px"}} />
-          <Close style={{marginLeft:"20px"}} onClick={(e) => onClose()}/>
-          </div>
+            <Grid container>
+              <Grid item xs={2}>
+                {stories[storyIndex].ForCloseFriends === true && <StarIcon style={{color:"green"}}>For Close</StarIcon>}
+                </Grid>
+                <Grid item xs={6}>
+                {storyPaused && <span className="pause">PAUSED</span>}
+                </Grid>
+                <Grid item xs={2}>
+                <MoreHoriz style={{margin:"auto"}}/>
+                </Grid>
+                <Grid item xs={2}>
+                <Close style={{margin:"auto"}} onClick={(e) => onClose()}/>
+                </Grid>
+          </Grid>
         </div>
         <div className="progress-bars">
           {stories.map((story, index) => (

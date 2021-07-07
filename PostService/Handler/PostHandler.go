@@ -30,7 +30,7 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.Create(&postDTO)
+	id,err := handler.Service.Create(&postDTO)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
@@ -38,7 +38,7 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-
+	_ = json.NewEncoder(w).Encode(id)
 }
 
 func (handler *PostHandler) AddPostToFavourites(w http.ResponseWriter, r *http.Request) {
@@ -343,7 +343,10 @@ func (handler *PostHandler) FindPostsByTag(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}else{
-		tag = "#" + tag
+		if tag[0:1] != "@" {
+			tag = "#" + tag
+		}
+
 	}
 
 	posts,_ := handler.Service.FindPostsByTag(tag)

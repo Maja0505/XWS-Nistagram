@@ -7,42 +7,14 @@ import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
-import StoryBar from "./components/StoryBar";
-import ContentDetails from "./components/ContentDetails";
 import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
+import LocationTagPost from "./components/LocationTagPost.js";
+import FollowSuggestions from "./components/FollowSuggestions";
 
 function App() {
-  const logedUsername = localStorage.getItem("username");
-
-  const users = [
-    {
-      Username: "Perica",
-      FirstName: "Perica",
-      LastName: "Peric",
-      DateOfBirth: "krdlkjf",
-      Email: "Peric.peric@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Female",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-
-    {
-      Username: "marko",
-      FirstName: "Marko",
-      LastName: "Markovic",
-      DateOfBirth: "krdlkjf",
-      Email: "marko.markovic@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Male",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-  ];
-
   return (
     <div>
       <Router>
@@ -72,7 +44,7 @@ function App() {
             <Route path="/admin" component={AdminHomePage}></Route>
 
             <Route
-              path="/dialog/:username/:post"
+              path="/dialog/:post"
               render={(props) => <PostDialog {...props} />}
             ></Route>
 
@@ -85,6 +57,16 @@ function App() {
               exact
               path="/explore/tags/:tag/"
               render={(props) => <HashTagPost {...props} />}
+            ></Route>
+            <Route
+              exact
+              path="/explore/locations/:location/"
+              render={(props) => <LocationTagPost {...props} />}
+            ></Route>
+
+            <Route
+              path="/follow-suggestions/"
+              component={FollowSuggestions}
             ></Route>
           </Switch>
         </div>

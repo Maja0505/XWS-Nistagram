@@ -20,14 +20,14 @@ type PostService struct {
 	Repo Repository.PostRepository
 }
 
-func (service *PostService) Create(postDTO *DTO.PostDTO) error {
+func (service *PostService) Create(postDTO *DTO.PostDTO) (gocql.UUID,error) {
 	post := Mapper.ConvertPostDTOToPost(postDTO)
-	err := service.Repo.Create(post)
+	id,err := service.Repo.Create(post)
 	if err != nil{
 		fmt.Println(err)
-		return  err
+		return  id,err
 	}
-	return nil
+	return id,nil
 }
 
 func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
