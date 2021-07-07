@@ -406,14 +406,17 @@ const NavBar = () => {
             xs={2}
             style={{ textAlign: "left", margin: "auto" }}
           >
-            <ExploreOutlined
-              style={{
-                color: "gray",
-                width: "29px",
-                height: "33px",
-                marginLeft: "5%",
-              }}
-            />
+            <Link to="/follow-suggestions/">
+              <ExploreOutlined
+                style={{
+                  color: "gray",
+                  width: "29px",
+                  height: "33px",
+                  marginLeft: "5%",
+                  cursor: "pointer",
+                }}
+              />
+            </Link>
             <FavoriteBorderOutlined
               style={{
                 color: "gray",

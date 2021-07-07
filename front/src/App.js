@@ -12,6 +12,7 @@ import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
 import LocationTagPost from "./components/LocationTagPost.js";
+import FollowSuggestions from "./components/FollowSuggestions";
 
 function App() {
   return (
@@ -61,6 +62,11 @@ function App() {
               exact
               path="/explore/locations/:location/"
               render={(props) => <LocationTagPost {...props} />}
+            ></Route>
+
+            <Route
+              path="/follow-suggestions/"
+              component={FollowSuggestions}
             ></Route>
           </Switch>
         </div>

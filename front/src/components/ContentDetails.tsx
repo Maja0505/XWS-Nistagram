@@ -2,7 +2,7 @@ import "./ContentDetails.css";
 import avatar from "../images/nistagramAvatar.jpg";
 
 import  { useState, useEffect,useRef } from "react";
-import Story from "../components/Story";
+import Story from "./Story";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import {
@@ -13,7 +13,7 @@ import {
   MenuItem,
   MenuList,
   } from "@material-ui/core";
-  import AddStory from "../components/AddStoryDialog"
+  import AddStory from "./AddStoryDialog"
 import axios from "axios";
 
 
@@ -57,22 +57,8 @@ export default function ContentDetails() {
   const [myStories,setMyStories] = useState([])
   const [stories,setStories] = useState([])
 
-  const storyClicked = (index:any) => {
-    setStoryIndex(index)
-    const updatedStories = stories.map((item) => {
-      if (item === stories[index]) {
-        const updatedItem = {
-        ...item,
-        opened: true,
-        };
-     
-        return updatedItem;
-      }
-     
-      return item;
-      });
-     
-      setStories(updatedStories);
+  const storyClicked = (story:any) => {
+    console.log(story)
   }
 
   const [storiesOpen, setStoriesOpen] = useState(false);
