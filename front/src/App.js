@@ -11,12 +11,19 @@ import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
+import { useEffect } from "react";
+import Button from '@material-ui/core/Button';
+import { SnackbarProvider, useSnackbar  } from 'notistack';
+import Snackbar from './components/Snackbar'
 import LocationTagPost from "./components/LocationTagPost.js";
 import FollowSuggestions from "./components/FollowSuggestions";
 
 function App() {
+  const logedUsername = localStorage.getItem("username");
+
   return (
     <div>
+
       <Router>
         <div className="App">
           <NavBar></NavBar>
@@ -71,6 +78,9 @@ function App() {
           </Switch>
         </div>
       </Router>
+     <SnackbarProvider maxSnack={3}>
+       <Snackbar/>
+     </SnackbarProvider>
     </div>
   );
 }

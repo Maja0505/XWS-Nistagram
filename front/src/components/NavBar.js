@@ -30,18 +30,23 @@ import {
   ThumbsUpDownOutlined,
   RoomRounded,
 } from "@material-ui/icons";
-
+import Badge from '@material-ui/core/Badge';
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const NavBar = () => {
   const username = localStorage.getItem("username");
+  const loggedUserId = localStorage.getItem("id")
 
   const [searchedContent, setSearchedContent] = useState([]);
   const [redirectionString, setRedirectionString] = useState();
   const [open, setOpen] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const [allNotifications,setAllNotifications] = useState([])
+
   const anchorRef = useRef(null);
   const [isHastag, setIsHastag] = useState(false);
   const [isUser, setIsUser] = useState(false);
+  const [invisible,setInvisible] = useState(localStorage.getItem('invisibleNotification'))
 
   const [redirection, setRedirection] = useState(false);
 
@@ -129,6 +134,7 @@ const NavBar = () => {
   };
 
   const handleToggle = () => {
+    setOpenNotifications(false);
     setOpen((prevOpen) => !prevOpen);
   };
 
@@ -138,6 +144,8 @@ const NavBar = () => {
     }
 
     setOpen(false);
+    setOpenNotifications(false);
+
   };
 
   function handleListKeyDown(event) {
@@ -148,14 +156,108 @@ const NavBar = () => {
   }
 
   const prevOpen = useRef(open);
+  const prevOpenNotifications = useRef(openNotifications);
+
 
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
       anchorRef.current.focus();
     }
 
+    if (prevOpenNotifications.current === true && openNotifications === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpenNotifications.current = open;
     prevOpen.current = open;
-  }, [open]);
+
+  }, [open,openNotifications]);
+
+  const handleNotificationButton = () => {
+
+    if(!openNotifications){
+      axios.get("/api/notification/channels/" + loggedUserId)
+        .then((res) => {
+          console.log(res.data)
+          if(res.data){
+            setAllNotifications(res.data)
+          }
+          setOpenNotifications((prevOpenNotifications) => !prevOpenNotifications);
+          setOpen(false);
+          localStorage.setItem('invisibleNotification',true)
+          setInvisible(localStorage.getItem('invisibleNotification'))
+        })
+    }
+  }
+
+
+  const dropDowMenuForNotifications = (
+    <Popper
+      open={openNotifications}
+      anchorEl={anchorRef.current}
+      role={undefined}
+      transition
+      disablePortal
+      style={{ width: "30%", zIndex: "1" }}
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          {...TransitionProps}
+          style={{
+            transformOrigin:
+              placement === "bottom" ? "center top" : "center bottom",
+          }}
+        >
+          <Paper>
+            <ClickAwayListener onClickAway={handleClose}>
+              <MenuList
+                autoFocusItem={openNotifications}
+                id="menu-list-grow"
+                onKeyDown={handleListKeyDown}
+              >
+                {allNotifications.length === 0 && <p>aaaaaa</p>}
+                {allNotifications.map((notification) => (
+                    <MenuItem onClick={handleClose}>
+                    <Grid container>
+                      <Grid item xs={3}>
+                        <Link
+                          to={"/homePage/" + `${username}`}
+                          style={{ textDecoration: "none", color: "black" }}
+                        >
+                          <AccountCircleOutlined />
+                        </Link>
+                      </Grid>
+                      <Grid item xs={7}>
+                        <Link
+                          to={(notification.post_id !== undefined && notification.post_id !== null) ?"/dialog/" + `${notification.post_id}` : "/homePage/" + `${notification.user_who_follow}`}
+                          style={{ textDecoration: "none", color: "black" }}
+                        >
+                          {(notification.content === "started following you." || notification.content === "requested to following you." || notification.content === "liked your photo." || notification.content === "disliked your photo." || notification.content === "tagged you in a post.") && <div style={{ width: "100%" }}>{notification.user_who_follow + " " + notification.content}</div>}
+                          {(notification.content === "commented your post:") && <div style={{ width: "100%" }}>{notification.user_who_follow + " " + notification.content + " " + notification.comment}</div>}
+      
+                        </Link>
+                      </Grid>
+                      <Grid item xs={2}>
+                        {notification.post_id !== undefined && notification.post_id !== null && 
+                        <img
+                          width="100%"
+                          height="100%"
+                          src={`http://localhost:8080/api/media/get-media-image/${notification.media}`}
+                        />}
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                ))}
+
+              </MenuList>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  );
+
+
 
   const dropDowMenuForProfile = (
     <Popper
@@ -417,14 +519,26 @@ const NavBar = () => {
                 }}
               />
             </Link>
+            <Badge color="secondary" variant="dot" invisible={invisible}>
+              
             <FavoriteBorderOutlined
               style={{
                 color: "gray",
                 width: "29px",
                 height: "33px",
                 marginLeft: "5%",
+                cursor: "pointer",
+
               }}
+              ref={anchorRef}
+              aria-controls={openNotifications ? "menu-list-grow" : undefined}
+              aria-haspopup="true"
+
+              onClick = {handleNotificationButton}
             />
+            </Badge>
+            {dropDowMenuForNotifications}
+
             <div>
               <Avatar
                 alt="N"

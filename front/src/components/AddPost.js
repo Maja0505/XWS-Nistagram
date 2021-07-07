@@ -29,9 +29,12 @@ const AddPost = ({ setTabValue }) => {
   const [image, setImage] = useState([]);
   const [description, setDescription] = useState("");
   const loggedUserId = localStorage.getItem("id");
+  const loggedUsername = localStorage.getItem("username");
+
   const [isVideo, setIsVideo] = useState([]);
   const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
   const [puklaSlika, setPuklaSlika] = useState(false);
+  const [listOfTaggedUserid,setListOfTaggedUserid] = useState([])
 
   const [location, setLocation] = useState("");
   const [taggedUsers, setTaggedUsers] = useState("");
@@ -69,12 +72,19 @@ const AddPost = ({ setTabValue }) => {
     }
     for (var j = 0; j < taggedUsers.length; j++) {
       let userTag = taggedUsers[j];
+      let userid = listOfTaggedUserid[j]
       axios
         .post("/api/post/add-tag", {
           Tag: userTag,
           PostID: postDTO.ID,
         })
         .then((res) => {
+          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            console.log("aa")
+            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + userid + '"' + ', "content": "tagged you in a post."' + ', "media": "' + postDTO.Media[0] + '"' + ', "post_id": "' + postDTO.ID + '"}')
+          };
           console.log("Upisan user tag  " + userTag);
         })
         .catch((error) => {
@@ -266,6 +276,8 @@ const AddPost = ({ setTabValue }) => {
             setLocation={setLocation}
             setTaggedUsers={setTaggedUsers}
             taggedUsers={taggedUsers}
+            setListOfTaggedUserid = {setListOfTaggedUserid}
+            listOfTaggedUserid = {listOfTaggedUserid}
           />
 
           <Grid container style={{ marginTop: "1%" }}>
