@@ -11,4 +11,5 @@ type PostDTO struct{
 	CommentsCount 	int64  			`json:"CommentsCount"`
 	Album			bool			`json:"Album"`
 	Location 		string			`json:"Location"`
+	RepeatCampaign 	bool			`json:"RepeatCampaign"`
 }

@@ -918,6 +918,25 @@ func (handler *PostHandler) GetLocationSuggestions(w http.ResponseWriter, r *htt
 
 }
 
+func (handler *PostHandler) UpdatePostCreatedAt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var upDTO DTO.UpdateCreatedAtDTO
+	err := json.NewDecoder(r.Body).Decode(&upDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.UpdatePostCreatedAt(&upDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
 	func ParseUUID(input string) (gocql.UUID, error) {
 	var u gocql.UUID
 	j := 0
