@@ -105,6 +105,10 @@ services:
       - network1
     volumes:
       - neo4j_db:/plugins
+      - neo4j_db:/conf
+      - neo4j_db:/data
+      - neo4j_db:/import
+      - neo4j_db:/logsneo4j
     environment:
       - NEO4J_AUTH=neo4j/nistagram
       - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687

@@ -319,8 +319,12 @@ func (service *UserFollowersService) FollowSuggestions(userId string) (*[]dto.Us
 	for _,f := range listOfFollowedUserFollowed {
 
 		strF := fmt.Sprintf("%v",f)
-
-		if strF != userId {
+		following, err := service.Repository.CheckFollowing(userId,strF)
+		if err != nil {
+			return nil, err
+		}
+		strFollowing := fmt.Sprintf("%v",*following)
+		if strF != userId && strFollowing == "false" {
 			_,existInMap := mapOfUsers[strF]
 			if existInMap{
 				mapOfUsers[strF] = mapOfUsers[strF] + 2
@@ -343,7 +347,12 @@ func (service *UserFollowersService) FollowSuggestions(userId string) (*[]dto.Us
 
 	for _,f := range listOfFollowedUserFollowedUserFollowedUser{
 		strF := fmt.Sprintf("%v",f)
-		if strF != userId {
+		following, err := service.Repository.CheckFollowing(userId,strF)
+		if err != nil {
+			return nil, err
+		}
+		strFollowing := fmt.Sprintf("%v",*following)
+		if strF != userId && strFollowing == "false" {
 		_,existInMap := mapOfUsers[strF]
 		if existInMap{
 			mapOfUsers[strF] = mapOfUsers[strF] + 0.5
@@ -369,11 +378,28 @@ func (service *UserFollowersService) FollowSuggestions(userId string) (*[]dto.Us
 		followSuggestions = append(followSuggestions,v.Key)
 		number++
 	}
+
+	if len(followSuggestions) == 0 {
+		allUsers, err := service.Repository.GetAllUsers(userId)
+		if err != nil{
+			return nil, err
+		}
+		usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(allUsers)
+
+		if err != nil{
+			return nil, err
+		}
+
+
+		return usernamesDTOList,nil
+	}
+
 	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(&followSuggestions)
 
 	if err != nil{
 		return nil, err
 	}
+
 
 	return usernamesDTOList,nil
 
