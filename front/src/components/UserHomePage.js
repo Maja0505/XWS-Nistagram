@@ -319,7 +319,13 @@ const UserHomePage = () => {
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
         console.log("uspesno");
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"user_who_follow":' + '"' + user.Username + '"' + ',"command": 2, "channel": ' + '"' + loggedUserId + '"' + ', "content": "requested to following you."}')
+        };
         setRequested(true);
+        
 
       });
     } else {
@@ -332,7 +338,7 @@ const UserHomePage = () => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + user.Username + '"' + ',"command": 2, "channel": ' + '"' + loggedUserId + '"' + ', "content": "is following you "}')
+          socket.send('{"user_who_follow":' + '"' + user.Username + '"' + ',"command": 2, "channel": ' + '"' + loggedUserId + '"' + ', "content": "started following you."}')
         };
         setFollowing(true);
       });
