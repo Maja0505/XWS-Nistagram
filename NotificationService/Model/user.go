@@ -48,8 +48,11 @@ func (u *User) Subscribe(rdb *redis.Client, channel string) error {
 	userChannelsKey := fmt.Sprintf(userChannelFmt, u.name)
 
 	if rdb.SIsMember(userChannelsKey, channel).Val() {
+		fmt.Println("postoji")
 		return nil
 	}
+	fmt.Println("ne postoji")
+
 	if err := rdb.SAdd(userChannelsKey, channel).Err(); err != nil {
 		return err
 	}

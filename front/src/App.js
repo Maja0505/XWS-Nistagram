@@ -14,37 +14,21 @@ import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
 import { useEffect } from "react";
+import Button from '@material-ui/core/Button';
+import { SnackbarProvider, useSnackbar  } from 'notistack';
+import Snackbar from './components/Snackbar'
 
 function App() {
   const logedUsername = localStorage.getItem("username");
 
+       //1. UseHooks to get enqueueSnackbar, closeSnackbar
+      
+       //2. Store both  enqueueSnackbar & closeSnackbar to class variables
+
+
 
   useEffect(() => {
-    let userid = localStorage.getItem("id")
-    let connected = localStorage.getItem("connected")
-    if(userid){
-      if(!connected){
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + userid)
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send('{"command": 0, "channel": ' + '"' + userid + '"' + '}')
-          localStorage.setItem('connected',true)
-        };
-  
-        socket.onclose = event => {
-          console.log("Socket Closed Connection: ", event);
-          localStorage.setItem('connected',false)
-      }
 
-      
-      socket.onmessage = event => {
-       alert(`${event.data}`);
-        };
-      }
-
-
-  
-  };
 
 
 
@@ -79,6 +63,7 @@ function App() {
 
   return (
     <div>
+
       <Router>
         <div className="App">
           <NavBar></NavBar>
@@ -123,6 +108,9 @@ function App() {
           </Switch>
         </div>
       </Router>
+     <SnackbarProvider maxSnack={3}>
+       <Snackbar/>
+     </SnackbarProvider>
     </div>
   );
 }
