@@ -5,6 +5,7 @@ type NotificationForFollow struct {
 	//CreatedAt redis.TimeCmd `json:"created_at,omitempty"`
 	Opened bool `json:"opened"`
 	PostId string `json:"post_id,omitempty"`
+	Media string `json:"media,omitempty"`
 	Comment string `json:"comment,omitempty"`
 	Content string `json:"content,omitempty"`
 	Channel string `json:"channel,omitempty"`

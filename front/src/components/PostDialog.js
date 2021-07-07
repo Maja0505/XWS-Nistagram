@@ -101,7 +101,7 @@ const PostDialog = () => {
       let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
       socket.onopen = () => {
         console.log("Successfully Connected");
-        socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "commented your post:"' + ', "post_id": "' + post + '"' + ', "comment": "' + newComment + '"}')
+        socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + imagePost.Media[0] + '"' + ', "comment": "' + newComment + '"}' + ', "post_id": "' + imagePost.ID + '"}')
       };
       setNewComment("");
       axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
@@ -211,7 +211,7 @@ const PostDialog = () => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "liked your photo."' + ', "post_id": "' + post + '"}')
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
         };
         setPostIsLiked(true);
       }
@@ -256,7 +256,7 @@ const PostDialog = () => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "disliked your photo."' + ', "post_id": "' + post + '"}')
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
         };
         setPostIsDisliked(true);
       }

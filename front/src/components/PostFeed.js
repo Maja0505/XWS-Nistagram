@@ -216,7 +216,7 @@ const PostFeed = ({ feed }) => {
           let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
           socket.onopen = () => {
             console.log("Successfully Connected");
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "liked your photo."' + ', "post_id": "' + feed.ID + '"}')
+            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + feed.Media[0] + '"' + ', "post_id": "' + feed.ID + '"}')
           };
         } else {
           if (isDisliked) {
@@ -258,7 +258,7 @@ const PostFeed = ({ feed }) => {
           let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
           socket.onopen = () => {
             console.log("Successfully Connected");
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "disliked your photo."' + ', "post_id": "' + feed.ID + '"}')
+            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + feed.Media[0] + '"'+ ', "post_id": "' + feed.ID + '"}')
           };
         } else {
           if (isLiked) {
@@ -290,7 +290,7 @@ const PostFeed = ({ feed }) => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "commented your post:"' + ', "post_id": "' + feed.ID + '"' + ', "comment": "' + newComment + '"}')
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + feed.Media[0] + '"' + ', "comment": "' + newComment + '"' + ', "post_id": "' + feed.ID + '"}')
         };
         axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
           setComments(res.data);
