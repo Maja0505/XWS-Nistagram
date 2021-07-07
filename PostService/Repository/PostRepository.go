@@ -895,26 +895,34 @@ func (repo *PostRepository) GetLocationSuggestions(s string) (*[]string, error){
 
 
 func (repo *PostRepository) GetAllReportContents() (*[]Model.ReportedContent , error){
+	fmt.Println("usao u repo")
 	var reportContents []Model.ReportedContent
 	m := map[string]interface{}{}
 
-	iter := repo.Session.Query("SELECT * FROM postkeyspace.reported_contents;").Iter()
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.reported_contents").Iter()
+	fmt.Println(iter)
+	fmt.Println("zavrsio query")
+
 	for iter.MapScan(m) {
+		fmt.Println("whyyy")
+
 		reportContents = append(reportContents, Model.ReportedContent{
 			ID:        	m["id"].(gocql.UUID),
-			UserID: 	m["userId"].(string),
-			AdminID: 	m["adminId"].(string),
+			UserID: 	m["userid"].(string),
+			AdminID: 	m["adminid"].(string),
 			Description:m["description"].(string),
-			ContentID: 	m["contentId"].(string),
+			ContentID: 	m["contentid"].(string),
 		})
+		fmt.Println("appedn")
+
 		m = map[string]interface{}{}
 	}
 	return &reportContents,nil
 }
 
-func (repo *PostRepository) DeleteReportContent(contentId gocql.UUID,userId string) error {
-	if err := repo.Session.Query("DELETE FROM postkeyspace.reported_contents where id = ? and userid = ? IF EXISTS;",
-		contentId,userId).Exec(); err != nil {
+func (repo *PostRepository) DeleteReportContent(id gocql.UUID,userId string) error {
+	if err := repo.Session.Query("DELETE FROM postkeyspace.reported_contents WHERE userid = ? AND id = ? IF EXISTS;",
+		userId,id).Exec(); err != nil {
 		fmt.Println("Error while deleting report content!")
 		fmt.Println(err)
 		return err

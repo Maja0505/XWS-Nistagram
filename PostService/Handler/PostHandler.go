@@ -919,13 +919,18 @@ func (handler *PostHandler) GetLocationSuggestions(w http.ResponseWriter, r *htt
 }
 
 func (handler *PostHandler) GetAllReportedContents(w http.ResponseWriter,r  *http.Request) {
+	fmt.Println("usau u GetAllReportedContents")
 	w.Header().Set("Content-Type", "application/json")
 
 	contents,err := handler.Service.GetAllReportedContents()
+	fmt.Println("zastoo")
+
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
+	fmt.Println("dobavio contente")
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(contents)
 }
@@ -933,19 +938,19 @@ func (handler *PostHandler) GetAllReportedContents(w http.ResponseWriter,r  *htt
 func (handler *PostHandler) DeleteReportedContent(w http.ResponseWriter,r  *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	stringContentId := vars["contentId"]
-	userId := vars["contentId"]
+	id := vars["id"]
+	userId := vars["userid"]
 
-	if stringContentId == "" || userId == "" {
+	if id == "" || userId == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var contentId, err = ParseUUID(stringContentId)
+	var reportid, err = ParseUUID(id)
 	if err != nil{
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.DeleteReportContent(contentId,userId)
+	err = handler.Service.DeleteReportContent(reportid,userId)
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
 		return
@@ -956,8 +961,8 @@ func (handler *PostHandler) DeleteReportedContent(w http.ResponseWriter,r  *http
 func (handler *PostHandler) DeletePost(w http.ResponseWriter,r  *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	stringPostId := vars["postId"]
-	userId := vars["contentId"]
+	stringPostId := vars["postid"]
+	userId := vars["userid"]
 	if stringPostId == "" || userId == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return

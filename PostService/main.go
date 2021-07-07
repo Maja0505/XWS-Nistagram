@@ -163,8 +163,8 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-location-for-post/{postId}", handler.GetLocationForPost).Methods("GET")
 	router.HandleFunc("/get-location-suggestions/{location}", handler.GetLocationSuggestions).Methods("GET")
 	router.HandleFunc("/get-all-reported-contents", handler.GetAllReportedContents).Methods("GET")
-	router.HandleFunc("/delete-reported-content/{contentId}/{userId}", handler.DeleteReportedContent).Methods("PUT")
-	router.HandleFunc("/delete-post/{postId}/{userId}", handler.DeletePost).Methods("PUT")
+	router.HandleFunc("/delete-reported-content/{id}/{userid}", handler.DeleteReportedContent).Methods("PUT")
+	router.HandleFunc("/delete-post/{postid}/{userid}", handler.DeletePost).Methods("PUT")
 
 }
 
