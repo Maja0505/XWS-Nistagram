@@ -29,15 +29,33 @@
   <body style="background-color: #F6F6F6;">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <script>
+        let userid = localStorage.getItem("id")
+    if(userid){
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + userid)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"command": 0, "channel": ' + '"' + userid + '"' + '}')
+          localStorage.setItem('connected',true)
+        };
+  
+        socket.onclose = event => {
+          console.log("Socket Closed Connection: ", event);
+          localStorage.setItem('connected',false)
+      }
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+      
+      socket.onmessage = event => {
+       p1 = JSON.parse(event.data);
+       p2 = JSON.parse(p1.content)
+      
+       console.log()
+       alert(p2.user_who_follow + " " + p2.content)
+        };
+      
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    }
+
+      </script>
   </body>
 </html>

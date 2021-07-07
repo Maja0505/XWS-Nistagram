@@ -13,9 +13,43 @@ import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
+import { useEffect } from "react";
 
 function App() {
   const logedUsername = localStorage.getItem("username");
+
+
+  useEffect(() => {
+    let userid = localStorage.getItem("id")
+    let connected = localStorage.getItem("connected")
+    if(userid){
+      if(!connected){
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + userid)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"command": 0, "channel": ' + '"' + userid + '"' + '}')
+          localStorage.setItem('connected',true)
+        };
+  
+        socket.onclose = event => {
+          console.log("Socket Closed Connection: ", event);
+          localStorage.setItem('connected',false)
+      }
+
+      
+      socket.onmessage = event => {
+       alert(`${event.data}`);
+        };
+      }
+
+
+  
+  };
+
+
+
+  }, [])
+
 
   const users = [
     {
