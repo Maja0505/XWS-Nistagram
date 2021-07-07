@@ -85,7 +85,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/{username}/follow-notification/{setting}",handler.UpdateFollowNotificationSetting).Methods("PUT")
 	router.HandleFunc("/upload-profile-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
-
+	router.HandleFunc("/delete/{userId}",handler.DeleteUser).Methods("PUT")
 
 }
 

@@ -422,6 +422,31 @@ func (service *PostService) GetLocationSuggestions(s string) (*[]string, error) 
 	return ret, nil
 }
 
+func (service *PostService) GetAllReportedContents() ( *[]Model.ReportedContent, error){
+	ret,err := service.Repo.GetAllReportContents()
+	if err != nil {
+		return nil, err
+	}
+	return ret, err
+}
+
+func (service *PostService) DeleteReportContent(contentId gocql.UUID,userId string) error{
+	err := service.Repo.DeleteReportContent(contentId,userId)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+func (service *PostService) DeletePost(postId gocql.UUID,userId string) error{
+	err := service.Repo.DeletePost(postId,userId)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+
 func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
 
 	var postsByAllNotMutedFollowedUsers []Model.Post

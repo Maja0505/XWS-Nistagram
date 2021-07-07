@@ -9,5 +9,5 @@ type ReportedContent struct {
 	Description  	string 		`json:"Description"`
 	ContentID 			string 		`json:"Image"`
 	UserID 			string		`json:"UserID"`
-	AdminID 			string		`json:"UserID"`
+	AdminID 			string		`json:"AdminID"`
 }
