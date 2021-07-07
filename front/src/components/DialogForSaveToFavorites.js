@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from "react";
+import { useState, useEffect } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -9,10 +9,10 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import { Grid, Divider } from "@material-ui/core";
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import { makeStyles } from "@material-ui/core/styles";
 import { TextField } from "@material-ui/core";
 import axios from "axios";
 
@@ -27,20 +27,17 @@ const styles = (theme) => ({
     top: theme.spacing(1),
     color: theme.palette.grey[500],
   },
-
 });
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
+    width: "100%",
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
   },
 }));
 
 const DialogTitle = withStyles(styles)((props) => {
-  
   const { children, classes, onClose, ...other } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
@@ -71,121 +68,125 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-export default function DialogForSaveToFavorites({loggedUserId, post ,open, setOpen,saved,setSaved }) {
+export default function DialogForSaveToFavorites({
+  loggedUserId,
+  post,
+  open,
+  setOpen,
+  saved,
+  setSaved,
+}) {
   const classes = useStyles();
-  const [inappropriate,setInappropriate] = useState(false)
-  const [saveToFavorites,setSaveToFavorites] = useState(true)
-  const [saveToCollection,setSaveToCollection] = useState(false)
-  const [createNewCollection,setCreateNewCollection] = useState(false)
-  const [saveToAnExistingCollection,setSaveToAnExistingCollection] = useState(false)
-  const [allUserCollections,setAllUserCollections] = useState([])
-  const [collectionName, setCollectionName] = useState('')
-  const [collectionsForPost, setCollectionsForPost] = useState([])
-  const [removingFromCollections, setRemovngFromCollections] = useState(false)
+  const [saveToFavorites, setSaveToFavorites] = useState(true);
+  const [saveToCollection, setSaveToCollection] = useState(false);
+  const [createNewCollection, setCreateNewCollection] = useState(false);
+  const [saveToAnExistingCollection, setSaveToAnExistingCollection] =
+    useState(false);
+  const [allUserCollections, setAllUserCollections] = useState([]);
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionsForPost, setCollectionsForPost] = useState([]);
+  const [removingFromCollections, setRemovngFromCollections] = useState(false);
   const handleClose = () => {
-    setSaveToCollection(false)
-    setSaveToAnExistingCollection(false)
-    setCreateNewCollection(false)
-    setSaveToFavorites(true)
+    setSaveToCollection(false);
+    setSaveToAnExistingCollection(false);
+    setCreateNewCollection(false);
+    setSaveToFavorites(true);
     setOpen(false);
   };
-  const [description,setDescription] = useState('')
-  const handleInappropriateButton = () => {
-    setInappropriate(true)
-  }
 
   useEffect(() => {
-    axios.get("/api/post/get-all-collections-for-post-by-user/" + loggedUserId + "/" + post)
-        .then((res) => {
-            if(res.data){
-                setCollectionsForPost(res.data)
-            }
-        })
+    axios
+      .get(
+        "/api/post/get-all-collections-for-post-by-user/" +
+          loggedUserId +
+          "/" +
+          post
+      )
+      .then((res) => {
+        if (res.data) {
+          setCollectionsForPost(res.data);
+        }
+      });
   }, []);
 
   const handleClickSavePost = (description) => {
-        console.log(post)
-        var favoritesDto = {
-        PostID: post,
-        UserID: loggedUserId,
-        Collection: collectionName
-        }
-        axios.post("/api/post/add-to-favourites",favoritesDto)
-            .then((res)=>{
-                
-                if(createNewCollection || saveToAnExistingCollection){
-                    axios.post("/api/post/add-to-collection",favoritesDto)
-                        .then((res)=> {
-                            console.log("uspelo")
-                            setOpen(false)
-                            setSaved(true)
-
-                        })
-                }else{
-                    console.log("uspelo")
-                    setOpen(false)
-                    setSaved(true)
-
-                }
-            })
-  
-  }
+    console.log(post);
+    var favoritesDto = {
+      PostID: post,
+      UserID: loggedUserId,
+      Collection: collectionName,
+    };
+    axios.post("/api/post/add-to-favourites", favoritesDto).then((res) => {
+      if (createNewCollection || saveToAnExistingCollection) {
+        axios.post("/api/post/add-to-collection", favoritesDto).then((res) => {
+          console.log("uspelo");
+          setOpen(false);
+          setSaved(true);
+        });
+      } else {
+        console.log("uspelo");
+        setOpen(false);
+        setSaved(true);
+      }
+    });
+  };
 
   const handleClickSaveToCollection = () => {
-    axios.get("/api/post/get-collections-for-user/" + loggedUserId)
-        .then((res) => {
-            if(res.data){
-                setAllUserCollections(res.data)
-            }
-            setSaveToFavorites(false)
-            setSaveToCollection(true)
-        }) 
-    
-  }
+    axios
+      .get("/api/post/get-collections-for-user/" + loggedUserId)
+      .then((res) => {
+        if (res.data) {
+          setAllUserCollections(res.data);
+        }
+        setSaveToFavorites(false);
+        setSaveToCollection(true);
+      });
+  };
 
   const handleClickCreateNewCollection = () => {
-    setSaveToCollection(false)
-    setCreateNewCollection(true)
-  }
+    setSaveToCollection(false);
+    setCreateNewCollection(true);
+  };
 
   const handleClickeSaveToAnExistngCollection = () => {
-    setSaveToCollection(false)
-    setSaveToAnExistingCollection(true)
-  }
+    setSaveToCollection(false);
+    setSaveToAnExistingCollection(true);
+  };
 
   const handleClickeRemovingFromAnExistngCollection = () => {
-    setSaveToFavorites(false)
-    setRemovngFromCollections(true)
-  }
+    setSaveToFavorites(false);
+    setRemovngFromCollections(true);
+  };
 
   const handleClickRemoveFromFavourites = () => {
     var favoritesDto = {
-        PostID: post,
-        UserID: loggedUserId,
-        Collection: ""
-        }
-      axios.post("/api/post/remove-post-from-favourites",favoritesDto)
-        .then((res) => {
-            console.log("uspenso")
-            setSaved(false)
-            setOpen(false)
-        })
-  }
+      PostID: post,
+      UserID: loggedUserId,
+      Collection: "",
+    };
+    axios
+      .post("/api/post/remove-post-from-favourites", favoritesDto)
+      .then((res) => {
+        console.log("uspenso");
+        setSaved(false);
+        setOpen(false);
+      });
+  };
 
   const handleClickRemovePostFromCollection = () => {
     var favoritesDto = {
-        PostID: post,
-        UserID: loggedUserId,
-        Collection: collectionName
-        }
-      axios.post("/api/post/remove-post-from-collection",favoritesDto)
-        .then((res) => {
-            console.log("uspenso")
-           
-            setOpen(false)
-        })
-  }
+      PostID: post,
+      UserID: loggedUserId,
+      Collection: collectionName,
+    };
+    axios
+      .post("/api/post/remove-post-from-collection", favoritesDto)
+      .then((res) => {
+        console.log("uspenso");
 
+        setOpen(false);
+      });
+  };
 
   return (
     <div>
@@ -202,7 +203,6 @@ export default function DialogForSaveToFavorites({loggedUserId, post ,open, setO
           Save post
         </DialogTitle>
         <DialogContent dividers>
-          
           <h4>Only you can see what you've saved</h4>
           <Divider />
 
@@ -211,93 +211,120 @@ export default function DialogForSaveToFavorites({loggedUserId, post ,open, setO
             className={classes.root}
             aria-label="mailbox folders"
           >
-
-           {saveToFavorites &&
-           <>
-           {!saved &&
-           <ListItem button>
-              <ListItemText primary="Save to favourites" onClick={() => handleClickSavePost("Save to favorites")}/>
-            </ListItem>}
-            {saved &&
-           <ListItem button>
-              <ListItemText primary="Remove from favourites" styles={{color:"red"}} onClick={handleClickRemoveFromFavourites}/>
-            </ListItem>}
-            {saved && collectionsForPost && collectionsForPost.length !== 0 && 
-           <ListItem button>
-              <ListItemText primary="Remove from collection" styles={{color:"red"}} onClick={handleClickeRemovingFromAnExistngCollection}/>
-            </ListItem>}
-            <Divider />
-            <ListItem button divider onClick={handleClickSaveToCollection}>
-              <ListItemText primary="Save to collection" />
-            </ListItem>
-          </>}
-          {saveToCollection &&
-          <>
-            <ListItem button onClick={handleClickCreateNewCollection}>
-              <ListItemText primary="Create new collection"  />
-            </ListItem>
-            <Divider />
-            {collectionsForPost && allUserCollections.length !== 0 && 
-              <ListItem button divider onClick={handleClickeSaveToAnExistngCollection}>
-              <ListItemText primary="Save to an existing collection"  />
-            </ListItem>
-            }
-          
-          </>
-          }
-          {createNewCollection &&
-            <Grid>
-                 <TextField
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        onChange = {(event) => setCollectionName(event.target.value)}
+            {saveToFavorites && (
+              <>
+                {!saved && (
+                  <ListItem button>
+                    <ListItemText
+                      primary="Save to favourites"
+                      onClick={() => handleClickSavePost("Save to favorites")}
+                    />
+                  </ListItem>
+                )}
+                {saved && (
+                  <ListItem button>
+                    <ListItemText
+                      primary="Remove from favourites"
+                      styles={{ color: "red" }}
+                      onClick={handleClickRemoveFromFavourites}
+                    />
+                  </ListItem>
+                )}
+                {saved &&
+                  collectionsForPost &&
+                  collectionsForPost.length !== 0 && (
+                    <ListItem button>
+                      <ListItemText
+                        primary="Remove from collection"
+                        styles={{ color: "red" }}
+                        onClick={handleClickeRemovingFromAnExistngCollection}
                       />
-                <Button disabled={collectionName === ""} onClick= {() => handleClickSavePost("")}>Save</Button>
-            </Grid>
-          
-          
-          }
-          {saveToAnExistingCollection &&
-          <>
-            
-            <Button disabled={collectionName===""} onClick={() => handleClickSavePost("")}>Add</Button>
-            {allUserCollections !== null && allUserCollections.map((collection) => (
-
-            <>
-            <ListItem button onClick={() => setCollectionName(collection)}>
-              <ListItemText primary={collection}  />
-            </ListItem>
-            <Divider />
-            </>
+                    </ListItem>
+                  )}
+                <Divider />
+                <ListItem button divider onClick={handleClickSaveToCollection}>
+                  <ListItemText primary="Save to collection" />
+                </ListItem>
+              </>
+            )}
+            {saveToCollection && (
+              <>
+                <ListItem button onClick={handleClickCreateNewCollection}>
+                  <ListItemText primary="Create new collection" />
+                </ListItem>
+                <Divider />
+                {collectionsForPost && allUserCollections.length !== 0 && (
+                  <ListItem
+                    button
+                    divider
+                    onClick={handleClickeSaveToAnExistngCollection}
+                  >
+                    <ListItemText primary="Save to an existing collection" />
+                  </ListItem>
+                )}
+              </>
+            )}
+            {createNewCollection && (
+              <Grid>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  onChange={(event) => setCollectionName(event.target.value)}
+                />
+                <Button
+                  disabled={collectionName === ""}
+                  onClick={() => handleClickSavePost("")}
+                >
+                  Save
+                </Button>
+              </Grid>
+            )}
+            {saveToAnExistingCollection && (
+              <>
+                <Button
+                  disabled={collectionName === ""}
+                  onClick={() => handleClickSavePost("")}
+                >
+                  Add
+                </Button>
+                {allUserCollections !== null &&
+                  allUserCollections.map((collection) => (
+                    <>
+                      <ListItem
+                        button
+                        onClick={() => setCollectionName(collection)}
+                      >
+                        <ListItemText primary={collection} />
+                      </ListItem>
+                      <Divider />
+                    </>
                   ))}
-        
+              </>
+            )}
 
-
-          
-          </>
-          }
-
-        {removingFromCollections &&
-          <>
-            
-            <Button disabled={collectionName===""} onClick={() => handleClickRemovePostFromCollection("")}>Remove</Button>
-            {collectionsForPost !== null && collectionsForPost.map((collection) => (
-
-            <>
-            <ListItem button onClick={() => setCollectionName(collection)}>
-              <ListItemText primary={collection}  />
-            </ListItem>
-            <Divider />
-            </>
+            {removingFromCollections && (
+              <>
+                <Button
+                  disabled={collectionName === ""}
+                  onClick={() => handleClickRemovePostFromCollection("")}
+                >
+                  Remove
+                </Button>
+                {collectionsForPost !== null &&
+                  collectionsForPost.map((collection) => (
+                    <>
+                      <ListItem
+                        button
+                        onClick={() => setCollectionName(collection)}
+                      >
+                        <ListItemText primary={collection} />
+                      </ListItem>
+                      <Divider />
+                    </>
                   ))}
-        
-
-
-          
-          </>
-          }
-
+              </>
+            )}
           </List>
         </DialogContent>
       </Dialog>

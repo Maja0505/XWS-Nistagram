@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type UserFollowersService struct{
@@ -287,6 +288,122 @@ func (service *UserFollowersService) CheckClosed(userId string, closedUserId str
 	return closed,err
 }
 
+func (service *UserFollowersService) FollowSuggestions(userId string) (*[]dto.UserByUsernameDTO, error) {
+
+	var followSuggestions []interface{}
+	mapOfUsers := make(map[string]float64)
+
+	allFollowedUsers, err := service.Repository.GetAllFollowedUsersByUser(userId)
+	if err != nil{
+		return nil,err
+	}
+	var listOfFollowedUserFollowed []interface{}
+	for _,followerUser := range *allFollowedUsers {
+		strFollowerUser := fmt.Sprintf("%v",followerUser)
+		if userId != strFollowerUser {
+			list,err := service.Repository.GetAllFollowedUsersByUser(strFollowerUser)
+			if err != nil{
+				return nil,err
+			}
+			s := strFollowerUser + "->" + fmt.Sprintf("%v",list)
+			fmt.Println(s)
+			listOfFollowedUserFollowed = append(listOfFollowedUserFollowed,*list...)
+		}else{
+			continue
+		}
+	}
+
+	fmt.Println()
+
+	var listOfFollowedUserFollowedUserFollowedUser []interface{}
+	for _,f := range listOfFollowedUserFollowed {
+
+		strF := fmt.Sprintf("%v",f)
+		following, err := service.Repository.CheckFollowing(userId,strF)
+		if err != nil {
+			return nil, err
+		}
+		strFollowing := fmt.Sprintf("%v",*following)
+		if strF != userId && strFollowing == "false" {
+			_,existInMap := mapOfUsers[strF]
+			if existInMap{
+				mapOfUsers[strF] = mapOfUsers[strF] + 2
+			}else{
+				mapOfUsers[strF] = 1
+			}
+
+			list,err := service.Repository.GetAllFollowedUsersByUser(strF)
+			if err != nil{
+				return nil,err
+			}
+			s := strF + "->" + fmt.Sprintf("%v",list)
+			fmt.Println(s)
+			listOfFollowedUserFollowedUserFollowedUser = append(listOfFollowedUserFollowedUserFollowedUser,*list...)
+		}else{
+			continue
+		}
+
+	}
+
+	for _,f := range listOfFollowedUserFollowedUserFollowedUser{
+		strF := fmt.Sprintf("%v",f)
+		following, err := service.Repository.CheckFollowing(userId,strF)
+		if err != nil {
+			return nil, err
+		}
+		strFollowing := fmt.Sprintf("%v",*following)
+		if strF != userId && strFollowing == "false" {
+		_,existInMap := mapOfUsers[strF]
+		if existInMap{
+			mapOfUsers[strF] = mapOfUsers[strF] + 0.5
+		}else{
+				mapOfUsers[strF] = 0.25
+			}
+		}else{
+			continue
+		}
+	}
+	sorted := make(PairList,len(mapOfUsers))
+	var i int
+	for key, value := range mapOfUsers {
+		sorted[i] = Pair{key, value}
+		i++
+	}
+	sort.Sort(sort.Reverse(sorted))
+	var number = 0
+	for _, v := range sorted {
+		if number == 15 {
+			break
+		}
+		followSuggestions = append(followSuggestions,v.Key)
+		number++
+	}
+
+	if len(followSuggestions) == 0 {
+		allUsers, err := service.Repository.GetAllUsers(userId)
+		if err != nil{
+			return nil, err
+		}
+		usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(allUsers)
+
+		if err != nil{
+			return nil, err
+		}
+
+
+		return usernamesDTOList,nil
+	}
+
+	usernamesDTOList,err := GetUsernamesByUserIdsFromUserService(&followSuggestions)
+
+	if err != nil{
+		return nil, err
+	}
+
+
+	return usernamesDTOList,nil
+
+}
 
 func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByUsernameDTO,error){
 
@@ -312,3 +429,14 @@ func GetUsernamesByUserIdsFromUserService (users *[]interface{}) (*[]dto.UserByU
 	}
 	return &data, nil
 }
+
+type Pair struct {
+	Key   string
+	Value float64
+}
+
+type PairList []Pair
+
+func (p PairList) Len() int           { return len(p) }
+func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
+func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }

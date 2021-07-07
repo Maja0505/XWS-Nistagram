@@ -9,7 +9,7 @@ type Story struct {
 	ID 					gocql.UUID 	`json:"ID"`
 	UserID 				string		`json:"UserID"`
 	CreatedAt 			time.Time 	`json:"CreatedAt"`
-	ExpiredAt 			time.Time 	`json:"ExpiredAt"`
+	Available 			bool 		`json:"Available"`
 	Image 				string 		`json:"Image"`
 	Highlights			bool		`json:"Highlights"`
 	ForCloseFriends		bool 		`json:"ForCloseFriends"`

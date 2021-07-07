@@ -2,6 +2,7 @@ package Repository
 
 import (
 	"XWS-Nistagram/PostService/Model"
+	"fmt"
 	"github.com/gocql/gocql"
 	"time"
 )
@@ -11,13 +12,16 @@ type StoryRepository struct {
 }
 
 func (repo *StoryRepository) Create(story *Model.Story) error {
-	ID, _ := gocql.RandomUUID()
-	createdAt := time.Now()
-	expiredAt := createdAt.Add(time.Hour * time.Duration(24))
-	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id,userid, createdat, expiredat , image , for_close_friends,highlights) VALUES(?, ?, ?, ?, ?, ?, ?)",
-		ID, story.UserID, createdAt, expiredAt, story.Image,story.ForCloseFriends,story.Highlights).Exec(); err != nil {
+	ID := gocql.TimeUUID()
+	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id, userid, available, image, for_close_friends, highlights) VALUES(?, ?, ?, ?, ?, ?)",
+		ID, story.UserID, true, story.Image,story.ForCloseFriends,story.Highlights).Exec(); err != nil {
 		return err
 	}
+	if err := repo.Session.Query("UPDATE postkeyspace.stories USING TTL 86400 SET available = True WHERE id = ? AND userid = ?",
+		ID, story.UserID).Exec(); err != nil {
+		return err
+	}
+	fmt.Println("Successfully created story!")
 
 	return nil
 }
@@ -28,6 +32,7 @@ func (repo *StoryRepository) SetStoryForHighlights(id gocql.UUID) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Successfully created highlight!")
 
 	return nil
 }
@@ -35,15 +40,17 @@ func (repo *StoryRepository) SetStoryForHighlights(id gocql.UUID) error {
 func (repo *StoryRepository) GetAllStoriesByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
-	query := "select * from postkeyspace.stories where userid=? allow filtering;"
+	query := "select * from postkeyspace.stories where userid=?;"
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
+		a := m["id"].(gocql.UUID)
+		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: m["createdat"].(time.Time),
-			ExpiredAt: m["expiredat"].(time.Time),
+			CreatedAt: b,
+			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
@@ -58,16 +65,17 @@ func (repo *StoryRepository) GetAllStoriesByUser(userId string) (*[]Model.Story,
 func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
-	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and for_close_friends=False and expiredat > ?  allow filtering;"
-	iter := repo.Session.Query(query,userId,now).Iter()
+	query := "select * from postkeyspace.stories where userid=? and available = true and for_close_friends=False allow filtering;"
+	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
+		a := m["id"].(gocql.UUID)
+		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: m["createdat"].(time.Time),
-			ExpiredAt: m["expiredat"].(time.Time),
+			CreatedAt: b,
+			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
@@ -82,16 +90,17 @@ func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Mo
 func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
-	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and expiredat > ?  allow filtering;"
-	iter := repo.Session.Query(query,userId,now).Iter()
+	query := "select * from postkeyspace.stories where userid=? and available = true allow filtering;"
+	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
+		a := m["id"].(gocql.UUID)
+		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: m["createdat"].(time.Time),
-			ExpiredAt: m["expiredat"].(time.Time),
+			CreatedAt: b,
+			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
@@ -106,15 +115,17 @@ func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (
 func (repo *StoryRepository) GetAllHighlightsStoriesByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
-	query := "select * from postkeyspace.stories where userid=? and highlights=True  allow filtering;"
+	query := "select * from postkeyspace.stories where userid=? and highlights=True allow filtering;"
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
+		a := m["id"].(gocql.UUID)
+		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: m["createdat"].(time.Time),
-			ExpiredAt: m["expiredat"].(time.Time),
+			CreatedAt: b,
+			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
@@ -128,7 +139,7 @@ func (repo *StoryRepository) GetAllHighlightsStoriesByUser(userId string) (*[]Mo
 
 func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStory(userId string) bool{
 	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and for_close_friends=False and expiredat > ? allow filtering;"
+	query := "select * from postkeyspace.stories where userid=? and for_close_friends=False and available = true allow filtering;"
 	iter := repo.Session.Query(query,userId,now).Iter()
 	for iter.MapScan(map[string]interface{}{}){
 		return true
@@ -138,7 +149,7 @@ func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStory(userId string) 
 
 func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStoryForCloseFriends(userId string) bool{
 	now := time.Now()
-	query := "select * from postkeyspace.stories where userid=? and expiredat > ? allow filtering;;"
+	query := "select * from postkeyspace.stories where userid=? and available = true  allow filtering;"
 	iter := repo.Session.Query(query,userId,now).Iter()
 	for iter.MapScan(map[string]interface{}{}){
 		return true

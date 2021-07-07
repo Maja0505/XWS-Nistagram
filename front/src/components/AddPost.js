@@ -7,6 +7,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
+import TagLocationAndUser from "./TagLocationAndUser.js";
+
 const useStyles = makeStyles((theme) => ({
   settings: {
     dots: true,
@@ -31,6 +33,9 @@ const AddPost = ({ setTabValue }) => {
   const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
   const [puklaSlika, setPuklaSlika] = useState(false);
 
+  const [location, setLocation] = useState("");
+  const [taggedUsers, setTaggedUsers] = useState("");
+
   const createPost = () => {
     console.log(image);
 
@@ -51,7 +56,7 @@ const AddPost = ({ setTabValue }) => {
         let tag = listOfTags[i].split(" ")[0];
         axios
           .post("/api/post/add-tag", {
-            Tag: tag,
+            Tag: "#" + tag,
             PostID: postDTO.ID,
           })
           .then((res) => {
@@ -61,6 +66,20 @@ const AddPost = ({ setTabValue }) => {
             console.log(error);
           });
       }
+    }
+    for (var j = 0; j < taggedUsers.length; j++) {
+      let userTag = taggedUsers[j];
+      axios
+        .post("/api/post/add-tag", {
+          Tag: userTag,
+          PostID: postDTO.ID,
+        })
+        .then((res) => {
+          console.log("Upisan user tag  " + userTag);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   };
 
@@ -118,19 +137,20 @@ const AddPost = ({ setTabValue }) => {
     console.log(imagesIdsForSave);
     if (!puklaSlika) {
       var postDTO = {
-        ID: uuidv4(),
         Description: description,
         Media: imagesIdsForSave,
         MediaCount: imagesIdsForSave.length,
         Album: imagesIdsForSave.length === 0 ? false : true,
         UserID: loggedUserId,
+        Location: location,
       };
       console.log("Uspesno upload-ovao sliku");
       axios
         .post("/api/post/create", postDTO)
         .then((res1) => {
           console.log("Uspesno kreirao post");
-          addTags(postDTO);
+          var postDTONew = { ...postDTO, ID: res1.data };
+          addTags(postDTONew);
           setTabValue(0);
           setPuklaSlika(false);
         })
@@ -239,14 +259,22 @@ const AddPost = ({ setTabValue }) => {
         </Grid>
         <Grid item xs={2} />
       </Grid>
-      {selectedFile && (
+
+      {selectedFile.length !== 0 && (
         <>
-          <Grid container style={{ marginTop: "2%" }}>
+          <TagLocationAndUser
+            setLocation={setLocation}
+            setTaggedUsers={setTaggedUsers}
+            taggedUsers={taggedUsers}
+          />
+
+          <Grid container style={{ marginTop: "1%" }}>
             <Grid item xs={3} />
             <Grid item xs={6}>
               <TextField
                 label="Description"
                 fullWidth
+                size="small"
                 variant="outlined"
                 multiline
                 rowsMax={5}

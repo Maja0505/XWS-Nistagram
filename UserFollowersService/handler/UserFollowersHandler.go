@@ -394,3 +394,24 @@ func (handler *UserFollowersHandler) CheckClosed(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(muted)
 	w.WriteHeader(http.StatusOK)
 }
+
+func (handler *UserFollowersHandler) GetFollowSuggestions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.FollowSuggestions(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+}

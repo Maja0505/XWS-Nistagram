@@ -1,20 +1,22 @@
 import { useParams } from "react-router-dom";
+import { RoomRounded } from "@material-ui/icons";
 import { Grid, Typography } from "@material-ui/core";
-import { useEffect, useState } from "react";
+import PostsForHashTag from "./PostsForHashTag.js";
 
-import PostsForHashTag from "./PostsForHashTag";
+import { useEffect, useState } from "react";
 
 import axios from "axios";
 
-const HashTagPost = () => {
-  const { tag } = useParams();
+const LocationTagPost = () => {
+  const { location } = useParams();
+
   const [posts, setPosts] = useState();
 
   useEffect(() => {
-    axios.get("/api/post/get-all-by-tag/" + tag).then((res) => {
+    axios.get("/api/post/get-all-by-location/" + location).then((res) => {
       setPosts(res.data);
     });
-  }, [tag]);
+  }, [location]);
 
   return (
     <div>
@@ -66,7 +68,8 @@ const HashTagPost = () => {
           </Grid>
           <Grid item xs={3} style={{ textAlign: "left", margin: "auto" }}>
             <Typography variant="h4" color="textSecondary">
-              #{tag}
+              <RoomRounded fontSize="large" />
+              {location}
             </Typography>
             <Typography variant="h6" color="textPrimary">
               <b>
@@ -91,4 +94,4 @@ const HashTagPost = () => {
   );
 };
 
-export default HashTagPost;
+export default LocationTagPost;

@@ -30,7 +30,7 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.Create(&postDTO)
+	id,err := handler.Service.Create(&postDTO)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
@@ -38,7 +38,7 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-
+	_ = json.NewEncoder(w).Encode(id)
 }
 
 func (handler *PostHandler) AddPostToFavourites(w http.ResponseWriter, r *http.Request) {
@@ -342,6 +342,11 @@ func (handler *PostHandler) FindPostsByTag(w http.ResponseWriter, r *http.Reques
 	if tag == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}else{
+		if tag[0:1] != "@" {
+			tag = "#" + tag
+		}
+
 	}
 
 	posts,_ := handler.Service.FindPostsByTag(tag)
@@ -860,9 +865,27 @@ func (handler *PostHandler) GetTagSuggestions(w http.ResponseWriter, r *http.Req
 	tag := mux.Vars(r)["tag"]
 
 	if tag == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		tag = "#"
+	}else{
+		tag = "#" + tag
+	}
+
+	tags, err := handler.Service.GetTagSuggestions(tag)
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
+
+	json.NewEncoder(w).Encode(tags)
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *PostHandler) GetAllTags(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	tag := "#"
 
 	tags, err := handler.Service.GetTagSuggestions(tag)
 	if err != nil {

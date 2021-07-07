@@ -28,19 +28,23 @@ import {
   BookmarkBorderOutlined,
   AccountCircleOutlined,
   ThumbsUpDownOutlined,
+  RoomRounded,
 } from "@material-ui/icons";
-
+import Badge from '@material-ui/core/Badge';
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const NavBar = () => {
   const username = localStorage.getItem("username");
 
-  const [searchedUser, setSearchedUser] = useState([]);
-  const [searchedUsername, setSearchedUsername] = useState();
+  const [searchedContent, setSearchedContent] = useState([]);
+  const [redirectionString, setRedirectionString] = useState();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
+  const [isHastag, setIsHastag] = useState(false);
+  const [isUser, setIsUser] = useState(false);
+  const [invisible,setInvisible] = useState(localStorage.getItem('invisibleNotification'))
 
-  const [redirectToSearchedUser, setRedirection] = useState(false);
+  const [redirection, setRedirection] = useState(false);
 
   const logout = () => {
     clearLocalStorage();
@@ -49,25 +53,80 @@ const NavBar = () => {
   const clearLocalStorage = () => {
     localStorage.clear();
   };
+
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
-      axios
-        .get("/api/user/search/" + username + "/" + text)
-        .then((res) => {
-          setSearchedUser(res.data);
-        })
-        .catch((error) => {
-          setSearchedUser([]);
-        });
+      if (text.substring(0, 1) === "#") {
+        setIsHastag(true);
+        setIsUser(false);
+        if (text.length > 1) {
+          axios
+            .get("/api/post/get-tag-suggestions/" + text.substring(1))
+            .then((res) => {
+              console.log(res.data);
+              setSearchedContent(res.data);
+            });
+        } else {
+          axios.get("/api/post/get-all-tags").then((res) => {
+            console.log(res.data);
+            setSearchedContent(res.data);
+          });
+        }
+      } else {
+        setIsHastag(false);
+        setIsUser(true);
+        axios
+          .get("/api/user/search/" + username + "/" + text)
+          .then((res) => {
+            console.log(res.data);
+            setSearchedContent(res.data);
+            axios
+              .get("/api/post/get-location-suggestions/" + text)
+              .then((res) => {
+                console.log(res.data);
+                if (res.data !== null) {
+                  setSearchedContent((prevState) => [
+                    ...prevState,
+                    ...res.data,
+                  ]);
+                }
+              })
+              .catch((error) => {
+                setSearchedContent([]);
+              });
+          })
+          .catch((error) => {
+            axios
+              .get("/api/post/get-location-suggestions/" + text)
+              .then((res) => {
+                console.log(res.data);
+                if (res.data !== null) {
+                  setSearchedContent(res.data);
+                }
+              })
+              .catch((error) => {
+                setSearchedContent([]);
+              });
+          });
+      }
     } else {
-      setSearchedUser([]);
+      setSearchedContent([]);
     }
   };
-  const goToUserProfile = (username) => {
-    if (username !== undefined && username !== null) {
-      setSearchedUsername("/homePage/" + username);
-      setRedirection(true);
+
+  const goToSearchContent = (content) => {
+    if (isUser && content !== null) {
+      if (content.Username !== undefined) {
+        setRedirectionString("/homePage/" + content.Username);
+      } else {
+        setRedirectionString("/explore/locations/" + content + "/");
+      }
     }
+    if (isHastag && content !== null) {
+      setRedirectionString("/explore/tags/" + content.substring(1) + "/");
+    }
+
+    setRedirection(true);
   };
 
   const handleToggle = () => {
@@ -98,6 +157,12 @@ const NavBar = () => {
 
     prevOpen.current = open;
   }, [open]);
+
+  const handleNotificationButton = () => {
+    localStorage.setItem('invisibleNotification',true)
+    setInvisible(localStorage.getItem('invisibleNotification'))
+  }
+
 
   const dropDowMenuForProfile = (
     <Popper
@@ -139,26 +204,6 @@ const NavBar = () => {
                         style={{ textDecoration: "none", color: "black" }}
                       >
                         <div style={{ width: "100%" }}>Profile</div>
-                      </Link>
-                    </Grid>
-                  </Grid>
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Grid container>
-                    <Grid item xs={3}>
-                      <Link
-                        to={"/" + `${username}` + "/saved"}
-                        style={{ textDecoration: "none", color: "black" }}
-                      >
-                        <BookmarkBorderOutlined />
-                      </Link>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <Link
-                        to={"/" + `${username}` + "/saved"}
-                        style={{ textDecoration: "none", color: "black" }}
-                      >
-                        <div style={{ width: "100%" }}>Saved</div>
                       </Link>
                     </Grid>
                   </Grid>
@@ -231,28 +276,55 @@ const NavBar = () => {
     <Grid item xs={6} style={{ textAlign: "center" }}>
       <Autocomplete
         freeSolo
-        renderOption={(option, { selected }) => (
-          <React.Fragment>
-            <Grid container>
-              <Grid item xs={2}>
+        renderOption={(option) => (
+          <Grid container>
+            <Grid item xs={2}>
+              {isHastag && (
+                <Avatar
+                  alt="#"
+                  style={{
+                    backgroundColor: "#ECECEC",
+                    border: "1px solid black",
+                    color: "black",
+                  }}
+                >
+                  #
+                </Avatar>
+              )}
+              {isUser && option.Username !== undefined && (
                 <Avatar
                   alt="N"
                   src={avatar}
                   style={{ border: "1px solid" }}
                 ></Avatar>
-              </Grid>
-              <Grid item xs={10} style={{ marginTop: "3%" }}>
-                {option}
-              </Grid>
+              )}
+              {isUser && option.Username === undefined && (
+                <Avatar
+                  alt="N"
+                  style={{
+                    backgroundColor: "#ECECEC",
+                    border: "1px solid black",
+                    color: "black",
+                  }}
+                >
+                  <RoomRounded />
+                </Avatar>
+              )}
             </Grid>
-          </React.Fragment>
+            <Grid item xs={10} style={{ marginTop: "3%" }}>
+              {option.Username !== undefined ? option.Username : option}
+            </Grid>
+          </Grid>
         )}
         options={
-          searchedUser.length !== 0
-            ? searchedUser.map((option) => option.Username)
+          searchedContent !== null && searchedContent.length !== 0
+            ? searchedContent.map((o) => o)
             : []
         }
-        onChange={(event, value) => goToUserProfile(value)}
+        getOptionLabel={(option) =>
+          option.Username !== undefined ? option.Username : option
+        }
+        onChange={(event, value) => goToSearchContent(value)}
         renderInput={(params) => (
           <>
             <TextField
@@ -341,14 +413,19 @@ const NavBar = () => {
             xs={2}
             style={{ textAlign: "left", margin: "auto" }}
           >
-            <ExploreOutlined
-              style={{
-                color: "gray",
-                width: "29px",
-                height: "33px",
-                marginLeft: "5%",
-              }}
-            />
+            <Link to="/follow-suggestions/">
+              <ExploreOutlined
+                style={{
+                  color: "gray",
+                  width: "29px",
+                  height: "33px",
+                  marginLeft: "5%",
+                  cursor: "pointer",
+                }}
+              />
+            </Link>
+            <Badge color="secondary" variant="dot" invisible={invisible}>
+              
             <FavoriteBorderOutlined
               style={{
                 color: "gray",
@@ -356,7 +433,9 @@ const NavBar = () => {
                 height: "33px",
                 marginLeft: "5%",
               }}
+              onClick = {handleNotificationButton}
             />
+            </Badge>
             <div>
               <Avatar
                 alt="N"
@@ -384,7 +463,7 @@ const NavBar = () => {
   );
   return (
     <>
-      {redirectToSearchedUser === true && <Redirect to={searchedUsername} />}
+      {redirection === true && <Redirect to={redirectionString} />}
       <AppBar position="static">
         {(username === null || username === undefined) &&
           NavBarForUnregisteredUser}
