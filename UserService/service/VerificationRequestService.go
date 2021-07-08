@@ -195,7 +195,7 @@ func (service *VerificationRequestService) UpdateAgentRegistrationRequestToAppro
 	agentForRegistration.WebSite = agentRequest.WebSite
 
 
-	err = service.UserService.CreateRegisteredUser(&agentForRegistration)
+	_,err = service.UserService.CreateRegisteredUser(&agentForRegistration)
 	if err != nil{
 		return err
 	}

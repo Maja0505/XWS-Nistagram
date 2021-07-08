@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_db:/usr/local/etc/redis/redis.config
+      - redis_db_test:/usr/local/etc/redis/redis.config
 
 volumes:
-    redis_db:
+    redis_db_test:
