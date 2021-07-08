@@ -36,7 +36,17 @@ func init() {
 		fmt.Println(err)
 	}
 
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id timeuuid, userid text, description text, media list<text>, album boolean, repeatcampaign boolean, createdat timestamp, links list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+
+	if err := Session.Query("DROP TABLE postkeyspace.stories").Exec(); err != nil {
+		fmt.Println("Error while dropping table!")
+		fmt.Println(err)
+	}
+	if err := Session.Query("DROP TABLE postkeyspace.posts").Exec(); err != nil {
+		fmt.Println("Error while dropping table!")
+		fmt.Println(err)
+	}
+
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id timeuuid, userid text, description text, media list<text>, album boolean, repeatcampaign boolean, createdat timestamp, links list<text>, iscampaign boolean, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}

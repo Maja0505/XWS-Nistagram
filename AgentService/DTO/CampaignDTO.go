@@ -23,4 +23,5 @@ type CampaignDTO struct {
 	Location 		string		`json:"Location"`
 	Description  	string 		`json:"Description"`
 	Tags 			[]string 	`json:"Tags"`
+	Influencers 	[]string 	`json:"Influencers"`
 }
