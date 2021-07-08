@@ -790,6 +790,8 @@ func (repo *PostRepository) ReportContent(content *Model.ReportedContent) error 
 	return nil
 }
 
+
+
 func (repo *PostRepository) GetCollectionsForUser(userid string) (*[] string, error) {
 	var collections []string
 	var collection string
@@ -896,4 +898,46 @@ func (repo *PostRepository) GetLocationSuggestions(s string) (*[]string, error){
 }
 
 
+func (repo *PostRepository) GetAllReportContents() (*[]Model.ReportedContent , error){
+	var reportContents []Model.ReportedContent
+	m := map[string]interface{}{}
 
+	iter := repo.Session.Query("SELECT * FROM postkeyspace.reported_contents").Iter()
+	fmt.Println(iter)
+
+	for iter.MapScan(m) {
+
+		reportContents = append(reportContents, Model.ReportedContent{
+			ID:        	m["id"].(gocql.UUID),
+			UserID: 	m["userid"].(string),
+			AdminID: 	m["adminid"].(string),
+			Description:m["description"].(string),
+			ContentID: 	m["contentid"].(string),
+		})
+
+		m = map[string]interface{}{}
+	}
+	return &reportContents,nil
+}
+
+func (repo *PostRepository) DeleteReportContent(id gocql.UUID,userId string) error {
+	if err := repo.Session.Query("DELETE FROM postkeyspace.reported_contents WHERE userid = ? AND id = ? IF EXISTS;",
+		userId,id).Exec(); err != nil {
+		fmt.Println("Error while deleting report content!")
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("Successfully deleted report content!!")
+	return nil
+}
+
+func (repo *PostRepository) DeletePost(postId gocql.UUID,userId string) error{
+	if err := repo.Session.Query("DELETE FROM postkeyspace.posts where id = ? and userid = ? IF EXISTS;",
+		postId,userId).Exec(); err != nil {
+		fmt.Println("Error while deleting post!")
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("Successfully deleted post!!")
+	return nil
+}

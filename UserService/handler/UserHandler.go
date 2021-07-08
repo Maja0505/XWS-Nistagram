@@ -328,6 +328,23 @@ func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWrite
 	w.WriteHeader(http.StatusOK)
 }
 
+func (handler *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.DeleteUserByUserId(userId)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (handler *UserHandler) UploadImage(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	imagePath := vars["id"]

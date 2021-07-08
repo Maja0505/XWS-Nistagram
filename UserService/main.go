@@ -85,7 +85,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/{username}/follow-notification/{setting}",handler.UpdateFollowNotificationSetting).Methods("PUT")
 	router.HandleFunc("/upload-profile-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
-
+	router.HandleFunc("/delete/{userId}",handler.DeleteUser).Methods("PUT")
 
 }
 
@@ -99,6 +99,12 @@ func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,r
 	router.HandleFunc("/verification-request/delete/{user}",handler.DeleteVerificationRequest).Methods("PUT")
 	router.HandleFunc("/verification-request/upload-verification-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/verification-request/get-image/{id}", handler.GetImage).Methods("GET")
+	router.HandleFunc("/agent-registration-request/create", handler.CreateAgentRegistrationRequest).Methods("POST")
+	router.HandleFunc("/agent-registration-request/get-all", handler.GetAllAgentRegistrationRequests).Methods("GET")
+	router.HandleFunc("/agent-registration-request/update-to-approved/{username}", handler.UpdateAgentRegistrationRequestToApproved).Methods("PUT")
+	router.HandleFunc("/agent-registration-request/delete/{username}", handler.DeleteAgentRegistrationRequestToApproved).Methods("PUT")
+
+
 
 }
 

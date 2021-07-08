@@ -173,3 +173,10 @@ func (service *UserService) UpdateVerificationSettings(userId string,category mo
 	return service.Repo.UpdateVerificationSettings(userId,category)
 }
 
+func (service *UserService) DeleteUserByUserId(userId string) error {
+	err := service.Repo.DeleteUserByUserId(userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
