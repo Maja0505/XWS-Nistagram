@@ -29,6 +29,19 @@ func init() {
 
 	Session, err = cluster.CreateSession()
 
+	if err != nil {
+		panic(err)
+	}
+	if err := Session.Query("create keyspace  if not exists agentkeyspace with replication = {'class':'SimpleStrategy','replication_factor':1};").Exec(); err != nil {
+		fmt.Println("Error while inserting agentkeyspace")
+		fmt.Println(err)
+	}
+
+	if err := Session.Query("CREATE TABLE if not exists agentkeyspace.campaigns(id timeuuid, userid text, ispost boolean, repeat boolean, start timestamp, end timestamp, repeatfactor int, media list<text>, links list<text>, influencers list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		fmt.Println(err)	}
+
 	fmt.Println("Cassandra well initialized!")
 }
 
@@ -63,10 +76,10 @@ func main(){
 	handler := initHandler(AgentService)
 
 	//AgentRepo.CreateTables()
-	uuid, err := ParseUUID("df397943-e018-11eb-80d7-d43d7e26656f")
-	fmt.Println(err)
-	a, err := AgentRepo.GetCampaignInfluencers(uuid)
-	fmt.Println(a)
+	//uuid, err := ParseUUID("df397943-e018-11eb-80d7-d43d7e26656f")
+	//fmt.Println(err)
+	//a, err := AgentRepo.GetCampaignInfluencers(uuid)
+	//fmt.Println(a)
 
 
 	router := mux.NewRouter().StrictSlash(true)

@@ -132,10 +132,22 @@ const AddCampaign = ({ setTabValue }) => {
     console.log(imagesIdsForSave);
     var end = null
     var start = null
-    console.log(valueOneStart)
-    const valueOneStart2 = moment(valueOneStart).format("YYYY-MM-DD hh:mm:ss");
-    const valueMultieEnd2 = moment(valueMultieEnd).format("YYYY-MM-DD hh:mm:ss");
-    const valueMultieStart2 = moment(valueMultieStart).format("YYYY-MM-DD hh:mm:ss");
+    var d1 = new Date();
+    var d2 = new Date();
+    var d3 = new Date();
+
+    if(valueOneStart !== null){
+      d1.setDate(valueOneStart.getDate()-1);
+    }
+    if(valueMultieEnd !== null && valueMultieStart !== null){
+      d2.setDate(valueMultieEnd.getDate()-1);
+      d3.setDate(valueMultieStart.getDate()-1);
+    }
+   
+   
+    const valueOneStart2 = moment(d1).format("YYYY-MM-DD hh:mm:ss");
+    const valueMultieEnd2 = moment(d2).format("YYYY-MM-DD hh:mm:ss");
+    const valueMultieStart2 = moment(d3).format("YYYY-MM-DD hh:mm:ss");
     console.log(valueMultieEnd2)
     console.log(valueMultieStart2)
 
@@ -167,6 +179,7 @@ const AddCampaign = ({ setTabValue }) => {
         location: location,
         repeat : repeat === "multiple-time" ? true : false,
         repeatfactor : Number(repeatFactor),
+        //Influencers:[]
       };
       console.log("Uspesno upload-ovao sliku");
       axios

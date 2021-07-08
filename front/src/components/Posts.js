@@ -134,6 +134,7 @@ const Posts = ({ userForProfile, username }) => {
       .get("/api/post/get-all-by-userid/" + userForProfile.ID)
       .then((res) => {
         if (res.data) {
+          console.log(res.data)
           setPosts(res.data);
         } else {
           setPosts([]);
@@ -198,7 +199,7 @@ const Posts = ({ userForProfile, username }) => {
                 )}
 
                 <span className={classes.imageBackdrop} />
-                {post.is !== 1 && (
+                {post.IsCampaign === false && (
                   <span className={classes.imageButton2}>
                     <Typography
                       component="span"
