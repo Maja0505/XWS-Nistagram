@@ -33,10 +33,13 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOf
     var index = array.indexOf("@" + userForTag);
     axios.get("/api/user/" + userForTag)
       .then((res) => {
-        if (index === -1) {
-          setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
-          setListOfTaggedUserid((prevState) => [...prevState,res.data.IdString])
+        if (res.data.ProfileSettings.AllowTags){
+          if (index === -1) {
+            setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
+            setListOfTaggedUserid((prevState) => [...prevState,res.data.IdString])
+          }
         }
+     
       })
    
   };

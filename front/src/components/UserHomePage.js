@@ -322,7 +322,7 @@ const UserHomePage = () => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + user.Username + '"' + ',"command": 2, "channel": ' + '"' + loggedUserId + '"' + ', "content": "requested to following you."}')
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + user.IdString + '"' + ', "content": "requested to following you."}')
         };
         setRequested(true);
         
@@ -338,7 +338,7 @@ const UserHomePage = () => {
         let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + user.Username + '"' + ',"command": 2, "channel": ' + '"' + loggedUserId + '"' + ', "content": "started following you."}')
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + user.IdString + '"' + ', "content": "started following you."}')
         };
         setFollowing(true);
       });

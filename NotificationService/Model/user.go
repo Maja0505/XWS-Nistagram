@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 const (
@@ -251,6 +254,50 @@ func (u *User) Disconnect() error {
 }
 
 func SendNotification(rdb *redis.Client,follow NotificationForFollow,u *User) error {
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_SERVICE_DOMAIN") + ":" + os.Getenv("USER_SERVICE_PORT") + "/userid/" + follow.Channel)
+
+	resp, err := http.Get(reqUrl)
+	if err != nil || resp.StatusCode == 404 {
+		return err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var user RegisteredUser
+	err = json.Unmarshal(body, &user)
+
+	fmt.Println(user.ProfileSettings.Public)
+
+	fmt.Println(user.NotificationSettings.FollowNotification)
+	fmt.Println(user.NotificationSettings.FollowRequestNotification)
+
+	if follow.Content == "liked your photo." || follow.Content == "disliked your photo." {
+		if !user.NotificationSettings.LikeNotification {
+			fmt.Println("errrrrrrrrrrrrrrooooooooooooorrrrrrrrrrr")
+			return errors.New("false")
+		}
+	}
+	if follow.Content == "commented your post:" {
+		if !user.NotificationSettings.CommentNotification {
+			fmt.Println("errrrrrrrrrrrrrrooooooooooooorrrrrrrrrrr")
+
+			return errors.New("false")
+		}
+	}
+
+	if follow.Content == "requested to following you." {
+		if !user.NotificationSettings.FollowRequestNotification {
+			fmt.Println("errrrrrrrrrrrrrrooooooooooooorrrrrrrrrrr request")
+
+			return errors.New("false")
+		}
+	}
+
+	if follow.Content == "started following you." {
+		if !user.NotificationSettings.FollowNotification {
+			fmt.Println("errrrrrrrrrrrrrrooooooooooooorrrrrrrrrrr follow")
+
+			return errors.New("false")
+		}
+	}
 	notification,err := json.Marshal(follow)
 	if err != nil {
 		return err

@@ -160,17 +160,23 @@ const PostDialog = () => {
 
     axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
       setCommentsForPost(res.data);
-    });
+    }).catch((error) => {
+      
+    })
 
     axios.get("/api/post/get-location-for-post/" + post).then((res) => {
       setLocation(res.data.Location);
-    });
+    }).catch((error) => {
+
+    })
 
     axios.get("/api/post/get-users-tagged-on-post/" + post).then((res) => {
       if (res.data !== null) {
         setTaggedUsers(res.data);
       }
-    });
+    }).catch((error) => {
+      
+    })
   }, [open]);
 
   const HandleClickLike = () => {
