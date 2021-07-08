@@ -297,3 +297,13 @@ func (repo *UserRepository) UpdateVerificationSettings(userId string,category mo
 
 }
 
+func (repo *UserRepository) DeleteUserByUserId(userId string) error {
+	db := repo.Database.Database("user-service-database")
+	coll := db.Collection("users")
+	_,err := coll.DeleteOne(context.TODO(),bson.M{"id_string" : userId})
+	if err != nil{
+		return err
+	}
+	return nil
+
+}

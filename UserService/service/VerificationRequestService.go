@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"userService/dto"
 	"userService/mapper"
+	"userService/model"
 	"userService/repository"
 )
 
@@ -140,5 +141,78 @@ func (service *VerificationRequestService) DeleteVerificationRequest(userString 
 		return err
 	}
 
+	return nil
+}
+
+func (service *VerificationRequestService) CreateAgentRegistrationRequest(agentRegistrationRequest *model.AgentRegistrationRequest) error{
+
+	if agentRegistrationRequest.Username == "" || agentRegistrationRequest.WebSite == "" {
+		return errors.New("Username or WebSite is empty")
+	}
+
+	existRegisteredUser,_ := service.UserService.FindUserByUsername(agentRegistrationRequest.Username)
+
+	existAgentRequest,_ := service.Repo.GetAgentRegistrationRequestByUsername(agentRegistrationRequest.Username)
+
+	if existAgentRequest != nil || existRegisteredUser != nil {
+		return errors.New("Aleready exists verification request for user or exist user with same username")
+	}
+
+	err := service.Repo.CreateAgentRegistrationRequest(agentRegistrationRequest)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+func (service *VerificationRequestService) GetAllAgentRegistrationRequests() (*[]model.AgentRegistrationRequest,error){
+
+	agentRegistrationRequests,err := service.Repo.GetAllAgentRegistrationRequests()
+	if err != nil {
+		return nil, err
+	}
+	return agentRegistrationRequests, nil
+}
+
+func (service *VerificationRequestService) UpdateAgentRegistrationRequestToApproved(username string ) error{
+
+	agentRequest,err := service.Repo.GetAgentRegistrationRequestByUsername(username)
+	if err != nil{
+		return err
+	}
+
+	var agentForRegistration dto.UserForRegistrationDTO
+	agentForRegistration.Username = agentRequest.Username
+	agentForRegistration.FirstName = agentRequest.FirstName
+	agentForRegistration.LastName = agentRequest.LastName
+	agentForRegistration.Email = agentRequest.Email
+	agentForRegistration.IsAgent = true
+	agentForRegistration.Password = agentRequest.Password
+	agentForRegistration.ConfirmedPassword = agentRequest.Password
+	agentForRegistration.DateOfBirth = agentRequest.DateOfBirth
+	agentForRegistration.PhoneNumber = agentRequest.PhoneNumber
+	agentForRegistration.Gender = agentRequest.Gender
+	agentForRegistration.WebSite = agentRequest.WebSite
+
+
+	err = service.UserService.CreateRegisteredUser(&agentForRegistration)
+	if err != nil{
+		return err
+	}
+
+	err = service.Repo.UpdateAgentRegistrationRequestToApproved(username)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func (service *VerificationRequestService) DeleteAgentRegistrationRequestToApproved(username string ) error{
+
+	err := service.Repo.DeleteAgentRegistrationRequestToApproved(username)
+	if err != nil{
+		return err
+	}
 	return nil
 }

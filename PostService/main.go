@@ -37,10 +37,6 @@ func init() {
 		fmt.Println(err)
 	}
 
-	/*if err := Session.Query("DROP TABLE postkeyspace.posts").Exec(); err != nil {
-		fmt.Println("Error while dropping posts table!")
-		fmt.Println(err)
-	}*/
 
 	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id timeuuid, userid text, description text, media list<text>, album boolean, repeatcampaign boolean, createdat timestamp, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
@@ -167,6 +163,9 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-all-tags", handler.GetAllTags).Methods("GET")
 	router.HandleFunc("/get-location-for-post/{postId}", handler.GetLocationForPost).Methods("GET")
 	router.HandleFunc("/get-location-suggestions/{location}", handler.GetLocationSuggestions).Methods("GET")
+	router.HandleFunc("/get-all-reported-contents", handler.GetAllReportedContents).Methods("GET")
+	router.HandleFunc("/delete-reported-content/{id}/{userid}", handler.DeleteReportedContent).Methods("PUT")
+	router.HandleFunc("/delete-post/{postid}/{userid}", handler.DeletePost).Methods("PUT")
 	router.HandleFunc("/update-createdat", handler.UpdatePostCreatedAt).Methods("POST")
 
 }

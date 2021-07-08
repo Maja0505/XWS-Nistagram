@@ -2,6 +2,7 @@ package model
 
 type RegisteredUser struct  {
 	User `bson:",inline"`
+	IsAgent bool `bson:"is_agent,omitempty"`
 	Following int64 `bson:"following,omitempty"`
 	Followers int64 `bson:"followers,omitempty"`
 	NumberOfPosts int64 `bson:"number_of_posts,omitempty"`

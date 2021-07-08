@@ -78,6 +78,7 @@ export default function DialogForReport({ loggedUserId, post, open, setOpen }) {
     };
     axios.post("/api/post/report-content", reportedContentDto).then((res) => {
       console.log("uspelo");
+      console.log(reportedContentDto);
       setInappropriate(false);
       setOpen(false);
     });
