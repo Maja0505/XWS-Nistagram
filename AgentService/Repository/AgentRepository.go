@@ -95,7 +95,7 @@ func (repo *AgentRepository) StartOneTimeTimer(in time.Time, campaign *Model.Cam
 		}
 		reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
 		Postdto := DTO.PostDTO{
-			Description: "Agent",
+			Description: campaign.Description,
 			Media: campaign.Media,
 			UserID: campaign.UserID,
 			MediaCount: int64(len(campaign.Media)),
@@ -131,6 +131,21 @@ func (repo *AgentRepository) StartOneTimeTimer(in time.Time, campaign *Model.Cam
 			fmt.Println(err)
 		}
 		body, err = ioutil.ReadAll(resp.Body)
+
+		for i := range campaign.Tags {
+			reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-tag")
+			tag := Model.Tag{
+				Tag: campaign.Tags[i],
+				PostID: uuid,
+			}
+			jsonTag, _ := json.Marshal(tag)
+
+			resp, err = http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonTag))
+			if err != nil || resp.StatusCode == 404 {
+				fmt.Println(err)
+			}
+			body, err = ioutil.ReadAll(resp.Body)
+		}
 	})
 	return nil
 }
@@ -181,7 +196,7 @@ func (repo *AgentRepository) StartRepeatTimer(in time.Time, campaign *Model.Camp
 		}
 		reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
 		Postdto := DTO.PostDTO{
-			Description: "Agent",
+			Description: campaign.Description,
 			Media: campaign.Media,
 			UserID: campaign.UserID,
 			MediaCount: int64(len(campaign.Media)),
@@ -223,6 +238,21 @@ func (repo *AgentRepository) StartRepeatTimer(in time.Time, campaign *Model.Camp
 			ID: uuid,
 			UserID: campaign.UserID,
 			CreatedAt: time.Now(),
+		}
+
+		for i := range campaign.Tags {
+			reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-tag")
+			tag := Model.Tag{
+				Tag: campaign.Tags[i],
+				PostID: uuid,
+			}
+			jsonTag, _ := json.Marshal(tag)
+
+			resp, err = http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonTag))
+			if err != nil || resp.StatusCode == 404 {
+				fmt.Println(err)
+			}
+			body, err = ioutil.ReadAll(resp.Body)
 		}
 
 		go doEvery(tick, campaign.End, &updto, updateCreatedAt)

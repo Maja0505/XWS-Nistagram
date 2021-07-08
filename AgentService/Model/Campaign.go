@@ -21,4 +21,6 @@ type Campaign struct {
 	End 			time.Time 	`json:"End"`
 	RepeatFactor	int			`json:"RepeatFactor"`
 	Location 		string		`json:"Location"`
+	Description 	string		`json:"Description"`
+	Tags 			[]string 	`json:"Tags"`
 }
