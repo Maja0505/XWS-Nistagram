@@ -49,6 +49,7 @@ func initHandler(service *Service.AgentService) *Handler.AgentHandler{
 func handleFunc(handler *Handler.AgentHandler,router *mux.Router){
 	router.HandleFunc("/create-campaign", handler.CreateCampaign).Methods("POST")
 	router.HandleFunc("/delete-campaign", handler.DeleteCampaign).Methods("POST")
+	router.HandleFunc("/add-influencer", handler.AddCampaignInfluencer).Methods("POST")
 
 }
 

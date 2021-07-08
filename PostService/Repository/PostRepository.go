@@ -36,6 +36,7 @@ func (repo *PostRepository) Create(post *Model.Post) (gocql.UUID,error) {
 	}
 	fmt.Println(post.ID)
 	var location = Model.Location{Location: post.Location, PostID: ID}
+	fmt.Println("AAA: ", location.Location, " BBB:  ", location.PostID)
 	if err := repo.AddLocation(&location); err != nil{
 		fmt.Println("Error while adding location during post creation!")
 		fmt.Println(err)
@@ -45,6 +46,8 @@ func (repo *PostRepository) Create(post *Model.Post) (gocql.UUID,error) {
 	fmt.Println("Successfully created post!!")
 	return ID,nil
 }
+
+
 
 func (repo *PostRepository) AddLocation(location *Model.Location) error {
 	fmt.Println("Lokacija: ", location.Location)
@@ -96,6 +99,16 @@ func (repo *PostRepository) AddPostToCollection(favourite *DTO.FavouriteDTO) err
 		return err
 	}
 	fmt.Println("Successfully added post to collection: ", favourite.Collection)
+	return nil
+}
+
+func (repo *PostRepository) AddLinks(links []string, id gocql.UUID, userid string) error {
+	if err := repo.Session.Query("UPDATE postkeyspace.posts SET links = ? + links WHERE id = ? AND userid = ?",
+		links, id, userid).Exec(); err != nil {
+		fmt.Println("Error while adding links!")
+		fmt.Println(err)
+		return err
+	}
 	return nil
 }
 
@@ -409,6 +422,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 				UserID:       m["userid"].(string),
 				Media: m["media"].([]string),
 				Album: m["album"].(bool),
+				Links: m["links"].([]string),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
@@ -425,6 +439,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 				UserID:      m["userid"].(string),
 				Media:       m["media"].([]string),
 				Album: 		 m["album"].(bool),
+				Links: m["links"].([]string),
 			}
 
 			posts = append(posts, post)
@@ -463,6 +478,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 				UserID:       m["userid"].(string),
 				Media: m["media"].([]string),
 				Album: m["album"].(bool),
+				Links: m["links"].([]string),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
