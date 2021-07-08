@@ -37,6 +37,11 @@ services:
       dockerfile: Dockerfile
     networks:
       - network1
+    environment:
+      NOTIFICATION_SERVICE_PORT: 8080
+      NOTIFICATION_SERVICE_HOST: redis
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
     depends_on:
       - redis
     links: 

@@ -3,10 +3,11 @@ package main
 import (
 	"XWS-Nistagram/NotificationService/Handler"
 	"XWS-Nistagram/NotificationService/Model"
-	_ "XWS-Nistagram/NotificationService/Model"
+
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -16,12 +17,17 @@ var rdb *redis.Client
 
 
 func init(){
-	fmt.Println("aaaaaaaaaa")
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	rdb := redis.NewClient(&redis.Options{Addr: "redis:6379"})
 	defer rdb.Close()
 	rdb.SAdd(Model.ChannelsKey, "general", "random")
 }
+
 
 func main() {
 	fmt.Println("aaaaaaaaaa")
