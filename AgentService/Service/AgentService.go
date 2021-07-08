@@ -30,3 +30,12 @@ func (service *AgentService) DeleteCampaign(campaignDTO *DTO.CampaignDTO) error 
 	}
 	return nil
 }
+
+func (service *AgentService) AddCampaignInfluencer(influencerDTO *DTO.AddInfluencerDTO) error {
+	err := service.Repo.AddCampaignInfluencer(influencerDTO.InfluencerID, influencerDTO.UserID, influencerDTO.ID, influencerDTO.Start)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}

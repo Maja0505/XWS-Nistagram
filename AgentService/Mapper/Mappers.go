@@ -20,5 +20,6 @@ func ConvertCampaignDTOToCampaign(campaignDTO *DTO.CampaignDTO) *Model.Campaign 
 	campaign.Repeat = campaignDTO.Repeat
 	campaign.RepeatFactor = campaignDTO.RepeatFactor
 	campaign.IsPost = campaignDTO.IsPost
+	campaign.Location = campaignDTO.Location
 	return &campaign
 }

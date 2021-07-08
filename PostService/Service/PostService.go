@@ -40,6 +40,15 @@ func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
 	return nil
 }
 
+func (service *PostService) AddLinks(dto *DTO.UpdateLinksDTO) error {
+	err := service.Repo.AddLinks(dto.Links, dto.ID, dto.UserID)
+	if err != nil{
+		fmt.Println(err)
+		return  err
+	}
+	return nil
+}
+
 func (service *PostService) AddTag(tag *Model.Tag) error {
 	err := service.Repo.AddTag(tag)
 	if err != nil{

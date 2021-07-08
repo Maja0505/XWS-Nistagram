@@ -20,4 +20,5 @@ type CampaignDTO struct {
 	Start 			time.Time 	`json:"Start"`
 	End 			time.Time 	`json:"End"`
 	RepeatFactor	int			`json:"RepeatFactor"`
+	Location 		string			`json:"Location"`
 }

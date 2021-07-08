@@ -50,6 +50,7 @@ func (repo *StoryRepository) GetAllStoriesByUser(userId string) (*[]Model.Story,
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
+			Link: m["link"].(string),
 		})
 		m = map[string]interface{}{}
 	}
@@ -73,6 +74,7 @@ func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Mo
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
+			Link: m["link"].(string),
 		})
 		m = map[string]interface{}{}
 	}
@@ -96,6 +98,7 @@ func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
+			Link: m["link"].(string),
 		})
 		m = map[string]interface{}{}
 	}
@@ -119,6 +122,7 @@ func (repo *StoryRepository) GetAllHighlightsStoriesByUser(userId string) (*[]Mo
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
 			ForCloseFriends: m["for_close_friends"].(bool),
+			Link: m["link"].(string),
 		})
 		m = map[string]interface{}{}
 	}
