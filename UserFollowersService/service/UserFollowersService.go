@@ -4,13 +4,16 @@ import (
 	"XWS-Nistagram/UserFollowersService/dto"
 	"XWS-Nistagram/UserFollowersService/mapper"
 	"XWS-Nistagram/UserFollowersService/repository"
+	"XWS-Nistagram/UserFollowersService/saga"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"sort"
+	"github.com/go-redis/redis"
 )
 
 type UserFollowersService struct{
@@ -440,3 +443,74 @@ type PairList []Pair
 func (p PairList) Len() int           { return len(p) }
 func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
 func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+
+//saga deo
+
+
+func (service *UserFollowersService) RedisConnection() {
+	// create client and ping redis
+	var err error
+	client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	if _, err = client.Ping().Result(); err != nil {
+		log.Fatalf("error creating redis client %s", err)
+	}
+
+	// subscribe to the required channels
+	pubsub := client.Subscribe(saga.UserFollowerChannel, saga.ReplyChannel)
+	if _, err = pubsub.Receive(); err != nil {
+		log.Fatalf("error subscribing %s", err)
+	}
+	defer func() { _ = pubsub.Close() }()
+	ch := pubsub.Channel()
+
+	log.Println("starting the user-follower service")
+	for {
+		select {
+		case msg := <-ch:
+			m := saga.Message{}
+			err := json.Unmarshal([]byte(msg.Payload), &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			switch msg.Channel {
+			case saga.UserFollowerChannel:
+
+				// Happy Flow
+				if m.Action == saga.ActionStart {
+
+					err := service.Repository.CreateUserNodeIfNotExist(m.UserId)
+					if err != nil{
+						fmt.Println("Neuspesno upisao u neo4j")
+						sendToReplyChannel(client, &m, saga.ActionRollback, saga.ServiceUser, saga.ServiceUserFollower)
+					}else{
+						fmt.Println("Uspesno upisao u neo4j")
+						sendToReplyChannel(client, &m, saga.ActionDone, saga.ServiceUser, saga.ServiceUserFollower)
+					}
+
+				}
+
+				// Rollback flow
+				if m.Action == saga.ActionRollback {
+					log.Printf("rolling back transaction")
+				}
+
+			}
+		}
+	}
+}
+
+func sendToReplyChannel(client *redis.Client, m *saga.Message, action string, service string, senderService string) {
+	var err error
+	m.Action = action
+	m.Service = service
+	m.SenderService = senderService
+	if err = client.Publish(saga.ReplyChannel, m).Err(); err != nil {
+		log.Printf("error publishing done-message to %s channel", saga.ReplyChannel)
+	}
+	log.Printf("done message published to channel :%s", saga.ReplyChannel)
+}
+
+

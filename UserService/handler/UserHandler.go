@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"userService/dto"
+	"userService/saga"
 	"userService/service"
 )
 
@@ -41,12 +42,15 @@ func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.
 		json.NewEncoder(w).Encode(err)
 		return
 	}
-	err = handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
+	idString,err := handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
 	if err != nil{
 		fmt.Println(err)
 		http.Error(w,err.Error(),417)
 		return
 	}
+
+	m := saga.Message{Service: saga.ServiceUserFollower, SenderService: saga.ServiceUser, Action: saga.ActionStart, UserId: idString }
+	handler.Service.Orchestrator.Next(saga.UserFollowerChannel,saga.ServiceUserFollower,m)
 
 	w.WriteHeader(http.StatusCreated)
 
@@ -72,6 +76,8 @@ func (handler *UserHandler) UpdateRegisteredUserProfile(w http.ResponseWriter, r
 		w.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
+
+
 	w.WriteHeader(http.StatusOK)
 }
 

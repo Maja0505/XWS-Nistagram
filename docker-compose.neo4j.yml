@@ -16,7 +16,6 @@ services:
       - neo4j_db_test:/logsneo4j
     environment:
       - NEO4J_AUTH=neo4j/nistagram
-      - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687
 
 volumes:
     neo4j_db_test:
