@@ -19,5 +19,6 @@ type Post struct {
 	Location 		string		`json:"Location"`
 	RepeatCampaign 	bool		`json:"RepeatCampaign"`
 	Links 			[]string 	`json:"Links"`
+	IsCampaign		bool 			`json:"IsCampaign"`
 
 }

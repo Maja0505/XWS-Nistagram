@@ -18,6 +18,7 @@ func ConvertPostDTOToPost(postDTO *DTO.PostDTO) *Model.Post {
 	post.CommentsCount = 0
 	post.Location = postDTO.Location
 	post.ID = postDTO.ID
+	post.IsCampaign = postDTO.IsCampaign
 	return &post
 }
 

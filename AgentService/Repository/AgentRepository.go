@@ -42,6 +42,7 @@ func (repo *AgentRepository) CreateCampaign(campaign *Model.Campaign) error {
 		return err
 	}
 	fmt.Println("Campaign created successfully!")
+	campaign.ID = ID
 	if campaign.IsPost == true{
 		if campaign.Repeat == false {
 			repo.StartOneTimeTimer(campaign.Start, campaign)
@@ -87,64 +88,14 @@ func (repo *AgentRepository) StartOneTimeTimer(in time.Time, campaign *Model.Cam
 	}
 	go time.AfterFunc(timerdur, func() {
 
-		var isAlbum = false
-		if len(campaign.Media) == 1{
-			isAlbum = false
-		}else{
-			isAlbum = true
-		}
-		reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
-		Postdto := DTO.PostDTO{
-			Description: campaign.Description,
-			Media: campaign.Media,
-			UserID: campaign.UserID,
-			MediaCount: int64(len(campaign.Media)),
-			Album: isAlbum,
-			Location: campaign.Location,
-		}
-		jsonPost,_ := json.Marshal(Postdto)
-
-		resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonPost))
-		if err != nil || resp.StatusCode == 404 {
-			fmt.Println(err)
-		}
-		body, err := ioutil.ReadAll(resp.Body)
-		var a string
-		json.Unmarshal(body, &a)
-		fmt.Println(a)
-		uuid, err := ParseUUID(a)
+		_, err := repo.CreateFullPost(campaign)
 		if err != nil{
 			fmt.Println(err)
 		}
-
-		reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-links")
-		addLinksDTO := DTO.UpdateLinksDTO{
-			ID: uuid,
-			UserID: campaign.UserID,
-			Links: campaign.Links,
-		}
-
-		jsonaddLinks,_ := json.Marshal(addLinksDTO)
-
-		resp, err = http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonaddLinks))
-		if err != nil || resp.StatusCode == 404 {
+		fmt.Println("Prosappp")
+		err = repo.CreatePostsForInfluencers(campaign)
+		if err != nil{
 			fmt.Println(err)
-		}
-		body, err = ioutil.ReadAll(resp.Body)
-
-		for i := range campaign.Tags {
-			reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-tag")
-			tag := Model.Tag{
-				Tag: campaign.Tags[i],
-				PostID: uuid,
-			}
-			jsonTag, _ := json.Marshal(tag)
-
-			resp, err = http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonTag))
-			if err != nil || resp.StatusCode == 404 {
-				fmt.Println(err)
-			}
-			body, err = ioutil.ReadAll(resp.Body)
 		}
 	})
 	return nil
@@ -157,24 +108,13 @@ func (repo *AgentRepository) StartOneTimeTimerStory(in time.Time, campaign *Mode
 		return err
 	}
 	go time.AfterFunc(timerdur, func() {
-
-		for _,s := range campaign.Media {
-			reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
-
-			storyDTO := DTO.StoryDTO{
-				Media:      s,
-				UserID:     campaign.UserID,
-				ForCloseFriends: false,
-				Highlights: false,
-			}
-			jsonPost, _ := json.Marshal(storyDTO)
-
-			resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
-			if err != nil || resp.StatusCode == 404 {
-				fmt.Println(err)
-			}
-			body, err := ioutil.ReadAll(resp.Body)
-			fmt.Println(body)
+		err := repo.CreateAgentStoriesOnce(campaign)
+		if err != nil{
+			fmt.Println(err)
+		}
+		err = repo.CreateInfluencerStoriesOnce(campaign)
+		if err != nil{
+			fmt.Println(err)
 		}
 	})
 	return nil
@@ -188,75 +128,22 @@ func (repo *AgentRepository) StartRepeatTimer(in time.Time, campaign *Model.Camp
 	}
 	go time.AfterFunc(timerdur, func() {
 
-		var isAlbum = false
-		if len(campaign.Media) == 1{
-			isAlbum = false
-		}else{
-			isAlbum = true
-		}
-		reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
-		Postdto := DTO.PostDTO{
-			Description: campaign.Description,
-			Media: campaign.Media,
-			UserID: campaign.UserID,
-			MediaCount: int64(len(campaign.Media)),
-			Album: isAlbum,
-			Location: campaign.Location,
-		}
-		jsonPost,_ := json.Marshal(Postdto)
-
-		resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonPost))
-		if err != nil || resp.StatusCode == 404 {
-			fmt.Println(err)
-		}
-		body, err := ioutil.ReadAll(resp.Body)
-
-
-		var a string
-		json.Unmarshal(body, &a)
-		fmt.Println(a)
-		uuid, err := ParseUUID(a)
+		uuid, err := repo.CreateFullPost(campaign)
 		if err != nil{
 			fmt.Println(err)
 		}
-		reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-links")
-		addLinksDTO := DTO.UpdateLinksDTO{
-			ID: uuid,
-			UserID: campaign.UserID,
-			Links: campaign.Links,
-		}
-
-		jsonaddLinks,_ := json.Marshal(addLinksDTO)
-
-		resp, err = http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonaddLinks))
-		if err != nil || resp.StatusCode == 404 {
+		err = repo.CreatePostsForInfluencers(campaign)
+		if err != nil{
 			fmt.Println(err)
 		}
-		body, err = ioutil.ReadAll(resp.Body)
-
-		updto := DTO.UpdateCreatedAtDTO{
+		updateDto := DTO.UpdateCreatedAtDTO{
 			ID: uuid,
 			UserID: campaign.UserID,
 			CreatedAt: time.Now(),
 		}
-
-		for i := range campaign.Tags {
-			reqUrl = fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-tag")
-			tag := Model.Tag{
-				Tag: campaign.Tags[i],
-				PostID: uuid,
-			}
-			jsonTag, _ := json.Marshal(tag)
-
-			resp, err = http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonTag))
-			if err != nil || resp.StatusCode == 404 {
-				fmt.Println(err)
-			}
-			body, err = ioutil.ReadAll(resp.Body)
-		}
-
-		go doEvery(tick, campaign.End, &updto, updateCreatedAt)
+		go doEvery(tick, campaign.End, &updateDto, updateCreatedAt)
 	})
+	fmt.Println("Successfully created influencer and agent posts!!!")
 	return nil
 }
 
@@ -268,39 +155,14 @@ func (repo *AgentRepository) StartRepeatTimerStory(in time.Time, campaign *Model
 	}
 	time.AfterFunc(timerdur, func() {
 
-		for _,s := range campaign.Media {
-			reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
-
-			storyDTO := DTO.StoryDTO{
-				Media:           s,
-				UserID:          campaign.UserID,
-				ForCloseFriends: false,
-				Highlights:      false,
-			}
-			jsonPost, _ := json.Marshal(storyDTO)
-
-			resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
-			if err != nil || resp.StatusCode == 404 {
-				fmt.Println(err)
-			}
-			body, err := ioutil.ReadAll(resp.Body)
-			var a string
-			json.Unmarshal(body, &a)
-			fmt.Println(a)
-			uuid, err := ParseUUID(a)
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			updto := DTO.UpdateCreatedAtDTO{
-				ID:     uuid,
-				UserID: campaign.UserID,
-				CreatedAt: time.Now(),
-			}
-
-			go doEvery(tick, campaign.End, &updto, updateStoryCreatedAt)
+		if err := repo.CreateAgentStories(campaign, tick); err != nil{
+			fmt.Println(err)
+		}
+		if err := repo.CreateInfluencerStories(campaign, tick); err != nil{
+			fmt.Println(err)
 		}
 	})
+	fmt.Println("Successfully created influencer and agent stories!!!")
 	return nil
 }
 
@@ -326,10 +188,8 @@ func (repo *AgentRepository) CalculateRepeatTimerTick(repeatfactor int) (time.Du
 	return ret, nil
 }
 
-func (repo *AgentRepository) CreatePost(campaign *Model.Campaign) error {
-	if campaign == nil {
-		return gocql.Error{Message: "Campaign is null!"}
-	}
+func (repo *AgentRepository) CreateAgentPost(campaign *Model.Campaign) (gocql.UUID,error) {
+
 	var isAlbum = false
 	if len(campaign.Media) == 1{
 		isAlbum = false
@@ -338,26 +198,303 @@ func (repo *AgentRepository) CreatePost(campaign *Model.Campaign) error {
 	}
 	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
 	Postdto := DTO.PostDTO{
-		Description: "Agent",
+		Description: campaign.Description,
 		Media: campaign.Media,
 		UserID: campaign.UserID,
 		MediaCount: int64(len(campaign.Media)),
 		Album: isAlbum,
+		Location: campaign.Location,
+		IsCampaign: true,
 	}
 	jsonPost,_ := json.Marshal(Postdto)
 
 	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonPost))
 	if err != nil || resp.StatusCode == 404 {
-		return err
+		fmt.Println(err)
+		return gocql.UUID{}, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(body)
-	return  nil
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	var a string
+	json.Unmarshal(body, &a)
+	fmt.Println(a)
+	uuid, err := ParseUUID(a)
+	if err != nil{
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	return uuid, nil
+}
 
+func (repo *AgentRepository) CreateInfluencerPost(campaign *Model.Campaign, infid *string) (gocql.UUID,error) {
+
+	fmt.Println("CreateInfluencerPost")
+	var isAlbum = false
+	if len(campaign.Media) == 1 {
+		isAlbum = false
+	} else {
+		isAlbum = true
+	}
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/create")
+	Postdto := DTO.PostDTO{
+		Description: campaign.Description,
+		Media:       campaign.Media,
+		UserID:      *infid,
+		MediaCount:  int64(len(campaign.Media)),
+		Album:       isAlbum,
+		Location:    campaign.Location,
+		IsCampaign: true,
+	}
+	jsonPost, _ := json.Marshal(Postdto)
+
+	resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	var a string
+	json.Unmarshal(body, &a)
+	fmt.Println(a)
+	uuid, err := ParseUUID(a)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	return uuid, nil
+}
+
+func (repo *AgentRepository) CreateLinks(userid *string, links *[]string, uuid *gocql.UUID) error {
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-links")
+	addLinksDTO := DTO.UpdateLinksDTO{
+		ID:     *uuid,
+		UserID: *userid,
+		Links:  *links,
+	}
+
+	jsonaddLinks, _ := json.Marshal(addLinksDTO)
+
+	resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonaddLinks))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return err
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+func (repo *AgentRepository) CreateTags(tags []string, uuid *gocql.UUID) error {
+	for i := range tags {
+		reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/add-tag")
+		tag := Model.Tag{
+			Tag:    tags[i],
+			PostID: *uuid,
+		}
+		jsonTag, _ := json.Marshal(tag)
+
+		resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonTag))
+		if err != nil || resp.StatusCode == 404 {
+			fmt.Println(err)
+			return err
+		}
+		_, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+func (repo *AgentRepository) CreateFullPost(campaign *Model.Campaign) (gocql.UUID, error) {
+	uuid, err := repo.CreateAgentPost(campaign)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+
+	err = repo.CreateLinks(&campaign.UserID, &campaign.Links, &uuid)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+
+	repo.CreateTags(campaign.Tags, &uuid)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	return uuid, nil
+}
+
+func (repo *AgentRepository) CreateAgentStory(campaign *Model.Campaign, i int) (gocql.UUID, error){
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
+
+	storyDTO := DTO.StoryDTO{
+		Media:           campaign.Media[i],
+		UserID:          campaign.UserID,
+		ForCloseFriends: false,
+		Highlights:      false,
+	}
+	jsonPost, _ := json.Marshal(storyDTO)
+
+	resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var a string
+	json.Unmarshal(body, &a)
+	fmt.Println(a)
+	uuid, err := ParseUUID(a)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	return uuid, nil
+}
+
+func (repo *AgentRepository) CreateInfluencerStory(campaign *Model.Campaign, i int, infid string) (gocql.UUID, error){
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
+
+	storyDTO := DTO.StoryDTO{
+		Media:           campaign.Media[i],
+		UserID:          infid,
+		ForCloseFriends: false,
+		Highlights:      false,
+	}
+	jsonPost, _ := json.Marshal(storyDTO)
+
+	resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var a string
+	json.Unmarshal(body, &a)
+	fmt.Println(a)
+	uuid, err := ParseUUID(a)
+	if err != nil {
+		fmt.Println(err)
+		return gocql.UUID{}, err
+	}
+	return uuid, nil
+}
+
+func (repo *AgentRepository) CreateAgentStories(campaign *Model.Campaign, tick time.Duration) error {
+	for i := range campaign.Media {
+		uuid, err := repo.CreateAgentStory(campaign, i)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		updto := DTO.UpdateCreatedAtDTO{
+			ID:        uuid,
+			UserID:    campaign.UserID,
+			CreatedAt: time.Now(),
+		}
+		go doEvery(tick, campaign.End, &updto, updateStoryCreatedAt)
+	}
+	return nil
+}
+
+func (repo *AgentRepository) CreateAgentStoriesOnce(campaign *Model.Campaign) error {
+	for i := range campaign.Media {
+		_, err := repo.CreateAgentStory(campaign, i)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (repo *AgentRepository) CreateInfluencerStories(campaign *Model.Campaign, tick time.Duration) error {
+	a, err := repo.GetCampaignInfluencers(campaign.ID)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	for _, s := range a {
+		for i := range campaign.Media {
+			uuid, err := repo.CreateInfluencerStory(campaign, i, s)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			updto := DTO.UpdateCreatedAtDTO{
+				ID:        uuid,
+				UserID:    s,
+				CreatedAt: time.Now(),
+			}
+			go doEvery(tick, campaign.End, &updto, updateStoryCreatedAt)
+		}
+	}
+	return nil
+}
+
+func (repo *AgentRepository) CreateInfluencerStoriesOnce(campaign *Model.Campaign) error {
+	a, err := repo.GetCampaignInfluencers(campaign.ID)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	for _, s := range a {
+		for i := range campaign.Media {
+			_, err := repo.CreateInfluencerStory(campaign, i, s)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (repo *AgentRepository) CreatePostsForInfluencers(campaign *Model.Campaign) error {
+	a, err := repo.GetCampaignInfluencers(campaign.ID)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	for _, s := range a {
+		fmt.Println(s)
+		uuid, err := repo.CreateInfluencerPost(campaign, &s)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		err = repo.CreateLinks(&s, &campaign.Links, &uuid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		repo.CreateTags(campaign.Tags, &uuid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return nil
 }
 
 func doEvery(d time.Duration, end time.Time, dto *DTO.UpdateCreatedAtDTO, f func(time.Time, *DTO.UpdateCreatedAtDTO)) {
-	//end = end.Add(-2*time.Hour)
+	end = end.Add(-2*time.Hour)
 	for x := range time.Tick(d) {
 		a := end.Sub(time.Now())
 		fmt.Println("Razlika ", a)
@@ -398,10 +535,7 @@ func updateStoryCreatedAt(t time.Time, dto *DTO.UpdateCreatedAtDTO) {
 	fmt.Println("Successfully updated createdat")
 }
 
-func (repo *AgentRepository) AddCampaignInfluencer(infid string, userid string, id gocql.UUID, start time.Time) error{
-	if start.Sub(time.Now()) < 0{
-		return gocql.Error{Message: "Campaign has already started!"}
-	}
+func (repo *AgentRepository) AddCampaignInfluencer(infid string, userid string, id gocql.UUID) error{
 	a := []string{infid}
 
 	if err := repo.Session.Query("UPDATE agentkeyspace.campaigns SET influencers = ? + influencers WHERE id = ? AND userid = ?",
@@ -412,6 +546,22 @@ func (repo *AgentRepository) AddCampaignInfluencer(infid string, userid string, 
 	}
 	fmt.Println("Successfully added influencer to campaign!")
 	return nil
+}
+
+func (repo *AgentRepository) GetCampaignInfluencers(campaignid gocql.UUID) ([]string, error){
+
+	fmt.Println("CC ", campaignid)
+	m := map[string]interface{}{}
+	iter := repo.Session.Query("SELECT * FROM agentkeyspace.campaigns WHERE id = ? ALLOW FILTERING",
+		campaignid).Iter();
+	//if iter.NumRows() == 0{
+	//	return nil, gocql.Error{Message: "Campaign not found!"}
+	//}
+	iter.MapScan(m)
+	var a = m["influencers"].([]string)
+
+	fmt.Println("Successfully loaded influencers from campaign!")
+	return a, nil
 }
 
 

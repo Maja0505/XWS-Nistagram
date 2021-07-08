@@ -32,7 +32,7 @@ func (service *AgentService) DeleteCampaign(campaignDTO *DTO.CampaignDTO) error 
 }
 
 func (service *AgentService) AddCampaignInfluencer(influencerDTO *DTO.AddInfluencerDTO) error {
-	err := service.Repo.AddCampaignInfluencer(influencerDTO.InfluencerID, influencerDTO.UserID, influencerDTO.ID, influencerDTO.Start)
+	err := service.Repo.AddCampaignInfluencer(influencerDTO.InfluencerID, influencerDTO.UserID, influencerDTO.ID)
 	if err != nil{
 		fmt.Println(err)
 		return  err
