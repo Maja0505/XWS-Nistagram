@@ -22,6 +22,7 @@ import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import { Grow, Popper, MenuItem, MenuList } from "@material-ui/core";
 import { useRef } from "react";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import LocalMallOutlinedIcon from '@material-ui/icons/LocalMallOutlined';
 import DialogForBlockUser from "./DialogForBlockUser";
 import DialogForMuteUser from "./DialogForMuteUser";
 import FollowRequest from "./FollowRequests";
@@ -36,6 +37,7 @@ import UsersList from "./UsersList";
 import AddPost from "./AddPost";
 import Story from "./Story";
 import PostWhereUserTagged from "./PostWhereUserTagged.js";
+import AddCampaign from "./AddCampaign";
 
 const UserHomePage = () => {
   const [user, setUser] = useState();
@@ -730,6 +732,14 @@ const UserHomePage = () => {
                       icon={<AssignmentIndOutlined />}
                       style={{ margin: "auto" }}
                     />
+
+                    {user.IsAgent && 
+                   <Tab
+                      label="Add campaign"
+                      icon={<LocalMallOutlinedIcon />}
+                      style={{ margin: "auto" }}
+                    />}
+
                   </Tabs>
                 </Paper>
               </Grid>
@@ -783,6 +793,9 @@ const UserHomePage = () => {
                   )}
                   {user !== undefined && user !== null && tabValue === 3 && (
                     <PostWhereUserTagged user={user}></PostWhereUserTagged>
+                  )}
+                    {user !== undefined && user !== null && tabValue === 4 && (
+                     <AddCampaign setTabValue={setTabValue} />
                   )}
                 </Grid>
               )}
