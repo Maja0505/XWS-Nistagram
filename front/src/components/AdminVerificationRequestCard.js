@@ -6,7 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { Grid } from "@material-ui/core";
+import { Grid, Paper } from "@material-ui/core";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -143,6 +143,20 @@ const AdminVerificationRequestCard = () => {
           </Grid>
         </Card>
       ))}
+
+      {allRequests !== null && allRequests !== undefined && (
+        <>
+          {allRequests.length === 0 && (
+            <Paper style={{ marginTop: "3%" }}>
+              <Grid container style={{ marginBottom: "2%" }}></Grid>
+              <Grid container>
+                <p style={{ margin: "auto" }}>NO VERIFICATION REQUESTS</p>
+              </Grid>
+              <Grid container style={{ marginTop: "2%" }}></Grid>
+            </Paper>
+          )}
+        </>
+      )}
     </div>
   );
 };

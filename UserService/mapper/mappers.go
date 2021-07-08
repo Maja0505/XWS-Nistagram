@@ -19,7 +19,7 @@ func ConvertRegisteredUserDtoToRegisteredUser(registeredUserDto *dto.RegisteredU
 	registeredUser.Biography = registeredUserDto.Biography
 	registeredUser.WebSite = registeredUserDto.WebSite
     registeredUser.ProfilePicture = registeredUserDto.ProfilePicture
-
+	registeredUser.IsAgent = registeredUserDto.IsAgent
 	return &registeredUser
 }
 
@@ -33,6 +33,8 @@ func ConvertUserForRegistrationDTOToRegisteredUser(registrationDTO *dto.UserForR
 	userForRegistration.Email = registrationDTO.Email
 	userForRegistration.DateOfBirth = registrationDTO.DateOfBirth
 	userForRegistration.Gender = registrationDTO.Gender
+	userForRegistration.IsAgent = registrationDTO.IsAgent
+	userForRegistration.WebSite = registrationDTO.WebSite
 	return &userForRegistration
 }
 

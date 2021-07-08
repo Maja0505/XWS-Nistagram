@@ -895,16 +895,13 @@ func (repo *PostRepository) GetLocationSuggestions(s string) (*[]string, error){
 
 
 func (repo *PostRepository) GetAllReportContents() (*[]Model.ReportedContent , error){
-	fmt.Println("usao u repo")
 	var reportContents []Model.ReportedContent
 	m := map[string]interface{}{}
 
 	iter := repo.Session.Query("SELECT * FROM postkeyspace.reported_contents").Iter()
 	fmt.Println(iter)
-	fmt.Println("zavrsio query")
 
 	for iter.MapScan(m) {
-		fmt.Println("whyyy")
 
 		reportContents = append(reportContents, Model.ReportedContent{
 			ID:        	m["id"].(gocql.UUID),
@@ -913,7 +910,6 @@ func (repo *PostRepository) GetAllReportContents() (*[]Model.ReportedContent , e
 			Description:m["description"].(string),
 			ContentID: 	m["contentid"].(string),
 		})
-		fmt.Println("appedn")
 
 		m = map[string]interface{}{}
 	}

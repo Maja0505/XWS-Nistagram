@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"userService/dto"
+	"userService/model"
 	"userService/service"
 )
 
@@ -130,6 +131,80 @@ func (handler *VerificationRequestHandler) DeleteVerificationRequest(w http.Resp
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *VerificationRequestHandler) CreateAgentRegistrationRequest(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+
+	var aRR model.AgentRegistrationRequest
+	err := json.NewDecoder(r.Body).Decode(&aRR)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = handler.Service.CreateAgentRegistrationRequest(&aRR)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (handler *VerificationRequestHandler) GetAllAgentRegistrationRequests(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+
+	verificationRequests,err := handler.Service.GetAllAgentRegistrationRequests()
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(verificationRequests)
+}
+
+func (handler *VerificationRequestHandler) UpdateAgentRegistrationRequestToApproved(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	if username == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.UpdateAgentRegistrationRequestToApproved(username)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *VerificationRequestHandler) DeleteAgentRegistrationRequestToApproved(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	if username == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.DeleteAgentRegistrationRequestToApproved(username)
+
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
 

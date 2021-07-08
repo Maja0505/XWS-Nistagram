@@ -423,10 +423,8 @@ func (service *PostService) GetLocationSuggestions(s string) (*[]string, error) 
 }
 
 func (service *PostService) GetAllReportedContents() ( *[]Model.ReportedContent, error){
-	fmt.Println("zasto2")
 
 	ret,err := service.Repo.GetAllReportContents()
-	fmt.Println("aaaaa")
 	if err != nil {
 		return nil, err
 	}
