@@ -11,19 +11,17 @@ type StoryRepository struct {
 	Session gocql.Session
 }
 
-func (repo *StoryRepository) Create(story *Model.Story) error {
+func (repo *StoryRepository) Create(story *Model.Story) (gocql.UUID, error) {
 	ID := gocql.TimeUUID()
-	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id, userid, available, image, for_close_friends, highlights) VALUES(?, ?, ?, ?, ?, ?)",
-		ID, story.UserID, true, story.Image,story.ForCloseFriends,story.Highlights).Exec(); err != nil {
-		return err
+	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id, userid, available, image, for_close_friends, highlights, createdat) VALUES(?, ?, ?, ?, ?, ?, ?)",
+		ID, story.UserID, true, story.Image,story.ForCloseFriends,story.Highlights, ID.Time()).Exec(); err != nil {
+		return ID, err
 	}
-	if err := repo.Session.Query("UPDATE postkeyspace.stories USING TTL 86400 SET available = True WHERE id = ? AND userid = ?",
-		ID, story.UserID).Exec(); err != nil {
-		return err
+	if err := repo.SetStoryAvailability(ID, story.UserID); err != nil{
+		return ID, err
 	}
 	fmt.Println("Successfully created story!")
-
-	return nil
+	return ID, nil
 }
 
 func (repo *StoryRepository) SetStoryForHighlights(id gocql.UUID) error {
@@ -44,12 +42,10 @@ func (repo *StoryRepository) GetAllStoriesByUser(userId string) (*[]Model.Story,
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
-		a := m["id"].(gocql.UUID)
-		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: b,
+			CreatedAt: m["createdat"].(time.Time),
 			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
@@ -69,12 +65,10 @@ func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Mo
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
-		a := m["id"].(gocql.UUID)
-		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: b,
+			CreatedAt: m["createdat"].(time.Time),
 			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
@@ -94,12 +88,10 @@ func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
-		a := m["id"].(gocql.UUID)
-		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: b,
+			CreatedAt: m["createdat"].(time.Time),
 			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
@@ -119,12 +111,10 @@ func (repo *StoryRepository) GetAllHighlightsStoriesByUser(userId string) (*[]Mo
 	iter := repo.Session.Query(query,userId).Iter()
 
 	for iter.MapScan(m){
-		a := m["id"].(gocql.UUID)
-		b := a.Time()
 		stories = append(stories, Model.Story{
 			ID: m["id"].(gocql.UUID),
 			UserID: m["userid"].(string),
-			CreatedAt: b,
+			CreatedAt: m["createdat"].(time.Time),
 			Available: m["available"].(bool),
 			Image: m["image"].(string),
 			Highlights: m["highlights"].(bool),
@@ -155,6 +145,26 @@ func (repo *StoryRepository) CheckDoesUserHaveAnyNotExpiredStoryForCloseFriends(
 		return true
 	}
 	return false
+}
+
+func (repo *StoryRepository) SetStoryAvailability(storyid gocql.UUID, userid string) error{
+	if err := repo.Session.Query("UPDATE postkeyspace.stories USING TTL 86400 SET available = True WHERE id = ? AND userid = ?",
+		storyid, userid).Exec(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *StoryRepository) UpdateStoryAvailabilityAndDate(storyid gocql.UUID, userid string, createdat time.Time) error{
+	if err := repo.Session.Query("UPDATE postkeyspace.stories USING TTL 86400 SET available = True WHERE id = ? AND userid = ?",
+		storyid, userid).Exec(); err != nil {
+		return err
+	}
+	if err := repo.Session.Query("UPDATE postkeyspace.stories SET createdat = ? WHERE id = ? AND userid = ?",
+		createdat, storyid, userid).Exec(); err != nil {
+		return err
+	}
+	return nil
 }
 
 

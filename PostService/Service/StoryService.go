@@ -17,9 +17,17 @@ type StoryService struct {
 	Repo Repository.StoryRepository
 }
 
-func (service *StoryService) Create(storyDTO *DTO.CreateStoryDTO) error {
+func (service *StoryService) Create(storyDTO *DTO.CreateStoryDTO) (gocql.UUID, error) {
 	story := Mapper.ConvertCreateStoryDTOToPost(storyDTO)
-	err := service.Repo.Create(story)
+	id, err := service.Repo.Create(story)
+	if err != nil{
+		return id, err
+	}
+	return id, nil
+}
+
+func (service *StoryService) UpdateStoryAvailabilityAndDate(dto *DTO.UpdateStoryAgentDTO) error {
+	err := service.Repo.UpdateStoryAvailabilityAndDate(dto.ID, dto.UserID, dto.CreatedAt)
 	if err != nil{
 		return  err
 	}

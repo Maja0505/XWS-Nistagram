@@ -42,15 +42,28 @@ func (repo *AgentRepository) CreateCampaign(campaign *Model.Campaign) error {
 		return err
 	}
 	fmt.Println("Campaign created successfully!")
-	if campaign.Repeat == false {
-		repo.StartOneTimeTimer(campaign.Start, campaign)
-	}else{
-		tick, err := repo.CalculateRepeatTimerTick(campaign.RepeatFactor)
-		if err != nil{
-			fmt.Println(err)
-			return err
+	if campaign.IsPost == true{
+		if campaign.Repeat == false {
+			repo.StartOneTimeTimer(campaign.Start, campaign)
+		}else{
+			tick, err := repo.CalculateRepeatTimerTick(campaign.RepeatFactor)
+			if err != nil{
+				fmt.Println(err)
+				return err
+			}
+			repo.StartRepeatTimer(campaign.Start, campaign, tick)
 		}
-		repo.StartReapeatTimeTimer(campaign.Start, campaign, tick)
+	}else{
+		if campaign.Repeat == false {
+			repo.StartOneTimeTimerStory(campaign.Start, campaign)
+		}else{
+			tick, err := repo.CalculateRepeatTimerTick(campaign.RepeatFactor)
+			if err != nil{
+				fmt.Println(err)
+				return err
+			}
+			repo.StartRepeatTimerStory(campaign.Start, campaign, tick)
+		}
 	}
 	return nil
 }
@@ -100,7 +113,37 @@ func (repo *AgentRepository) StartOneTimeTimer(in time.Time, campaign *Model.Cam
 	return nil
 }
 
-func (repo *AgentRepository) StartReapeatTimeTimer(in time.Time, campaign *Model.Campaign, tick time.Duration) error {
+func (repo *AgentRepository) StartOneTimeTimerStory(in time.Time, campaign *Model.Campaign) error {
+	timerdur, err := repo.CalculateTimerDuration(in)
+	if err != nil{
+		fmt.Println(err)
+		return err
+	}
+	time.AfterFunc(timerdur, func() {
+
+		for _,s := range campaign.Media {
+			reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
+
+			storyDTO := DTO.StoryDTO{
+				Media:      s,
+				UserID:     campaign.UserID,
+				ForCloseFriends: false,
+				Highlights: false,
+			}
+			jsonPost, _ := json.Marshal(storyDTO)
+
+			resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
+			if err != nil || resp.StatusCode == 404 {
+				fmt.Println(err)
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			fmt.Println(body)
+		}
+	})
+	return nil
+}
+
+func (repo *AgentRepository) StartRepeatTimer(in time.Time, campaign *Model.Campaign, tick time.Duration) error {
 	timerdur, err := repo.CalculateTimerDuration(in)
 	if err != nil{
 		fmt.Println(err)
@@ -143,6 +186,50 @@ func (repo *AgentRepository) StartReapeatTimeTimer(in time.Time, campaign *Model
 		}
 
 		doEvery(tick, campaign.End, &updto, updateCreatedAt)
+	})
+	return nil
+}
+
+func (repo *AgentRepository) StartRepeatTimerStory(in time.Time, campaign *Model.Campaign, tick time.Duration) error {
+	timerdur, err := repo.CalculateTimerDuration(in)
+	if err != nil{
+		fmt.Println(err)
+		return err
+	}
+	time.AfterFunc(timerdur, func() {
+
+		for _,s := range campaign.Media {
+			reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
+
+			storyDTO := DTO.StoryDTO{
+				Media:           s,
+				UserID:          campaign.UserID,
+				ForCloseFriends: false,
+				Highlights:      false,
+			}
+			jsonPost, _ := json.Marshal(storyDTO)
+
+			resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
+			if err != nil || resp.StatusCode == 404 {
+				fmt.Println(err)
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			var a string
+			json.Unmarshal(body, &a)
+			fmt.Println(a)
+			uuid, err := ParseUUID(a)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			updto := DTO.UpdateCreatedAtDTO{
+				ID:     uuid,
+				UserID: campaign.UserID,
+				CreatedAt: time.Now(),
+			}
+
+			go doEvery(tick, campaign.End, &updto, updateStoryCreatedAt)
+		}
 	})
 	return nil
 }
@@ -200,7 +287,7 @@ func (repo *AgentRepository) CreatePost(campaign *Model.Campaign) error {
 }
 
 func doEvery(d time.Duration, end time.Time, dto *DTO.UpdateCreatedAtDTO, f func(time.Time, *DTO.UpdateCreatedAtDTO)) {
-	end = end.Add(-2*time.Hour)
+	//end = end.Add(-2*time.Hour)
 	for x := range time.Tick(d) {
 		a := end.Sub(time.Now())
 		fmt.Println("Razlika ", a)
@@ -216,6 +303,20 @@ func doEvery(d time.Duration, end time.Time, dto *DTO.UpdateCreatedAtDTO, f func
 func updateCreatedAt(t time.Time, dto *DTO.UpdateCreatedAtDTO) {
 
 	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/update-createdat")
+	jsonPost,_ := json.Marshal(dto)
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonPost))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println("ERROR")
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(body)
+	fmt.Println("Successfully updated createdat")
+}
+
+func updateStoryCreatedAt(t time.Time, dto *DTO.UpdateCreatedAtDTO) {
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/update-agent")
 	jsonPost,_ := json.Marshal(dto)
 
 	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(jsonPost))

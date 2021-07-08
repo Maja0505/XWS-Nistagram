@@ -1,7 +1,6 @@
 package main
 
 import (
-	"XWS-Nistagram/PostService/DataStructures"
 	"XWS-Nistagram/PostService/Handler"
 	"XWS-Nistagram/PostService/Repository"
 	"XWS-Nistagram/PostService/Service"
@@ -37,10 +36,10 @@ func init() {
 		fmt.Println(err)
 	}
 
-	/*if err := Session.Query("DROP TABLE postkeyspace.posts").Exec(); err != nil {
-		fmt.Println("Error while dropping posts table!")
+	if err := Session.Query("DROP TABLE postkeyspace.stories").Exec(); err != nil {
+		fmt.Println("Error while dropping table!")
 		fmt.Println(err)
-	}*/
+	}
 
 	if err := Session.Query("CREATE TABLE if not exists postkeyspace.posts(id timeuuid, userid text, description text, media list<text>, album boolean, repeatcampaign boolean, createdat timestamp, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
@@ -91,7 +90,7 @@ func init() {
 		fmt.Println(err)
 	}
 
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id timeuuid, userid text, available boolean, image text, highlights boolean, for_close_friends boolean, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id timeuuid, userid text, available boolean, image text, highlights boolean, for_close_friends boolean, createdat timestamp, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
@@ -168,7 +167,6 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/get-location-for-post/{postId}", handler.GetLocationForPost).Methods("GET")
 	router.HandleFunc("/get-location-suggestions/{location}", handler.GetLocationSuggestions).Methods("GET")
 	router.HandleFunc("/update-createdat", handler.UpdatePostCreatedAt).Methods("POST")
-
 }
 
 func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
@@ -182,27 +180,13 @@ func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
 	router.HandleFunc("/story/all-highlights/{userId}", handler.GetAllHighlightsStoriesByUser).Methods("GET")
 	router.HandleFunc("/story/all-follows-with-stories/{userId}", handler.GetAllFollowsWithStories).Methods("GET")
 
-
 	router.HandleFunc("/story/video-upload/{videoId}", handler.UploadVideo).Methods("POST")
 	router.HandleFunc("/story/video-get/{videoId}", handler.GetVideo).Methods("GET")
 	router.HandleFunc("/story/image-upload/{imageId}", handler.UploadImage).Methods("POST")
-	
 
-
-}
-
-func loadTrie(trie *DataStructures.Trie, repository Repository.PostRepository){
-	tags, err := repository.GetAllTags()
-	if err != nil{
-		fmt.Println("Greska prilikom vracanja tagova!!!")
-	}
-	for _, s := range *tags{
-		fmt.Println(s)
-		trie.Add(s, s)
-	}
+	router.HandleFunc("/story/update-agent", handler.UpdateStoryAvailabilityAndDate).Methods("POST")
 
 }
-
 
 func main(){
 	fmt.Println("\n----------------MAIN----------------\n")

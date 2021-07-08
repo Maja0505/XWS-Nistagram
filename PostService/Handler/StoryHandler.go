@@ -25,7 +25,7 @@ func (handler *StoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.Service.Create(&storyDTO)
+	id, err := handler.Service.Create(&storyDTO)
 	if err != nil{
 		fmt.Println(err)
 		w.WriteHeader(http.StatusExpectationFailed)
@@ -33,7 +33,25 @@ func (handler *StoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(id)
 
+}
+func (handler *StoryHandler) UpdateStoryAvailabilityAndDate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var upDTO DTO.UpdateStoryAgentDTO
+	err := json.NewDecoder(r.Body).Decode(&upDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.Service.UpdateStoryAvailabilityAndDate(&upDTO)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (handler *StoryHandler) SetStoryForHighlights(w http.ResponseWriter, r *http.Request) {
