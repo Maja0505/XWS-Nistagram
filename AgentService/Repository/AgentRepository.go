@@ -19,13 +19,19 @@ type AgentRepository struct {
 
 func (repo *AgentRepository) CreateTables() error {
 
-	if err := repo.Session.Query("DROP TABLE IF EXISTS agentkeyspace.campaigns;").Exec(); err != nil {
+	/*if err := repo.Session.Query("DROP TABLE IF EXISTS agentkeyspace.campaigns;").Exec(); err != nil {
 		fmt.Println("Error while dropping tables!")
+		fmt.Println(err)
+		return err
+	}*/
+
+	if err := repo.Session.Query("CREATE TABLE if not exists agentkeyspace.campaigns(id timeuuid, userid text, ispost boolean, repeat boolean, start timestamp, end timestamp, repeatfactor int, media list<text>, links list<text>, influencers list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
 	}
 
-	if err := repo.Session.Query("CREATE TABLE if not exists agentkeyspace.campaigns(id timeuuid, userid text, ispost boolean, repeat boolean, start timestamp, end timestamp, repeatfactor int, media list<text>, links list<text>, influencers list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+	if err := repo.Session.Query("CREATE TABLE if not exists agentkeyspace.campaignrequest(userid text, campaignid timeuuid, PRIMARY KEY((userid), campaignid)) WITH CLUSTERING ORDER BY (campaignid DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 		return err
@@ -65,6 +71,16 @@ func (repo *AgentRepository) CreateCampaign(campaign *Model.Campaign) error {
 			}
 			repo.StartRepeatTimerStory(campaign.Start, campaign, tick)
 		}
+	}
+	return nil
+}
+
+func (repo *AgentRepository) CreateCampaignRequest(userid string, campaignid gocql.UUID) error {
+	if err := repo.Session.Query("INSERT INTO agentkeyspace.campaignrequest(campaignid, userid) VALUES(?, ?)",
+		campaignid, userid).Exec(); err != nil {
+		fmt.Println("Error while creating campaign request!")
+		fmt.Println(err)
+		return err
 	}
 	return nil
 }
@@ -562,6 +578,60 @@ func (repo *AgentRepository) GetCampaignInfluencers(campaignid gocql.UUID) ([]st
 
 	fmt.Println("Successfully loaded influencers from campaign!")
 	return a, nil
+}
+
+func (repo *AgentRepository) GetCampaignsForUser(userid string) ( *[]Model.Campaign, error){
+	var campaigns []Model.Campaign
+	m := map[string]interface{}{}
+
+	iter := repo.Session.Query("SELECT * FROM agentkeyspace.campaigns WHERE userid=?", userid).Iter()
+	fmt.Println(iter.NumRows())
+	if iter.NumRows() == 0{
+		return nil, nil
+	}
+	for iter.MapScan(m) {
+		var a = m["start"].(time.Time)
+		if a.Sub(time.Now()) > 0 {
+			var a = m["id"].(gocql.UUID)
+			b := a.Time()
+			var campaign = Model.Campaign{
+				ID:           m["id"].(gocql.UUID),
+				CreatedAt:    b,
+				//Description:  m["description"].(string),
+				UserID:       m["userid"].(string),
+				Media:        m["media"].([]string),
+				Links:        m["links"].([]string),
+				Repeat:       m["repeat"].(bool),
+				IsPost:       m["ispost"].(bool),
+				Start:        m["start"].(time.Time),
+				End:          m["end"].(time.Time),
+				RepeatFactor: m["repeatfactor"].(int),
+				Influencers:  m["influencers"].([]string),
+			}
+			campaigns = append(campaigns, campaign)
+			m = map[string]interface{}{}
+		}
+	}
+	return &campaigns, nil
+}
+
+func (repo *AgentRepository) GetCampaignRequests(userid string) ( *[]DTO.RequestDTO, error){
+	var campaignRequests []DTO.RequestDTO
+	m := map[string]interface{}{}
+
+	iter := repo.Session.Query("SELECT * FROM agentkeyspace.campaignrequest WHERE userid=?", userid).Iter()
+	if iter.NumRows() == 0{
+		return nil, nil
+	}
+	for iter.MapScan(m) {
+			var campaign = DTO.RequestDTO{
+				CampaignID:   m["campaignid"].(gocql.UUID),
+				UserID:       m["userid"].(string),
+			}
+		campaignRequests = append(campaignRequests, campaign)
+		m = map[string]interface{}{}
+	}
+	return &campaignRequests, nil
 }
 
 

@@ -48,9 +48,11 @@ func initHandler(service *Service.AgentService) *Handler.AgentHandler{
 
 func handleFunc(handler *Handler.AgentHandler,router *mux.Router){
 	router.HandleFunc("/create-campaign", handler.CreateCampaign).Methods("POST")
+	router.HandleFunc("/create-campaign-request", handler.CreateCampaignRequest).Methods("POST")
 	router.HandleFunc("/delete-campaign", handler.DeleteCampaign).Methods("POST")
 	router.HandleFunc("/add-influencer", handler.AddCampaignInfluencer).Methods("POST")
-
+	router.HandleFunc("/get-campaigns-for-user/{id}", handler.GetCampaignsForUser).Methods("GET")
+	router.HandleFunc("/get-campaign-requests/{id}", handler.GetCampaignRequests).Methods("GET")
 }
 
 
@@ -63,11 +65,6 @@ func main(){
 	handler := initHandler(AgentService)
 
 	//AgentRepo.CreateTables()
-	uuid, err := ParseUUID("df397943-e018-11eb-80d7-d43d7e26656f")
-	fmt.Println(err)
-	a, err := AgentRepo.GetCampaignInfluencers(uuid)
-	fmt.Println(a)
-
 
 	router := mux.NewRouter().StrictSlash(true)
 	handleFunc(handler,router)
@@ -79,28 +76,4 @@ func main(){
 	fmt.Println("\nServer running...")
 	log.Fatal(http.ListenAndServe(":" + os.Getenv("AGENT_SERVICE_PORT"), handlers.CORS(headers, methods, origins)(router)))
 
-}
-
-func ParseUUID(input string) (gocql.UUID, error) {
-	var u gocql.UUID
-	j := 0
-	for _, r := range input {
-		switch {
-		case r == '-' && j&1 == 0:
-			continue
-		case r >= '0' && r <= '9' && j < 32:
-			u[j/2] |= byte(r-'0') << uint(4-j&1*4)
-		case r >= 'a' && r <= 'f' && j < 32:
-			u[j/2] |= byte(r-'a'+10) << uint(4-j&1*4)
-		case r >= 'A' && r <= 'F' && j < 32:
-			u[j/2] |= byte(r-'A'+10) << uint(4-j&1*4)
-		default:
-			return gocql.UUID{}, fmt.Errorf("invalid UUID %q", input)
-		}
-		j += 1
-	}
-	if j != 32 {
-		return gocql.UUID{}, fmt.Errorf("invalid UUID %q", input)
-	}
-	return u, nil
 }
