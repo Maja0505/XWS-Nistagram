@@ -10,6 +10,7 @@ import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axios from "axios";
 import PhotoLibraryOutlinedIcon from "@material-ui/icons/PhotoLibraryOutlined";
+import LocalMallOutlinedIcon from '@material-ui/icons/LocalMallOutlined';
 
 const images = [
   {
@@ -197,6 +198,26 @@ const Posts = ({ userForProfile, username }) => {
                 )}
 
                 <span className={classes.imageBackdrop} />
+                {post.is !== 1 && (
+                  <span className={classes.imageButton2}>
+                    <Typography
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle2}
+                      width="100%"
+                      height="30%"
+                    >
+                      <Grid container style={{ margin: "auto" }}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                          <LocalMallOutlinedIcon></LocalMallOutlinedIcon>
+                        </Grid>
+                      </Grid>
+                    </Typography>
+                  </span>
+                )}
+
                 {post.Media.length !== 1 && (
                   <span className={classes.imageButton2}>
                     <Typography

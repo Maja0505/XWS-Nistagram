@@ -1,4 +1,4 @@
-import { Button, FormLabel, Grid, TextField, Zoom } from "@material-ui/core";
+import { Button, FormLabel, Grid, TextField } from "@material-ui/core";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -6,10 +6,13 @@ import Slider from "react-slick";
 import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import DateTimePicker from 'react-datetime-picker';
+import { DateTimePicker  }  from '@material-ui/pickers'
 import uuid from "react-uuid";
+import DateFnsUtils from '@date-io/date-fns';
+import * as moment from 'moment';
 
 import TagLocationAndUser from "./TagLocationAndUser.js";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 
 const useStyles = makeStyles((theme) => ({
   settings: {
@@ -39,13 +42,15 @@ const AddCampaign = ({ setTabValue }) => {
   const [listOfTaggedUserid,setListOfTaggedUserid] = useState([])
   const [links,setLinks] = useState([])
   const [repeat,setRepeat] = useState("")
-  const [valueOneStart, onChangeOneStart] = useState(new Date());
-  const [valueMultieStart, onChangeMultieStart] = useState(new Date());
-  const [valueMultieEnd, onChangeMultieEnd] = useState(new Date());
+  const [valueOneStart, onChangeOneStart] = useState(null);
+  const [valueMultieStart, onChangeMultieStart] = useState(null);
+  const [valueMultieEnd, onChangeMultieEnd] = useState(null);
   const [repeatFactor,setRepeatFactor] = useState(0)
 
   const [location, setLocation] = useState("");
   const [taggedUsers, setTaggedUsers] = useState("");
+  const [clearedDate, handleClearedDateChange] = useState(null);
+  const [tags,setTags] = useState([])
 
 
   const createPost = () => {
@@ -61,45 +66,16 @@ const AddCampaign = ({ setTabValue }) => {
     savePost();
   };
 
-  const addTags = (postDTO) => {
+  const addTags = () => {
     var listOfTags = description.split("#");
     if (listOfTags.length > 0) {
       for (var i = 1; i < listOfTags.length; i++) {
         let tag = listOfTags[i].split(" ")[0];
-        axios
-          .post("/api/post/add-tag", {
-            Tag: "#" + tag,
-            PostID: postDTO.ID,
-          })
-          .then((res) => {
-            console.log("Upisan tag  " + tag);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
+        var array = tags;
+        array.push('#'+ tag);
+        setTags(array);
     }
-    for (var j = 0; j < taggedUsers.length; j++) {
-      let userTag = taggedUsers[j];
-      let userid = listOfTaggedUserid[j]
-      axios
-        .post("/api/post/add-tag", {
-          Tag: userTag,
-          PostID: postDTO.ID,
-        })
-        .then((res) => {
-          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            console.log("aa")
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + userid + '"' + ', "content": "tagged you in a post."' + ', "media": "' + postDTO.Media[0] + '"' + ', "post_id": "' + postDTO.ID + '"}')
-          };
-          console.log("Upisan user tag  " + userTag);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+  }
   };
 
   const uploadVideo = (imageForUpload, index) => {
@@ -156,38 +132,49 @@ const AddCampaign = ({ setTabValue }) => {
     console.log(imagesIdsForSave);
     var end = null
     var start = null
-    if(repeat) {
-      var endArray = valueMultieEnd.split(" ")
+    console.log(valueOneStart)
+    const valueOneStart2 = moment(valueOneStart).format("YYYY-MM-DD hh:mm:ss");
+    const valueMultieEnd2 = moment(valueMultieEnd).format("YYYY-MM-DD hh:mm:ss");
+    const valueMultieStart2 = moment(valueMultieStart).format("YYYY-MM-DD hh:mm:ss");
+    console.log(valueMultieEnd2)
+    console.log(valueMultieStart2)
+
+    if(repeat === "multiple-time") {
+      var endArray = valueMultieEnd2.split(" ")
       end  = endArray[0] + "T" + endArray[1] +"Z"
-     var startMArray = valueMultieStart.split(" ")
+     var startMArray = valueMultieStart2.split(" ")
       start  = startMArray[0] + "T" + startMArray[1] +"Z"
+      console.log(endArray)
+    console.log(startMArray)
     }else{
-      var startOArray = valueOneStart.split(" ")
+      var startOArray = valueOneStart2.split(" ")
       start  = startOArray[0] + "T" + startOArray[1] +"Z"
+      end = startOArray[0] + "T" + startOArray[1] +"Z"
     }
- 
+    
+    addTags()
+  
     if (!puklaSlika) {
       var postDTO = {
-        ID: uuid(),
-        //Description: description,
-        Media: imagesIdsForSave,
-        End : end,
-        Start : start,
-        Links : links,
-        //MediaCount: imagesIdsForSave.length,
-        IsPost: true,
-        UserID: loggedUserId,
-        //Location: location,
-        Repeat : repeat,
-        repeatFactor : repeatFactor,
+        description: description,
+        media: imagesIdsForSave,
+        end : end,
+        start : start,
+        links : links,
+        tags: tags,
+        ispost: true,
+        userid: loggedUserId,
+        location: location,
+        repeat : repeat === "multiple-time" ? true : false,
+        repeatfactor : Number(repeatFactor),
       };
       console.log("Uspesno upload-ovao sliku");
       axios
-        .post("/api/post/create", postDTO)
+        .post("/api/agent/create-campaign", postDTO)
         .then((res1) => {
           console.log("Uspesno kreirao post");
-          var postDTONew = { ...postDTO, ID: res1.data };
-          addTags(postDTONew);
+          //var postDTONew = { ...postDTO, ID: res1.data };
+          //addTags(postDTONew);
           setTabValue(0);
           setPuklaSlika(false);
         })
@@ -314,13 +301,19 @@ const AddCampaign = ({ setTabValue }) => {
 
       {selectedFile.length !== 0 && (
         <>
-          <TagLocationAndUser
-            setLocation={setLocation}
-            setTaggedUsers={setTaggedUsers}
-            taggedUsers={taggedUsers}
-            setListOfTaggedUserid = {setListOfTaggedUserid}
-            listOfTaggedUserid = {listOfTaggedUserid}
-          />
+          <Grid container style={{ marginTop: "1%" }}>
+            <Grid item xs={3} />
+            <Grid item xs={6}>
+              <TextField
+                label="Add location"
+                fullWidth
+                variant="outlined"
+                size="small"
+                onChange={(e) => setLocation(e.target.value)}
+              ></TextField>
+            </Grid>
+            <Grid item xs={3} />
+          </Grid>
 
           <Grid container style={{ marginTop: "1%" }}>
             <Grid item xs={3} />
@@ -370,20 +363,30 @@ const AddCampaign = ({ setTabValue }) => {
           <Grid item xs={3}/>
 
             <Grid item xs={3}>
-            <FormLabel>Start</FormLabel>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+
             <DateTimePicker
-                      onChange={onChangeMultieStart}
-                      value={valueMultieStart}
-                      format={"yyyy-MM-dd hh:mm:ss"}
-                    />
+              autoOk
+              ampm={false}
+              value={valueMultieStart}
+              onChange={onChangeMultieStart}
+              format="yyyy-MM-dd hh:mm"
+              label="Start"
+             />
+             </MuiPickersUtilsProvider>
+
             </Grid>
             <Grid item xs={3} >
-            <FormLabel>End</FormLabel>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <DateTimePicker
-                      onChange={onChangeMultieEnd}
-                      value={valueMultieEnd}
-                      format={"yyyy-MM-dd hh:mm:ss"}
-                    />
+              autoOk
+              ampm={false}
+              value={valueMultieEnd}
+              onChange={onChangeMultieEnd}
+              format="yyyy-MM-dd hh:mm"
+              label=" End"
+             />
+            </MuiPickersUtilsProvider>
             </Grid>
             <Grid item xs={3}/>
           </Grid>
@@ -416,13 +419,19 @@ const AddCampaign = ({ setTabValue }) => {
                 <Grid container style={{ marginTop: "1%" }}>
                 <Grid item xs={3}/>
                     <Grid item xs={3}>
-                    <FormLabel>Start</FormLabel>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
 
                     <DateTimePicker
-                      onChange={onChangeOneStart}
+                      autoOk
+                      ampm={false}
                       value={valueOneStart}
-                      format={"yyyy-MM-dd hh:mm:ss"}
+                      onChange={onChangeOneStart}
+                      format="yyyy-MM-dd hh:mm"
+                      label="Start"
                     />
+                    </MuiPickersUtilsProvider>
+
+               
                     </Grid>
                     <Grid item xs={3}/>
                 </Grid>
