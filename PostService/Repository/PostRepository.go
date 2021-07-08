@@ -28,8 +28,8 @@ func (repo *PostRepository) Create(post *Model.Post) (gocql.UUID,error) {
 		isAlbum = true
 	}
 	ID := gocql.TimeUUID()
-	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, description, media, userid, album) VALUES(?, ?, ?, ?, ?)",
-		ID, post.Description, post.Media, post.UserID, isAlbum).Exec(); err != nil {
+	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, description, media, userid, album, repeatcampaign, createdat) VALUES(?, ?, ?, ?, ?, ?, ?)",
+		ID, post.Description, post.Media, post.UserID, isAlbum, post.RepeatCampaign, ID.Time()).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return ID,err
@@ -402,11 +402,9 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 			var b int64 = m2["dislikes"].(int64)
 			var c int64 = m2["comments"].(int64)
 			var d int64 = m2["media"].(int64)
-			var f = m["id"].(gocql.UUID)
-			var e time.Time = f.Time()
 			var post = Model.Post{
 				ID:        m["id"].(gocql.UUID),
-				CreatedAt: e,
+				CreatedAt: m["createdat"].(time.Time),
 				Description:  m["description"].(string),
 				UserID:       m["userid"].(string),
 				Media: m["media"].([]string),
@@ -420,11 +418,9 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 			m = map[string]interface{}{}
 			m2 = map[string]interface{}{}
 		}else {
-			var f = m["id"].(gocql.UUID)
-			var e time.Time = f.Time()
 			var post = Model.Post{
 				ID:          m["id"].(gocql.UUID),
-				CreatedAt:   e,
+				CreatedAt:   m["createdat"].(time.Time),
 				Description: m["description"].(string),
 				UserID:      m["userid"].(string),
 				Media:       m["media"].([]string),
@@ -460,11 +456,9 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 			var b int64 = m2["dislikes"].(int64)
 			var c int64 = m2["comments"].(int64)
 			var d int64 = m2["media"].(int64)
-			var f = m["id"].(gocql.UUID)
-			var e time.Time = f.Time()
 			var post = Model.Post{
 				ID:        m["id"].(gocql.UUID),
-				CreatedAt: e,
+				CreatedAt: m["createdat"].(time.Time),
 				Description:  m["description"].(string),
 				UserID:       m["userid"].(string),
 				Media: m["media"].([]string),
@@ -478,11 +472,9 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 			m = map[string]interface{}{}
 			m2 = map[string]interface{}{}
 		}else {
-			var f = m["id"].(gocql.UUID)
-			var e time.Time = f.Time()
 			var post = Model.Post{
 				ID:          m["id"].(gocql.UUID),
-				CreatedAt:   e,
+				CreatedAt:   m["createdat"].(time.Time),
 				Description: m["description"].(string),
 				UserID:      m["userid"].(string),
 				Media:       m["media"].([]string),
@@ -843,6 +835,18 @@ func (repo *PostRepository) GetAllLocations() ( *[]string, error) {
 
 	return &locations, nil
 }
+
+func (repo *PostRepository) UpdatePostCreatedAt(time time.Time, userid string, postid gocql.UUID) error {
+	if err := repo.Session.Query("UPDATE postkeyspace.posts SET createdat = ? where userid = ? AND id = ? IF EXISTS;",
+		time, userid, postid).Exec(); err != nil {
+		fmt.Println("Error while updating post createdat!")
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("Successfully updated createdat time!")
+	return nil
+}
+
 
 func (repo *PostRepository) InitTrie() error{
 	fmt.Println("Initialization of tags trie...")

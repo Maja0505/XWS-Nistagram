@@ -7,7 +7,7 @@ import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
 import TaggedUsersList from "./TaggedUsersList.js";
 
-const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers }) => {
+const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOfTaggedUserid,listOfTaggedUserid }) => {
   const username = localStorage.getItem("username");
   const [searchedContent, setSearchedContent] = useState([]);
   const [userForTag, setUserForTag] = useState();
@@ -31,9 +31,14 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers }) => {
   const addUserInTaggedUsers = () => {
     var array = [...taggedUsers];
     var index = array.indexOf("@" + userForTag);
-    if (index === -1) {
-      setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
-    }
+    axios.get("/api/user/" + userForTag)
+      .then((res) => {
+        if (index === -1) {
+          setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
+          setListOfTaggedUserid((prevState) => [...prevState,res.data.IdString])
+        }
+      })
+   
   };
 
   const viewAllTaggedUsers = () => {
@@ -124,6 +129,8 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers }) => {
           open={open}
           setOpen={setOpen}
           setTaggedUsers={setTaggedUsers}
+          setListOfTaggedUserid = {setListOfTaggedUserid}
+          listOfTaggedUserid = {listOfTaggedUserid}
         ></TaggedUsersList>
       )}
     </div>

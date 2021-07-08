@@ -44,6 +44,8 @@ const PostFeed = ({ feed }) => {
   const [profileImage, setProfileImage] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
   const loggedUserId = localStorage.getItem("id");
+  const loggedUsername = localStorage.getItem("username");
+
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -211,6 +213,11 @@ const PostFeed = ({ feed }) => {
               LikesCount: Number(copyOfFeed.LikesCount) + Number(1),
             });
           }
+          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + feed.Media[0] + '"' + ', "post_id": "' + feed.ID + '"}')
+          };
         } else {
           if (isDisliked) {
             setIsDisliked(!isDisliked);
@@ -248,6 +255,11 @@ const PostFeed = ({ feed }) => {
               DislikesCount: Number(copyOfFeed.DislikesCount) + Number(1),
             });
           }
+          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + feed.Media[0] + '"'+ ', "post_id": "' + feed.ID + '"}')
+          };
         } else {
           if (isLiked) {
             setIsLiked(!isLiked);
@@ -275,6 +287,11 @@ const PostFeed = ({ feed }) => {
         Content: newComment,
       })
       .then((res) => {
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + feed.Media[0] + '"' + ', "comment": "' + newComment + '"' + ', "post_id": "' + feed.ID + '"}')
+        };
         axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
           setComments(res.data);
         });

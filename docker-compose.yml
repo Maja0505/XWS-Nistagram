@@ -30,6 +30,21 @@ services:
     volumes:
       - micro_services:/app
 
+  notification-service:
+    image: notification-service:compose_build
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    depends_on:
+      - redis
+    links: 
+      - redis
+    restart: on-failure
+    volumes:
+      - micro_services:/app
+
   post-service:
     image: post-service:compose_build
     build:
@@ -129,11 +144,21 @@ services:
     volumes:
       - cass_db:/etc/cassandra/cass.yaml
 
+  redis:
+    image: "redis:alpine"
+    networks:
+      - network1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_db:/usr/local/etc/redis/redis.config
+
 volumes:
     cass_db:
     neo4j_db:
     mongo_db:
     micro_services:
+    redis_db:
 
 networks:
    network1:

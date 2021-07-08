@@ -40,6 +40,8 @@ import avatar from "../images/nistagramAvatar.jpg";
 
 const PostDialog = () => {
   const loggedUserId = localStorage.getItem("id");
+  const loggedUsername = localStorage.getItem("username");
+
   const [newComment, setNewComment] = useState("");
 
   const { post } = useParams();
@@ -96,6 +98,11 @@ const PostDialog = () => {
     };
     axios.post("/api/post/add-comment", comment).then((res) => {
       console.log("upisan komentar");
+      let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+      socket.onopen = () => {
+        console.log("Successfully Connected");
+        socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + imagePost.Media[0] + '"' + ', "comment": "' + newComment + '"}' + ', "post_id": "' + imagePost.ID + '"}')
+      };
       setNewComment("");
       axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
         setCommentsForPost(res.data);
@@ -201,6 +208,11 @@ const PostDialog = () => {
             LikesCount: Number(imagePost.LikesCount) + Number(1),
           });
         }
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
+        };
         setPostIsLiked(true);
       }
     });
@@ -241,6 +253,11 @@ const PostDialog = () => {
             DislikesCount: Number(imagePost.DislikesCount) + Number(1),
           });
         }
+        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
+        };
         setPostIsDisliked(true);
       }
     });

@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 
 const LoginPage = () => {
+
   const [user, setUser] = useState({ username: "", password: "" });
 
   const singUp = () => {
@@ -17,6 +18,8 @@ const LoginPage = () => {
         console.log(res.data)
         localStorage.setItem("username", res.data.Username);
         localStorage.setItem("id", res.data.ID);
+
+  
         if(user.username === "admin"){
           window.location.href = "http://localhost:3000/admin"
         }else{

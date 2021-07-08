@@ -448,6 +448,17 @@ func (service *PostService) DeletePost(postId gocql.UUID,userId string) error{
 }
 
 
+func (service *PostService) UpdatePostCreatedAt(dto *DTO.UpdateCreatedAtDTO) error {
+
+	err := service.Repo.UpdatePostCreatedAt(dto.CreatedAt, dto.UserID, dto.ID)
+	if err != nil{
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
 
 	var postsByAllNotMutedFollowedUsers []Model.Post
