@@ -17,6 +17,7 @@ import { SnackbarProvider, useSnackbar  } from 'notistack';
 import Snackbar from './components/Snackbar'
 import LocationTagPost from "./components/LocationTagPost.js";
 import FollowSuggestions from "./components/FollowSuggestions";
+import Message from "./components/Message"
 
 function App() {
   const logedUsername = localStorage.getItem("username");
@@ -74,6 +75,10 @@ function App() {
             <Route
               path="/follow-suggestions/"
               component={FollowSuggestions}
+            ></Route>
+                   <Route
+              path="/messages/"
+              component={Message}
             ></Route>
           </Switch>
         </div>

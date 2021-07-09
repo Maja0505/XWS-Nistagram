@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
+	"strings"
 )
 
 const (
@@ -184,34 +185,39 @@ func (u *User) doConnect(rdb *redis.Client, channels ...string) error {
 	return nil
 }
 
-func GetChannels(rdb *redis.Client, username string) ([]string, error) {
+func GetChannels(rdb *redis.Client, userid string) ([]string, error) {
 
-	if !rdb.SIsMember(usersKey, username).Val() {
+	if !rdb.SIsMember(usersKey, userid).Val() {
 		return nil, errors.New("user not exists")
 	}
 
 	var c []string
 
-	c1, err := rdb.SMembers(ChannelsKey).Result()
-	if err != nil {
-		return nil, err
-	}
-	c = append(c, c1...)
-
 	// get all user channels (from DB) and start subscribe
-	c2, err := rdb.SMembers(fmt.Sprintf(userChannelFmt, username)).Result()
+	c2, err := rdb.SMembers(fmt.Sprintf(userChannelFmt, userid)).Result()
 	if err != nil {
 		return nil, err
 	}
-	c = append(c, c2...)
+	for _, s := range c2 {
+		if strings.Contains(s,"-") {
+			var ids = strings.Split(s,"-")
+			for _, id := range ids {
+				if id != userid {
+					c = append(c, id)
+				}
+			}
+		}
+	}
 
 	return c, nil
 }
 
-func GetChannelsNotifications(rdb *redis.Client, channel string) ([]string, error) {
+func GetChannelsNotifications(rdb *redis.Client, userid1 string,userid2 string) ([]string, error) {
 
-	fmt.Println(ChannelsKey)
-
+	channel := userid1 + "-" + userid2
+	if !rdb.SIsMember(ChannelsKey, channel).Val() {
+		channel = userid2 + "-" + userid1
+	}
 	if !rdb.SIsMember(ChannelsKey, channel).Val() {
 		return nil, errors.New("channel not exists")
 	}

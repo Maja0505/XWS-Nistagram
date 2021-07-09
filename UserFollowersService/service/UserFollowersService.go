@@ -451,7 +451,7 @@ func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (service *UserFollowersService) RedisConnection() {
 	// create client and ping redis
 	var err error
-	client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	client := redis.NewClient(&redis.Options{Addr: "redis:6379"})
 	if _, err = client.Ping().Result(); err != nil {
 		log.Fatalf("error creating redis client %s", err)
 	}

@@ -514,6 +514,7 @@ const NavBar = () => {
                   }}
                 />
               </Link>
+              <Link to="/messages/">
               <EmailOutlined
                 style={{
                   color: "gray",
@@ -521,6 +522,7 @@ const NavBar = () => {
                   height: "29px",
                 }}
               />
+              </Link>
             </Grid>
             <Grid
               container
