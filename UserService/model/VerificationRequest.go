@@ -5,21 +5,25 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Category int
 
 const (
-	Influencer Category = iota
+	Blogger_Influencer Category = iota
 	Sports
-	New_Media
-	Business
-	Brand
-	Organization
+	News_Media
+	Business_Brand_Organization
+	Government_Politics
+	Music
+	Fashion
+	Entertainment
+	Other
 )
 
 type VerificationRequest struct {
 	ID	primitive.ObjectID `bson:"_id,omitempty"`
+	User primitive.ObjectID `bson:"user,omitempty"`
 	Username string `bson:"username,omitempty"`
-	FirstName string `bson:"first_name,omitempty"`
-	LastName string `bson:"last_name,omitempty"`
-	Admin primitive.ObjectID `bson:"admin,omitempty"`
+	FullName string `bson:"full_name,omitempty"`
+	KnownAs string `bson:"known_as,omitempty"`
+	Admin string `bson:"admin,omitempty"`
 	Category Category `bson:"category,omitempty"`
-	Approved bool `bson:"approved,omitempty"`
+	Approved bool `bson:"approved"`
 	Image string `bson:"image,omitempty"`
 }

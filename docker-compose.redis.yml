@@ -1,9 +1,13 @@
-version: "3.2"
+version: '3'
 services:
 
- redis:
+  redis:
     image: "redis:alpine"
+    container_name: redis
     ports:
       - "6379:6379"
     volumes:
-      - ./redis:/usr/local/etc/redis/redis.config
+      - redis_db_test:/usr/local/etc/redis/redis.config
+
+volumes:
+    redis_db_test:

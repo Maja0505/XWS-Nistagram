@@ -10,19 +10,28 @@ const LoginPage = () => {
     window.location.href = "http://localhost:3000/registration";
   };
 
-  const loginIn = () => {
+  const login = () => {
     axios
-      .get("/api/user/user/" + user.username)
+      .get("/api/user/" + user.username)
       .then((res) => {
-        console.log(res.data)
+        console.log(res.data);
         localStorage.setItem("username", res.data.Username);
         localStorage.setItem("id", res.data.ID);
-        window.location.href =
-          "http://localhost:3000/homePage/" + res.data.Username;
+        localStorage.setItem("isAgent", res.data.IsAgent);
+
+        if (user.username === "admin") {
+          window.location.href = "http://localhost:3000/admin";
+        } else {
+          window.location.href =
+            "http://localhost:3000/homePage/" + res.data.Username;
+        }
       })
       .catch((error) => {
         alert("Wrong username or password");
       });
+    //localStorage.setItem("username", user.username);
+    /*window.location.href =
+          "http://localhost:3000/homePage/" + user.username;*/
   };
 
   return (
@@ -61,7 +70,7 @@ const LoginPage = () => {
           variant="contained"
           color="primary"
           style={{ marginRight: "2%" }}
-          onClick={loginIn}
+          onClick={login}
         >
           LOG IN
         </Button>

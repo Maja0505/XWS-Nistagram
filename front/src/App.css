@@ -24,6 +24,13 @@
   color: white;
 }
 
+.storyContent {
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+}
+
 .App-link {
   color: #61dafb;
 }

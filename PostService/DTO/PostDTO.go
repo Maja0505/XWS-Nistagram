@@ -1,17 +1,17 @@
 package DTO
 
-import (
-	"github.com/gocql/gocql"
-	"time"
-)
+import "github.com/gocql/gocql"
 
 type PostDTO struct{
-	ID 				gocql.UUID 		`json:"ID"`
-	CreatedAt 		time.Time 		`json:"CreatedAt"`
+	ID 				gocql.UUID		`json:"ID"`
 	Description  	string 			`json:"Description"`
-	DislikesCount 	int64 			`json:"DislikesCount"`
-	LikesCount		int64				`json:"LikesCount"`
-	Image 			string 			`json:"Image"`
-	UserID 			string		`json:"UserID"`
+	MediaCount		int64			`json:"MediaCount"`
+	Media 			[]string 		`json:"Media"`
+	UserID 			string			`json:"UserID"`
 	CommentsCount 	int64  			`json:"CommentsCount"`
+	Album			bool			`json:"Album"`
+	Location 		string			`json:"Location"`
+	RepeatCampaign 	bool			`json:"RepeatCampaign"`
+	Links 			[]string 		`json:"Links"`
+	IsCampaign		bool 			`json:"IsCampaign"`
 }

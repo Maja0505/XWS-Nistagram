@@ -15,4 +15,6 @@ type RegisteredUserProfileInfoDTO struct {
 	Gender *model.Gender
 	Biography string
 	WebSite string
+	ProfilePicture string
+	IsAgent bool
 }
