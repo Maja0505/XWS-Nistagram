@@ -7,6 +7,8 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/gorilla/handlers"
+
 	"log"
 	"net/http"
 	"os"
@@ -43,9 +45,9 @@ func main() {
 	r := mux.NewRouter()
 	fmt.Println(rdb)
 	r.Path("/chat/{username}").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.MessageWebSocketHandler))
-	r.Path("/user/{user}/channels").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.UserChannelsHandler))
-	r.Path("/channels/{channel}").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.UserChannelsNotificationsHandler))
-	r.Path("/channels/{channel}/not-opened").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.UserChannelsNotOpenedNotificationsHandler))
+	r.Path("/user/{user}/chats").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.GetAllMessageChatForUser))
+	r.Path("/channels/{userid1}/{userid2}/messages").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.UserChannelsNotificationsHandler))
+	r.Path("/channels/{userid1}/{userid2}/get-channel-name").Methods("GET").HandlerFunc(Handler.H(rdb, Handler.UserChannelsNotOpenedNotificationsHandler))
 	r.Path("/user/{user}/channels/{channel}/update").Methods("PUT").HandlerFunc(Handler.H(rdb, Handler.UserChannelsNotificationsUpdateHandler))
 
 
@@ -55,6 +57,9 @@ func main() {
 	if port == ":" {
 		port = ":8080"
 	}
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
+	origins := handlers.AllowedOrigins([]string{"*"})
 	fmt.Println("notification service started on port", port)
-	log.Fatal(http.ListenAndServe(port, r))
+	log.Fatal(http.ListenAndServe(port,  handlers.CORS(headers, methods, origins)(r)))
 }

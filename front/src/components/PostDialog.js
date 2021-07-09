@@ -35,6 +35,7 @@ import Picker from "emoji-picker-react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import SendContentDialog from "./SendContentDialog.js";
 
 import avatar from "../images/nistagramAvatar.jpg";
 
@@ -64,8 +65,8 @@ const PostDialog = () => {
   const [openPicker, setOpenPicker] = useState(false);
   const [location, setLocation] = useState();
   const [taggedUsers, setTaggedUsers] = useState([]);
-  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] =
-    useState(false);
+  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] = useState(false);
+  const [openSendContentDialog,setOpenSendContentDialog] = useState(false)
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -437,6 +438,10 @@ const PostDialog = () => {
     }
   };
 
+  const HandleClickOpenSendContentDialog = () => {
+    setOpenSendContentDialog(true)
+  }
+
   function SampleNextArrow(props) {
     const { className, style, onClick } = props;
     return (
@@ -689,6 +694,7 @@ const PostDialog = () => {
                         <SendRounded
                           fontSize="large"
                           style={{ cursor: "pointer" }}
+                          onClick = {HandleClickOpenSendContentDialog}
                         ></SendRounded>
                       </Grid>
                       <Grid item xs={2}>
@@ -808,6 +814,12 @@ const PostDialog = () => {
           saved={postSavedToFavourites}
           setSaved={setPostSavedToFavourites}
         ></DialogForSaveToFavorites>
+      )}
+
+      {openSendContentDialog && (
+        <SendContentDialog open={openSendContentDialog} setOpen={setOpenSendContentDialog} userForPost={imagePost.UserID} postId = {imagePost.ID}>
+
+        </SendContentDialog>
       )}
 
       {openDialogForLikes && (
