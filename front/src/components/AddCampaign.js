@@ -6,9 +6,9 @@ import Slider from "react-slick";
 import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { DateTimePicker  }  from '@material-ui/pickers'
-import DateFnsUtils from '@date-io/date-fns';
-import * as moment from 'moment';
+import { DateTimePicker } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
+import * as moment from "moment";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 
 const useStyles = makeStyles((theme) => ({
@@ -36,19 +36,18 @@ const AddCampaign = ({ setTabValue }) => {
   const [isVideo, setIsVideo] = useState([]);
   const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
   const [puklaSlika, setPuklaSlika] = useState(false);
-  const [listOfTaggedUserid,setListOfTaggedUserid] = useState([])
-  const [links,setLinks] = useState([])
-  const [repeat,setRepeat] = useState("")
+  const [listOfTaggedUserid, setListOfTaggedUserid] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [repeat, setRepeat] = useState("");
   const [valueOneStart, onChangeOneStart] = useState(null);
   const [valueMultieStart, onChangeMultieStart] = useState(null);
   const [valueMultieEnd, onChangeMultieEnd] = useState(null);
-  const [repeatFactor,setRepeatFactor] = useState(0)
+  const [repeatFactor, setRepeatFactor] = useState(0);
 
   const [location, setLocation] = useState("");
   const [taggedUsers, setTaggedUsers] = useState("");
   const [clearedDate, handleClearedDateChange] = useState(null);
-  const [tags,setTags] = useState([])
-
+  const [tags, setTags] = useState([]);
 
   const createPost = () => {
     console.log(image);
@@ -69,10 +68,10 @@ const AddCampaign = ({ setTabValue }) => {
       for (var i = 1; i < listOfTags.length; i++) {
         let tag = listOfTags[i].split(" ")[0];
         var array = tags;
-        array.push('#'+ tag);
+        array.push("#" + tag);
         setTags(array);
+      }
     }
-  }
   };
 
   const uploadVideo = (imageForUpload, index) => {
@@ -127,55 +126,47 @@ const AddCampaign = ({ setTabValue }) => {
   const savePost = () => {
     console.log(puklaSlika);
     console.log(imagesIdsForSave);
-    var end = null
-    var start = null
-    var d1 = new Date();
-    var d2 = new Date();
-    var d3 = new Date();
+    var end = valueOneStart;
+    var start = valueOneStart;
+    var d1 = new Date(valueOneStart);
+    var d2 = new Date(valueMultieEnd);
+    var d3 = new Date(valueMultieStart);
 
-    if(valueOneStart !== null){
-      d1.setDate(valueOneStart.getDate()-1);
-    }
-    if(valueMultieEnd !== null && valueMultieStart !== null){
-      d2.setDate(valueMultieEnd.getDate()-1);
-      d3.setDate(valueMultieStart.getDate()-1);
-    }
-   
-   
-    const valueOneStart2 = moment(d1).format("YYYY-MM-DD hh:mm:ss");
-    const valueMultieEnd2 = moment(d2).format("YYYY-MM-DD hh:mm:ss");
-    const valueMultieStart2 = moment(d3).format("YYYY-MM-DD hh:mm:ss");
-    console.log(valueMultieEnd2)
-    console.log(valueMultieStart2)
+    const valueOneStart2 = moment(d1).format("YYYY-MM-DD HH:mm:ss");
+    const valueMultieEnd2 = moment(d2).format("YYYY-MM-DD HH:mm:ss");
+    const valueMultieStart2 = moment(d3).format("YYYY-MM-DD HH:mm:ss");
+    console.log(valueMultieEnd2);
+    console.log(valueMultieStart2);
 
-    if(repeat === "multiple-time") {
-      var endArray = valueMultieEnd2.split(" ")
-      end  = endArray[0] + "T" + endArray[1] +"Z"
-     var startMArray = valueMultieStart2.split(" ")
-      start  = startMArray[0] + "T" + startMArray[1] +"Z"
-      console.log(endArray)
-    console.log(startMArray)
-    }else{
-      var startOArray = valueOneStart2.split(" ")
-      start  = startOArray[0] + "T" + startOArray[1] +"Z"
-      end = startOArray[0] + "T" + startOArray[1] +"Z"
+    if (repeat === "multiple-time") {
+      var endArray = valueMultieEnd2.split(" ");
+      end = endArray[0] + "T" + endArray[1] + ".141Z";
+      var startMArray = valueMultieStart2.split(" ");
+      start = startMArray[0] + "T" + startMArray[1] + ".141Z";
+      console.log(endArray);
+      console.log(startMArray);
+    } else {
+      var startOArray = valueOneStart2.split(" ");
+      start = startOArray[0] + "T" + startOArray[1] + ".141Z";
+      end = startOArray[0] + "T" + startOArray[1] + ".141Z";
+      console.log(startOArray);
     }
-    
-    addTags()
-  
+
+    addTags();
+
     if (!puklaSlika) {
       var postDTO = {
         description: description,
         media: imagesIdsForSave,
-        end : end,
-        start : start,
-        links : links,
+        end: end,
+        start: start,
+        links: links,
         tags: tags,
         ispost: true,
         userid: loggedUserId,
         location: location,
-        repeat : repeat === "multiple-time" ? true : false,
-        repeatfactor : Number(repeatFactor),
+        repeat: repeat === "multiple-time" ? true : false,
+        repeatfactor: Number(repeatFactor),
         //Influencers:[]
       };
       console.log("Uspesno upload-ovao sliku");
@@ -195,13 +186,12 @@ const AddCampaign = ({ setTabValue }) => {
     }
   };
 
-
-  const HandleChangeLink = (index,value) => {
+  const HandleChangeLink = (index, value) => {
     let newArr = [...links]; // copying the old datas array
     newArr[index] = value; // replace e.target.value with whatever you want to change it to
     setLinks(newArr);
-    console.log(links)
-  }
+    console.log(links);
+  };
 
   const HandleUploadMedia = (event) => {
     setSelectedFile([]);
@@ -231,12 +221,12 @@ const AddCampaign = ({ setTabValue }) => {
       console.log(formData);
     }
     for (let index = 0; index < event.target.files.length; index++) {
-        var array = links;
-        array.push("");
-        setLinks(array);
+      var array = links;
+      array.push("");
+      setLinks(array);
     }
-        console.log(links)
-        console.log(isVideo);
+    console.log(links);
+    console.log(isVideo);
   };
 
   function SampleNextArrow(props) {
@@ -270,7 +260,6 @@ const AddCampaign = ({ setTabValue }) => {
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
   };
-
 
   return (
     <div>
@@ -342,111 +331,105 @@ const AddCampaign = ({ setTabValue }) => {
           </Grid>
 
           <Grid container style={{ marginTop: "1%" }}>
-          <Grid item xs={3}/>
+            <Grid item xs={3} />
 
             <Grid item xs={3}>
-            <Button
-              variant="contained"
-              color="primary"
-              marginLeft={10}
-              onClick={() => setRepeat("one-time")}
-              style={{ margin: "auto" ,width:"100%"}}
-            >
-              one-time
-            </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                marginLeft={10}
+                onClick={() => setRepeat("one-time")}
+                style={{ margin: "auto", width: "100%" }}
+              >
+                one-time
+              </Button>
             </Grid>
-            <Grid item xs={3} >
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ margin: "auto",width:"100%" }}
-              onClick={() => setRepeat("multiple-time")}
-            >
-              multiple-time
-            </Button>
-            </Grid>
-            <Grid item xs={3}/>
-          </Grid>
-        {repeat === "multiple-time" &&
-        <>
-          <Grid container style={{ marginTop: "1%" }}>
-          <Grid item xs={3}/>
-
             <Grid item xs={3}>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-
-            <DateTimePicker
-              autoOk
-              ampm={false}
-              value={valueMultieStart}
-              onChange={onChangeMultieStart}
-              format="yyyy-MM-dd hh:mm"
-              label="Start"
-             />
-             </MuiPickersUtilsProvider>
-
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ margin: "auto", width: "100%" }}
+                onClick={() => setRepeat("multiple-time")}
+              >
+                multiple-time
+              </Button>
             </Grid>
-            <Grid item xs={3} >
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <DateTimePicker
-              autoOk
-              ampm={false}
-              value={valueMultieEnd}
-              onChange={onChangeMultieEnd}
-              format="yyyy-MM-dd hh:mm"
-              label=" End"
-             />
-            </MuiPickersUtilsProvider>
-            </Grid>
-            <Grid item xs={3}/>
+            <Grid item xs={3} />
           </Grid>
-          <Grid container style={{ marginTop: "1%" }}>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={6}>
-            <Grid item xs={6}>
-              <TextField
-              id="outlined-number"
-              label="Repeat in day"
-              type="number"
-              textAlign="left"
-              style={{textAlign:"left"}}
-              value={repeatFactor}
-              onChange={(event) => setRepeatFactor(event.target.value)}
-              InputLabelProps={{
-                  shrink: true,
-              }}
-              variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            </Grid>
-            <Grid item xs={3}></Grid>
-          </Grid>
-          </>
-        }
+          {repeat === "multiple-time" && (
+            <>
+              <Grid container style={{ marginTop: "1%" }}>
+                <Grid item xs={3} />
 
-        {repeat === "one-time" &&
-                <Grid container style={{ marginTop: "1%" }}>
-                <Grid item xs={3}/>
-                    <Grid item xs={3}>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-
+                <Grid item xs={3}>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DateTimePicker
                       autoOk
                       ampm={false}
-                      value={valueOneStart}
-                      onChange={onChangeOneStart}
+                      value={valueMultieStart}
+                      onChange={onChangeMultieStart}
                       format="yyyy-MM-dd hh:mm"
                       label="Start"
                     />
-                    </MuiPickersUtilsProvider>
-
-               
-                    </Grid>
-                    <Grid item xs={3}/>
+                  </MuiPickersUtilsProvider>
                 </Grid>
+                <Grid item xs={3}>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <DateTimePicker
+                      autoOk
+                      ampm={false}
+                      value={valueMultieEnd}
+                      onChange={onChangeMultieEnd}
+                      format="yyyy-MM-dd hh:mm"
+                      label=" End"
+                    />
+                  </MuiPickersUtilsProvider>
+                </Grid>
+                <Grid item xs={3} />
+              </Grid>
+              <Grid container style={{ marginTop: "1%" }}>
+                <Grid item xs={3}></Grid>
+                <Grid item xs={6}>
+                  <Grid item xs={6}>
+                    <TextField
+                      id="outlined-number"
+                      label="Repeat in day"
+                      type="number"
+                      textAlign="left"
+                      style={{ textAlign: "left" }}
+                      value={repeatFactor}
+                      onChange={(event) => setRepeatFactor(event.target.value)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={6}></Grid>
+                </Grid>
+                <Grid item xs={3}></Grid>
+              </Grid>
+            </>
+          )}
 
-        }
+          {repeat === "one-time" && (
+            <Grid container style={{ marginTop: "1%" }}>
+              <Grid item xs={3} />
+              <Grid item xs={3}>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                  <DateTimePicker
+                    autoOk
+                    ampm={false}
+                    value={valueOneStart}
+                    onChange={onChangeOneStart}
+                    format="yyyy-MM-dd hh:mm"
+                    label="Start"
+                  />
+                </MuiPickersUtilsProvider>
+              </Grid>
+              <Grid item xs={3} />
+            </Grid>
+          )}
           <Grid container style={{ marginTop: "3%" }}>
             <Grid item xs={2} />
             <Grid item xs={8}>
@@ -466,15 +449,16 @@ const AddCampaign = ({ setTabValue }) => {
                           <source src={selectedFile[index]} type="video/mp4" />
                         </video>
                       )}
-                             <TextField
-                                label="Link to web site of this product:"
-                                fullWidth
-                                size="small"
-                                variant="outlined"
-                                rowsMax={1}
-                                onChange={(e) => HandleChangeLink(index,e.target.value)}
-                            ></TextField>
-
+                      <TextField
+                        label="Link to web site of this product:"
+                        fullWidth
+                        size="small"
+                        variant="outlined"
+                        rowsMax={1}
+                        onChange={(e) =>
+                          HandleChangeLink(index, e.target.value)
+                        }
+                      ></TextField>
                     </div>
                   ))}
                 </Slider>

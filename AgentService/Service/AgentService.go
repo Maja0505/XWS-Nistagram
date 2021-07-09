@@ -67,3 +67,12 @@ func (service *AgentService) GetCampaignRequests(userid string) ( *[]DTO.Request
 	}
 	return camp, nil
 }
+
+func (service *AgentService) GetCampaignByID(camapaignIdString string) ( *Model.Campaign, error) {
+	camp, err := service.Repo.GetCampaignById(camapaignIdString)
+	if err != nil{
+		fmt.Println(err)
+		return nil, err
+	}
+	return camp, nil
+}
