@@ -7,11 +7,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { DateTimePicker  }  from '@material-ui/pickers'
-import uuid from "react-uuid";
 import DateFnsUtils from '@date-io/date-fns';
 import * as moment from 'moment';
-
-import TagLocationAndUser from "./TagLocationAndUser.js";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 
 const useStyles = makeStyles((theme) => ({

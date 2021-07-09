@@ -50,6 +50,28 @@ services:
     volumes:
       - micro_services:/app
 
+
+  message-service:
+    image: message-service:compose_build
+    build:
+      context: ./MessageService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      MESSAGE_SERVICE_PORT: 8080
+      MESSAGE_SERVICE_HOST: redis
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
+    depends_on:
+      - redis
+    links: 
+      - redis
+    restart: on-failure
+    volumes:
+      - micro_services:/app
+
+
   post-service:
     image: post-service:compose_build
     build:
