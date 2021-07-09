@@ -22,7 +22,7 @@ import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import { Grow, Popper, MenuItem, MenuList } from "@material-ui/core";
 import { useRef } from "react";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import LocalMallOutlinedIcon from '@material-ui/icons/LocalMallOutlined';
+import LocalMallOutlinedIcon from "@material-ui/icons/LocalMallOutlined";
 import DialogForBlockUser from "./DialogForBlockUser";
 import DialogForMuteUser from "./DialogForMuteUser";
 import FollowRequest from "./FollowRequests";
@@ -38,6 +38,8 @@ import AddPost from "./AddPost";
 import Story from "./Story";
 import PostWhereUserTagged from "./PostWhereUserTagged.js";
 import AddCampaign from "./AddCampaign";
+import AddCampaignToInfluencerDialog from "./AddCampaignToInfluencerDialog";
+import ViewCampaignRequestsForInfluencerDialog from "./ViewCampaignRequestsForInfluencerDialog";
 
 const UserHomePage = () => {
   const [user, setUser] = useState();
@@ -52,6 +54,7 @@ const UserHomePage = () => {
 
   const loggedUsername = localStorage.getItem("username");
   const loggedInId = localStorage.getItem("id");
+  const loggedIsAgent = localStorage.getItem("isAgent");
   const [load1, setLoad1] = useState(false);
   const [load2, setLoad2] = useState(false);
   const [load3, setLoad3] = useState(false);
@@ -67,6 +70,16 @@ const UserHomePage = () => {
     useState(false);
   const [openHighlightsDialog, setOpenHighlightsDialog] = useState(false);
   const [highlightStories, setHighlightStories] = useState([]);
+
+  const [
+    openDialogForAddCamapignToInfluencer,
+    setOpenDialogForAddCamapignToInfluencer,
+  ] = useState(false);
+
+  const [
+    openDialogForViewInfluencerCampaignRequests,
+    setOpenDialogForViewInfluencerCampaignRequests,
+  ] = useState(false);
 
   const loggedUserId = localStorage.getItem("id");
 
@@ -321,14 +334,24 @@ const UserHomePage = () => {
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
         console.log("uspesno");
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + user.IdString + '"' + ', "content": "requested to following you."}')
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              user.IdString +
+              '"' +
+              ', "content": "requested to following you."}'
+          );
         };
         setRequested(true);
-        
-
       });
     } else {
       var follow = {
@@ -337,10 +360,22 @@ const UserHomePage = () => {
         Private: false,
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + user.IdString + '"' + ', "content": "started following you."}')
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              user.IdString +
+              '"' +
+              ', "content": "started following you."}'
+          );
         };
         setFollowing(true);
       });
@@ -590,11 +625,39 @@ const UserHomePage = () => {
                     buttonForFollow}
                 </Grid>
 
-                <Grid item xs={2}></Grid>
+                <Grid item xs={3}>
+                  {loggedUsername !== username &&
+                    loggedIsAgent === "true" &&
+                    user.VerificationSettings.Category === 0 &&
+                    (following || !user.ProfileSettings.Public) && (
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={(e) =>
+                          setOpenDialogForAddCamapignToInfluencer(true)
+                        }
+                      >
+                        Send campaign
+                      </Button>
+                    )}
+                  {loggedUsername === username &&
+                    user.VerificationSettings.Category === 0 &&
+                    loggedIsAgent === "false" && (
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={(e) =>
+                          setOpenDialogForViewInfluencerCampaignRequests(true)
+                        }
+                      >
+                        Campaign requests
+                      </Button>
+                    )}
+                </Grid>
 
                 <Grid
                   item
-                  xs={4}
+                  xs={3}
                   style={{
                     textAlign: "right",
                   }}
@@ -733,13 +796,13 @@ const UserHomePage = () => {
                       style={{ margin: "auto" }}
                     />
 
-                    {user.IsAgent && 
-                   <Tab
-                      label="Add campaign"
-                      icon={<LocalMallOutlinedIcon />}
-                      style={{ margin: "auto" }}
-                    />}
-
+                    {user.IsAgent && (
+                      <Tab
+                        label="Add campaign"
+                        icon={<LocalMallOutlinedIcon />}
+                        style={{ margin: "auto" }}
+                      />
+                    )}
                   </Tabs>
                 </Paper>
               </Grid>
@@ -794,8 +857,8 @@ const UserHomePage = () => {
                   {user !== undefined && user !== null && tabValue === 3 && (
                     <PostWhereUserTagged user={user}></PostWhereUserTagged>
                   )}
-                    {user !== undefined && user !== null && tabValue === 4 && (
-                     <AddCampaign setTabValue={setTabValue} />
+                  {user !== undefined && user !== null && tabValue === 4 && (
+                    <AddCampaign setTabValue={setTabValue} />
                   )}
                 </Grid>
               )}
@@ -889,6 +952,27 @@ const UserHomePage = () => {
               user={user.IdString}
             ></Story>
           )}
+      </div>
+      <div>
+        {openDialogForAddCamapignToInfluencer && (
+          <AddCampaignToInfluencerDialog
+            label={"Send campaign request to influencer"}
+            influencer={user.IdString}
+            agent={loggedUserId}
+            open={openDialogForAddCamapignToInfluencer}
+            setOpen={setOpenDialogForAddCamapignToInfluencer}
+          ></AddCampaignToInfluencerDialog>
+        )}
+      </div>
+
+      <div>
+        {openDialogForViewInfluencerCampaignRequests && (
+          <ViewCampaignRequestsForInfluencerDialog
+            label={"Camapign requests"}
+            open={openDialogForViewInfluencerCampaignRequests}
+            setOpen={setOpenDialogForViewInfluencerCampaignRequests}
+          ></ViewCampaignRequestsForInfluencerDialog>
+        )}
       </div>
     </>
   );
