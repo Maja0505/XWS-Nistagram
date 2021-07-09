@@ -16,6 +16,7 @@ import (
 	"time"
 	"userService/handler"
 	"userService/repository"
+	"userService/saga"
 	"userService/service"
 )
 
@@ -46,7 +47,7 @@ func initVerificationRequestRepo(database *mongo.Client) *repository.Verificatio
 }
 
 func initUserService(userRepo *repository.UserRepository) *service.UserService{
-	return &service.UserService{Repo : userRepo}
+	return &service.UserService{Repo : userRepo,Orchestrator: saga.NewOrchestrator()}
 }
 
 func initVerificationRequestService(verificationRequestRepo *repository.VerificationRequestRepository,userService *service.UserService) *service.VerificationRequestService{
@@ -128,6 +129,9 @@ func main() {
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)
 	userHandler := initUserHandler(userService)
+
+	go userService.Orchestrator.Start()
+	go userService.RedisConnection()
 
 	verificationRequestRepo := initVerificationRequestRepo(database)
 	verificationRequestService := initVerificationRequestService(verificationRequestRepo,userService)
