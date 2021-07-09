@@ -14,7 +14,7 @@ const (
 type Message struct {
 	ID bool `json:"id"`
 	Opened bool `json:"opened"`
-	Type MessageType `json:"type,omitempty"`
+	Type MessageType `json:"type"`
 	ContentId string `json:"content_id,omitempty"`
 	UserForContentId string `json:"user_for_content_id,omitempty"`
 	Text string `json:"text,omitempty"`

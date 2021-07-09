@@ -33,6 +33,8 @@ import DialogForReport from "./DialogForReport";
 import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 import Slider from "react-slick";
 import Picker from "emoji-picker-react";
+import SendContentDialog from "./SendContentDialog.js";
+
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -66,6 +68,8 @@ const PostFeed = ({ feed }) => {
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
   const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] =
     useState(false);
+  const [openSendContentDialog,setOpenSendContentDialog] = useState(false)
+
 
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -79,6 +83,9 @@ const PostFeed = ({ feed }) => {
     setOpen((prevOpen) => !prevOpen);
   };
 
+  const HandleClickOpenSendContentDialog = () => {
+    setOpenSendContentDialog(true)
+  }
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
@@ -157,6 +164,8 @@ const PostFeed = ({ feed }) => {
       .put("/api/post/like-exists", { PostID: feed.ID, UserID: loggedUserId })
       .then((res) => {
         setIsLiked(res.data);
+      }).catch((error) => {
+
       });
 
     axios
@@ -166,6 +175,8 @@ const PostFeed = ({ feed }) => {
       })
       .then((res) => {
         setIsDisliked(res.data);
+      }).catch((error) => {
+        
       });
 
     axios
@@ -174,6 +185,8 @@ const PostFeed = ({ feed }) => {
       )
       .then((res) => {
         setIsSaved(res.data);
+      }).catch((error) => {
+        
       });
 
     makeDescriptionFromPost(feed.Description);
@@ -182,16 +195,22 @@ const PostFeed = ({ feed }) => {
       .then((res) => {
         setUsername(res.data.Username);
         setProfileImage(res.data.ProfilePicture);
+      }).catch((error) => {
+        
       });
 
     axios.get("/api/post/get-location-for-post/" + feed.ID).then((res) => {
       setLocationForFeed(res.data.Location);
+    }).catch((error) => {
+        
     });
 
     axios.get("/api/post/get-users-tagged-on-post/" + feed.ID).then((res) => {
       if (res.data !== null) {
         setTaggedUsers(res.data);
       }
+    }).catch((error) => {
+        
     });
   }, [feed]);
 
@@ -608,9 +627,11 @@ const PostFeed = ({ feed }) => {
                   )}
                 </Grid>
                 <Grid item xs={3}>
+
                   <SendRounded
                     fontSize="large"
                     style={{ margin: "auto", cursor: "pointer" }}
+                    onClick = {HandleClickOpenSendContentDialog}
                   />
                 </Grid>
               </Grid>
@@ -805,6 +826,11 @@ const PostFeed = ({ feed }) => {
           open={openDialogForTaggedUsers}
           setOpen={setOpenDialogForTaggedUsers}
         ></UsersList>
+      )}
+      {openSendContentDialog && (
+        <SendContentDialog open={openSendContentDialog} setOpen={setOpenSendContentDialog} userForPost={feed.UserID} postId = {feed.ID}>
+
+        </SendContentDialog>
       )}
     </div>
   );

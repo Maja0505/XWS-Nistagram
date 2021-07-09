@@ -25,8 +25,10 @@ services:
     restart: on-failure
     depends_on:
       - mongo
+      - redis
     links: 
       - mongo
+      - redis
     volumes:
       - micro_services:/app
 
@@ -132,8 +134,10 @@ services:
     restart: on-failure
     depends_on:
       - neo4j
+      - redis
     links: 
       - neo4j
+      - redis
     volumes:
       - micro_services:/app
 

@@ -192,7 +192,7 @@ func (service *UserService) DeleteUserByUserId(userId string) error {
 func (service *UserService) RedisConnection() {
 	// create client and ping redis
 	var err error
-	client := redis.NewClient(&redis.Options{Addr: "localhost:6379",})
+	client := redis.NewClient(&redis.Options{Addr: "redis:6379"})
 	if _, err = client.Ping().Result(); err != nil {
 		log.Fatalf("error creating redis client %s", err)
 	}

@@ -17,7 +17,10 @@ const StartPage = () => {
       .then((res) => {
         console.log(res.data);
         setFeeds(res.data);
-      });
+      }).catch((error) => {
+        
+      }
+    );
   }, []);
 
   return (
