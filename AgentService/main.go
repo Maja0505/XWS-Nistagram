@@ -29,6 +29,24 @@ func init() {
 
 	Session, err = cluster.CreateSession()
 
+	if err != nil {
+		panic(err)
+	}
+	if err := Session.Query("create keyspace  if not exists agentkeyspace with replication = {'class':'SimpleStrategy','replication_factor':1};").Exec(); err != nil {
+		fmt.Println("Error while inserting agentkeyspace")
+		fmt.Println(err)
+	}
+
+	if err := Session.Query("CREATE TABLE if not exists agentkeyspace.campaigns(id timeuuid, userid text, ispost boolean, repeat boolean, start timestamp, end timestamp, repeatfactor int, media list<text>, links list<text>, influencers list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+		fmt.Println(err)	}
+
+	if err := Session.Query("CREATE TABLE if not exists agentkeyspace.campaignrequest(userid text, campaignid timeuuid, PRIMARY KEY((userid), campaignid)) WITH CLUSTERING ORDER BY (campaignid DESC);").Exec(); err != nil {
+		fmt.Println("Error while creating tables!")
+		fmt.Println(err)
+	}
+
 	fmt.Println("Cassandra well initialized!")
 }
 
@@ -48,8 +66,11 @@ func initHandler(service *Service.AgentService) *Handler.AgentHandler{
 
 func handleFunc(handler *Handler.AgentHandler,router *mux.Router){
 	router.HandleFunc("/create-campaign", handler.CreateCampaign).Methods("POST")
+	router.HandleFunc("/create-campaign-request", handler.CreateCampaignRequest).Methods("POST")
 	router.HandleFunc("/delete-campaign", handler.DeleteCampaign).Methods("POST")
-
+	router.HandleFunc("/add-influencer", handler.AddCampaignInfluencer).Methods("POST")
+	router.HandleFunc("/get-campaigns-for-user/{id}", handler.GetCampaignsForUser).Methods("GET")
+	router.HandleFunc("/get-campaign-requests/{id}", handler.GetCampaignRequests).Methods("GET")
 }
 
 
@@ -60,9 +81,6 @@ func main(){
 	AgentRepo := initAgentRepo(Session)
 	AgentService := initAgentService(AgentRepo)
 	handler := initHandler(AgentService)
-
-	//AgentRepo.CreateTables()
-
 
 	router := mux.NewRouter().StrictSlash(true)
 	handleFunc(handler,router)

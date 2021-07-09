@@ -13,4 +13,5 @@ type Story struct {
 	Image 				string 		`json:"Image"`
 	Highlights			bool		`json:"Highlights"`
 	ForCloseFriends		bool 		`json:"ForCloseFriends"`
+	Link 				string 		`json:"Link"`
 }

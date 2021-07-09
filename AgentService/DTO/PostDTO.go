@@ -12,4 +12,5 @@ type PostDTO struct{
 	Album			bool			`json:"Album"`
 	Location 		string			`json:"Location"`
 	RepeatCampaign 	bool			`json:"RepeatCampaign"`
+	IsCampaign		bool 			`json:"IsCampaign"`
 }

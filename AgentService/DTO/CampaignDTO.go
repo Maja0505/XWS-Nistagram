@@ -20,4 +20,8 @@ type CampaignDTO struct {
 	Start 			time.Time 	`json:"Start"`
 	End 			time.Time 	`json:"End"`
 	RepeatFactor	int			`json:"RepeatFactor"`
+	Location 		string		`json:"Location"`
+	Description  	string 		`json:"Description"`
+	Tags 			[]string 	`json:"Tags"`
+	Influencers 	[]string 	`json:"Influencers"`
 }

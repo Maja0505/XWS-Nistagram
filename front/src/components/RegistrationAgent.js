@@ -8,13 +8,19 @@ import {
   FormControlLabel,
   Radio,
 } from "@material-ui/core";
-
+import validator from "validator";
 import axios from "axios";
 
 const RegistrationAgent = ({ setRedirection }) => {
   const [user, setUser] = useState({ gender: 1 });
 
   const handleSubmitClick = () => {
+    if (!validator.isEmail(user.Email)) {
+      alert("Invalid email format \n Example : pera@pera.com");
+      setUser({ ...user, Email: "" });
+      return;
+    }
+
     console.log(user);
     let userForRegistration = {
       ...user,

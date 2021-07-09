@@ -10,6 +10,7 @@ import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axios from "axios";
 import PhotoLibraryOutlinedIcon from "@material-ui/icons/PhotoLibraryOutlined";
+import LocalMallOutlinedIcon from "@material-ui/icons/LocalMallOutlined";
 
 const images = [
   {
@@ -133,6 +134,7 @@ const Posts = ({ userForProfile, username }) => {
       .get("/api/post/get-all-by-userid/" + userForProfile.ID)
       .then((res) => {
         if (res.data) {
+          console.log(res.data);
           setPosts(res.data);
         } else {
           setPosts([]);
@@ -151,9 +153,7 @@ const Posts = ({ userForProfile, username }) => {
 
   return (
     <div className={classes.root}>
-      {redirection === true && (
-            <Redirect to={"/dialog/" + postID}></Redirect>
-            )}
+      {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
       <Grid container>
         {posts !== null &&
           posts !== undefined &&
@@ -197,7 +197,27 @@ const Posts = ({ userForProfile, username }) => {
                 )}
 
                 <span className={classes.imageBackdrop} />
-                {post.Media.length !== 1 && (
+                {post.IsCampaign === true && (
+                  <span className={classes.imageButton2}>
+                    <Typography
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle2}
+                      width="100%"
+                      height="30%"
+                    >
+                      <Grid container style={{ margin: "auto" }}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                          <LocalMallOutlinedIcon></LocalMallOutlinedIcon>
+                        </Grid>
+                      </Grid>
+                    </Typography>
+                  </span>
+                )}
+
+                {post.Media.length !== 1 && post.IsCampaign === false && (
                   <span className={classes.imageButton2}>
                     <Typography
                       component="span"

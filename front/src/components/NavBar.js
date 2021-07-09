@@ -30,23 +30,25 @@ import {
   ThumbsUpDownOutlined,
   RoomRounded,
 } from "@material-ui/icons";
-import Badge from '@material-ui/core/Badge';
+import Badge from "@material-ui/core/Badge";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const NavBar = () => {
   const username = localStorage.getItem("username");
-  const loggedUserId = localStorage.getItem("id")
+  const loggedUserId = localStorage.getItem("id");
 
   const [searchedContent, setSearchedContent] = useState([]);
   const [redirectionString, setRedirectionString] = useState();
   const [open, setOpen] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
-  const [allNotifications,setAllNotifications] = useState([])
+  const [allNotifications, setAllNotifications] = useState([]);
 
   const anchorRef = useRef(null);
   const [isHastag, setIsHastag] = useState(false);
   const [isUser, setIsUser] = useState(false);
-  const [invisible,setInvisible] = useState(localStorage.getItem('invisibleNotification'))
+  const [invisible, setInvisible] = useState(
+    localStorage.getItem("invisibleNotification")
+  );
 
   const [redirection, setRedirection] = useState(false);
 
@@ -145,7 +147,6 @@ const NavBar = () => {
 
     setOpen(false);
     setOpenNotifications(false);
-
   };
 
   function handleListKeyDown(event) {
@@ -158,7 +159,6 @@ const NavBar = () => {
   const prevOpen = useRef(open);
   const prevOpenNotifications = useRef(openNotifications);
 
-
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
       anchorRef.current.focus();
@@ -170,26 +170,22 @@ const NavBar = () => {
 
     prevOpenNotifications.current = open;
     prevOpen.current = open;
-
-  }, [open,openNotifications]);
+  }, [open, openNotifications]);
 
   const handleNotificationButton = () => {
-
-    if(!openNotifications){
-      axios.get("/api/notification/channels/" + loggedUserId)
-        .then((res) => {
-          console.log(res.data)
-          if(res.data){
-            setAllNotifications(res.data)
-          }
-          setOpenNotifications((prevOpenNotifications) => !prevOpenNotifications);
-          setOpen(false);
-          localStorage.setItem('invisibleNotification',true)
-          setInvisible(localStorage.getItem('invisibleNotification'))
-        })
+    if (!openNotifications) {
+      axios.get("/api/notification/channels/" + loggedUserId).then((res) => {
+        console.log(res.data);
+        if (res.data) {
+          setAllNotifications(res.data);
+        }
+        setOpenNotifications((prevOpenNotifications) => !prevOpenNotifications);
+        setOpen(false);
+        localStorage.setItem("invisibleNotification", true);
+        setInvisible(localStorage.getItem("invisibleNotification"));
+      });
     }
-  }
-
+  };
 
   const dropDowMenuForNotifications = (
     <Popper
@@ -217,7 +213,7 @@ const NavBar = () => {
               >
                 {allNotifications.length === 0 && <p>aaaaaa</p>}
                 {allNotifications.map((notification) => (
-                    <MenuItem onClick={handleClose}>
+                  <MenuItem onClick={handleClose}>
                     <Grid container>
                       <Grid item xs={3}>
                         <Link
@@ -229,26 +225,51 @@ const NavBar = () => {
                       </Grid>
                       <Grid item xs={7}>
                         <Link
-                          to={(notification.post_id !== undefined && notification.post_id !== null) ?"/dialog/" + `${notification.post_id}` : "/homePage/" + `${notification.user_who_follow}`}
+                          to={
+                            notification.post_id !== undefined &&
+                            notification.post_id !== null
+                              ? "/dialog/" + `${notification.post_id}`
+                              : "/homePage/" + `${notification.user_who_follow}`
+                          }
                           style={{ textDecoration: "none", color: "black" }}
                         >
-                          {(notification.content === "started following you." || notification.content === "requested to following you." || notification.content === "liked your photo." || notification.content === "disliked your photo." || notification.content === "tagged you in a post.") && <div style={{ width: "100%" }}>{notification.user_who_follow + " " + notification.content}</div>}
-                          {(notification.content === "commented your post:") && <div style={{ width: "100%" }}>{notification.user_who_follow + " " + notification.content + " " + notification.comment}</div>}
-      
+                          {(notification.content === "started following you." ||
+                            notification.content ===
+                              "requested to following you." ||
+                            notification.content === "liked your photo." ||
+                            notification.content === "disliked your photo." ||
+                            notification.content ===
+                              "tagged you in a post.") && (
+                            <div style={{ width: "100%" }}>
+                              {notification.user_who_follow +
+                                " " +
+                                notification.content}
+                            </div>
+                          )}
+                          {notification.content === "commented your post:" && (
+                            <div style={{ width: "100%" }}>
+                              {notification.user_who_follow +
+                                " " +
+                                notification.content +
+                                " " +
+                                notification.comment}
+                            </div>
+                          )}
                         </Link>
                       </Grid>
                       <Grid item xs={2}>
-                        {notification.post_id !== undefined && notification.post_id !== null && 
-                        <img
-                          width="100%"
-                          height="100%"
-                          src={`http://localhost:8080/api/media/get-media-image/${notification.media}`}
-                        />}
+                        {notification.post_id !== undefined &&
+                          notification.post_id !== null && (
+                            <img
+                              width="100%"
+                              height="100%"
+                              src={`http://localhost:8080/api/media/get-media-image/${notification.media}`}
+                            />
+                          )}
                       </Grid>
                     </Grid>
                   </MenuItem>
                 ))}
-
               </MenuList>
             </ClickAwayListener>
           </Paper>
@@ -256,8 +277,6 @@ const NavBar = () => {
       )}
     </Popper>
   );
-
-
 
   const dropDowMenuForProfile = (
     <Popper
@@ -480,87 +499,108 @@ const NavBar = () => {
             Nistagram
           </Typography>
         </Grid>
-        <Grid item xs={8} container style={{ textAlign: "right" }}>
-          {searchBar}
-          <Grid item xs={2} style={{ margin: "auto" }}>
-            <Link to="/">
-              <HomeOutlined
-                style={{
-                  color: "gray",
-                  width: "33px",
-                  height: "33px",
-                  marginRight: "5%",
-                  cursor: "pointer",
-                }}
-              />
-            </Link>
-            <EmailOutlined
-              style={{
-                color: "gray",
-                width: "29px",
-                height: "29px",
-              }}
-            />
-          </Grid>
-          <Grid
-            container
-            item
-            xs={2}
-            style={{ textAlign: "left", margin: "auto" }}
-          >
-            <Link to="/follow-suggestions/">
-              <ExploreOutlined
+        {username !== "admin" && (
+          <Grid item xs={8} container style={{ textAlign: "right" }}>
+            {searchBar}
+            <Grid item xs={2} style={{ margin: "auto" }}>
+              <Link to="/">
+                <HomeOutlined
+                  style={{
+                    color: "gray",
+                    width: "33px",
+                    height: "33px",
+                    marginRight: "5%",
+                    cursor: "pointer",
+                  }}
+                />
+              </Link>
+              <EmailOutlined
                 style={{
                   color: "gray",
                   width: "29px",
-                  height: "33px",
-                  marginLeft: "5%",
-                  cursor: "pointer",
+                  height: "29px",
                 }}
               />
-            </Link>
-            <Badge color="secondary" variant="dot" invisible={invisible}>
-              
-            <FavoriteBorderOutlined
-              style={{
-                color: "gray",
-                width: "29px",
-                height: "33px",
-                marginLeft: "5%",
-                cursor: "pointer",
+            </Grid>
+            <Grid
+              container
+              item
+              xs={2}
+              style={{ textAlign: "left", margin: "auto" }}
+            >
+              <Link to="/follow-suggestions/">
+                <ExploreOutlined
+                  style={{
+                    color: "gray",
+                    width: "29px",
+                    height: "33px",
+                    marginLeft: "5%",
+                    cursor: "pointer",
+                  }}
+                />
+              </Link>
+              <Badge color="secondary" variant="dot" invisible={invisible}>
+                <FavoriteBorderOutlined
+                  style={{
+                    color: "gray",
+                    width: "29px",
+                    height: "33px",
+                    marginLeft: "5%",
+                    cursor: "pointer",
+                  }}
+                  ref={anchorRef}
+                  aria-controls={
+                    openNotifications ? "menu-list-grow" : undefined
+                  }
+                  aria-haspopup="true"
+                  onClick={handleNotificationButton}
+                />
+              </Badge>
+              {dropDowMenuForNotifications}
 
-              }}
-              ref={anchorRef}
-              aria-controls={openNotifications ? "menu-list-grow" : undefined}
-              aria-haspopup="true"
+              <div>
+                <Avatar
+                  alt="N"
+                  src={avatar}
+                  ref={anchorRef}
+                  aria-controls={open ? "menu-list-grow" : undefined}
+                  aria-haspopup="true"
+                  onClick={handleToggle}
+                  style={{
+                    width: "29px",
+                    height: "33px",
+                    marginTop: "1.5%",
+                    marginLeft: "5%",
+                    cursor: "pointer",
+                  }}
+                />
 
-              onClick = {handleNotificationButton}
-            />
-            </Badge>
-            {dropDowMenuForNotifications}
-
-            <div>
-              <Avatar
-                alt="N"
-                src={avatar}
-                ref={anchorRef}
-                aria-controls={open ? "menu-list-grow" : undefined}
-                aria-haspopup="true"
-                onClick={handleToggle}
-                style={{
-                  width: "29px",
-                  height: "33px",
-                  marginTop: "1.5%",
-                  marginLeft: "5%",
-                  cursor: "pointer",
-                }}
-              />
-
-              {dropDowMenuForProfile}
-            </div>
+                {dropDowMenuForProfile}
+              </div>
+            </Grid>
+            <Grid item xs={2}></Grid>
           </Grid>
-          <Grid item xs={2}></Grid>
-        </Grid>
+        )}
+
+        {username === "admin" && (
+          <Grid item xs={8} container style={{ textAlign: "right" }}>
+            <Grid item xs={8} />
+            <Grid item xs={2}>
+              <Button variant="text" onClick={logout}>
+                <a
+                  href={"/"}
+                  style={{
+                    textDecoration: "none",
+                    color: "red",
+                    width: "100%",
+                  }}
+                >
+                  Logout
+                </a>
+              </Button>
+            </Grid>
+          </Grid>
+        )}
       </Grid>
     </Toolbar>
   );
