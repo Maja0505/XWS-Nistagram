@@ -122,6 +122,25 @@ func (handler *AgentHandler) AddCampaignInfluencer(w http.ResponseWriter, r *htt
 	w.WriteHeader(http.StatusCreated)
 }
 
+
+func (handler *AgentHandler) GetCampaignById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	camapignIdString := vars["id"]
+	if camapignIdString == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	camp, err := handler.Service.GetCampaignByID(camapignIdString)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(camp)
+}
+
 func ParseUUID(input string) (gocql.UUID, error) {
 	var u gocql.UUID
 	j := 0

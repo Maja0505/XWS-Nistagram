@@ -586,7 +586,7 @@ func (repo *AgentRepository) GetCampaignsForUser(userid string) ( *[]Model.Campa
 		return nil, nil
 	}
 	for iter.MapScan(m) {
-		var a = m["start"].(time.Time)
+		var a = m["end"].(time.Time)
 		if a.Sub(time.Now()) > 0 {
 			var a = m["id"].(gocql.UUID)
 			b := a.Time()
@@ -630,6 +630,47 @@ func (repo *AgentRepository) GetCampaignRequests(userid string) ( *[]DTO.Request
 	return &campaignRequests, nil
 }
 
+func (repo *AgentRepository) GetCampaignById(campaignidString string) ( *Model.Campaign, error){
+
+	campaignid,err := ParseUUID(campaignidString)
+	if err != nil {
+		return nil, err
+	}
+
+	var campaignFirst Model.Campaign
+	m := map[string]interface{}{}
+
+	iter := repo.Session.Query("SELECT * FROM agentkeyspace.campaigns WHERE id = ? ALLOW FILTERING;",
+		campaignid).Iter()
+	fmt.Println(iter.NumRows())
+	if iter.NumRows() == 0{
+		return nil, nil
+	}
+	for iter.MapScan(m) {
+		var a = m["start"].(time.Time)
+		if a.Sub(time.Now()) > 0 {
+			var a = m["id"].(gocql.UUID)
+			b := a.Time()
+			var campaign = Model.Campaign{
+				ID:           m["id"].(gocql.UUID),
+				CreatedAt:    b,
+				//Description:  m["description"].(string),
+				UserID:       m["userid"].(string),
+				Media:        m["media"].([]string),
+				Links:        m["links"].([]string),
+				Repeat:       m["repeat"].(bool),
+				IsPost:       m["ispost"].(bool),
+				Start:        m["start"].(time.Time),
+				End:          m["end"].(time.Time),
+				RepeatFactor: m["repeatfactor"].(int),
+				Influencers:  m["influencers"].([]string),
+			}
+			campaignFirst = campaign
+			return &campaignFirst, nil
+		}
+	}
+	return nil, nil
+}
 
 func ParseUUID(input string) (gocql.UUID, error) {
 	var u gocql.UUID

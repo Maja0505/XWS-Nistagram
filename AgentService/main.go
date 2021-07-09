@@ -68,9 +68,11 @@ func handleFunc(handler *Handler.AgentHandler,router *mux.Router){
 	router.HandleFunc("/create-campaign", handler.CreateCampaign).Methods("POST")
 	router.HandleFunc("/create-campaign-request", handler.CreateCampaignRequest).Methods("POST")
 	router.HandleFunc("/delete-campaign", handler.DeleteCampaign).Methods("POST")
+	router.HandleFunc("/get-campaign/{id}", handler.GetCampaignById).Methods("GET")
 	router.HandleFunc("/add-influencer", handler.AddCampaignInfluencer).Methods("POST")
 	router.HandleFunc("/get-campaigns-for-user/{id}", handler.GetCampaignsForUser).Methods("GET")
 	router.HandleFunc("/get-campaign-requests/{id}", handler.GetCampaignRequests).Methods("GET")
+
 }
 
 
