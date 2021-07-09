@@ -98,10 +98,31 @@ const PostDialog = () => {
     };
     axios.post("/api/post/add-comment", comment).then((res) => {
       console.log("upisan komentar");
-      let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+      let socket = new WebSocket(
+        "ws://localhost:8080/api/notification/chat/" + loggedUserId
+      );
       socket.onopen = () => {
         console.log("Successfully Connected");
-        socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + imagePost.Media[0] + '"' + ', "comment": "' + newComment + '"}' + ', "post_id": "' + imagePost.ID + '"}')
+        socket.send(
+          '{"user_who_follow":' +
+            '"' +
+            loggedUsername +
+            '"' +
+            ',"command": 2, "channel": ' +
+            '"' +
+            imagePost.UserID +
+            '"' +
+            ', "content": "commented your post:"' +
+            ', "media": "' +
+            imagePost.Media[0] +
+            '"' +
+            ', "comment": "' +
+            newComment +
+            '"}' +
+            ', "post_id": "' +
+            imagePost.ID +
+            '"}'
+        );
       };
       setNewComment("");
       axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
@@ -158,25 +179,28 @@ const PostDialog = () => {
         }
       });
 
-    axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
-      setCommentsForPost(res.data);
-    }).catch((error) => {
-      
-    })
+    axios
+      .get("/api/post/get-comments-for-post/" + post)
+      .then((res) => {
+        setCommentsForPost(res.data);
+      })
+      .catch((error) => {});
 
-    axios.get("/api/post/get-location-for-post/" + post).then((res) => {
-      setLocation(res.data.Location);
-    }).catch((error) => {
+    axios
+      .get("/api/post/get-location-for-post/" + post)
+      .then((res) => {
+        setLocation(res.data.Location);
+      })
+      .catch((error) => {});
 
-    })
-
-    axios.get("/api/post/get-users-tagged-on-post/" + post).then((res) => {
-      if (res.data !== null) {
-        setTaggedUsers(res.data);
-      }
-    }).catch((error) => {
-      
-    })
+    axios
+      .get("/api/post/get-users-tagged-on-post/" + post)
+      .then((res) => {
+        if (res.data !== null) {
+          setTaggedUsers(res.data);
+        }
+      })
+      .catch((error) => {});
   }, [open]);
 
   const HandleClickLike = () => {
@@ -214,10 +238,28 @@ const PostDialog = () => {
             LikesCount: Number(imagePost.LikesCount) + Number(1),
           });
         }
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              imagePost.UserID +
+              '"' +
+              ', "content": "liked your photo."' +
+              ', "media": "' +
+              imagePost.Media[0] +
+              '"' +
+              ', "post_id": "' +
+              imagePost.ID +
+              '"}'
+          );
         };
         setPostIsLiked(true);
       }
@@ -259,10 +301,28 @@ const PostDialog = () => {
             DislikesCount: Number(imagePost.DislikesCount) + Number(1),
           });
         }
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + imagePost.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + imagePost.Media[0] + '"' + ', "post_id": "' + imagePost.ID + '"}')
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              imagePost.UserID +
+              '"' +
+              ', "content": "disliked your photo."' +
+              ', "media": "' +
+              imagePost.Media[0] +
+              '"' +
+              ', "post_id": "' +
+              imagePost.ID +
+              '"}'
+          );
         };
         setPostIsDisliked(true);
       }
@@ -459,6 +519,24 @@ const PostDialog = () => {
                             />
                           </video>
                         )}
+                        {imagePost.IsCampaign === true &&
+                          imagePost.Links[index] !== "" && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              style={{ width: "100%", height: "40px" }}
+                            >
+                              <a
+                                href={imagePost.Links[index]}
+                                style={{
+                                  textDecoration: "none",
+                                  color: "white",
+                                }}
+                              >
+                                Visit on web site
+                              </a>
+                            </Button>
+                          )}
                       </div>
                     ))}
                   </Slider>
@@ -710,7 +788,7 @@ const PostDialog = () => {
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
-      <Grid container style={{ marginTop: "2%" }} />
+      <Grid container style={{ marginBottom: "2%" }} />
 
       {openDialogForReport && (
         <DialogForReport

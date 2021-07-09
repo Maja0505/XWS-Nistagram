@@ -423,6 +423,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 				Media: m["media"].([]string),
 				Album: m["album"].(bool),
 				Links: m["links"].([]string),
+				IsCampaign: m["iscampaign"].(bool),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
@@ -440,6 +441,7 @@ func (repo *PostRepository) FindPostById(postid gocql.UUID) ( *Model.Post, error
 				Media:       m["media"].([]string),
 				Album: 		 m["album"].(bool),
 				Links: m["links"].([]string),
+				IsCampaign: m["iscampaign"].(bool),
 			}
 
 			posts = append(posts, post)
@@ -479,6 +481,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 				Media: m["media"].([]string),
 				Album: m["album"].(bool),
 				Links: m["links"].([]string),
+				IsCampaign: m["iscampaign"].(bool),
 				LikesCount: a,
 				DislikesCount: b,
 				CommentsCount: c,
@@ -495,6 +498,7 @@ func (repo *PostRepository) FindPostsByUserId(userid string) ( *[]Model.Post, er
 				UserID:      m["userid"].(string),
 				Media:       m["media"].([]string),
 				Album: 		 m["album"].(bool),
+				IsCampaign:  m["iscampaign"].(bool),
 			}
 			posts = append(posts, post)
 			m = map[string]interface{}{}

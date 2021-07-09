@@ -213,10 +213,28 @@ const PostFeed = ({ feed }) => {
               LikesCount: Number(copyOfFeed.LikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
+          );
           socket.onopen = () => {
             console.log("Successfully Connected");
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "liked your photo."' + ', "media": "' + feed.Media[0] + '"' + ', "post_id": "' + feed.ID + '"}')
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                feed.UserID +
+                '"' +
+                ', "content": "liked your photo."' +
+                ', "media": "' +
+                feed.Media[0] +
+                '"' +
+                ', "post_id": "' +
+                feed.ID +
+                '"}'
+            );
           };
         } else {
           if (isDisliked) {
@@ -255,10 +273,28 @@ const PostFeed = ({ feed }) => {
               DislikesCount: Number(copyOfFeed.DislikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
+          );
           socket.onopen = () => {
             console.log("Successfully Connected");
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "disliked your photo."' + ', "media": "' + feed.Media[0] + '"'+ ', "post_id": "' + feed.ID + '"}')
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                feed.UserID +
+                '"' +
+                ', "content": "disliked your photo."' +
+                ', "media": "' +
+                feed.Media[0] +
+                '"' +
+                ', "post_id": "' +
+                feed.ID +
+                '"}'
+            );
           };
         } else {
           if (isLiked) {
@@ -287,10 +323,31 @@ const PostFeed = ({ feed }) => {
         Content: newComment,
       })
       .then((res) => {
-        let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
         socket.onopen = () => {
           console.log("Successfully Connected");
-          socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + feed.UserID + '"' + ', "content": "commented your post:"' + ', "media": "' + feed.Media[0] + '"' + ', "comment": "' + newComment + '"' + ', "post_id": "' + feed.ID + '"}')
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              feed.UserID +
+              '"' +
+              ', "content": "commented your post:"' +
+              ', "media": "' +
+              feed.Media[0] +
+              '"' +
+              ', "comment": "' +
+              newComment +
+              '"' +
+              ', "post_id": "' +
+              feed.ID +
+              '"}'
+          );
         };
         axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
           setComments(res.data);
@@ -489,6 +546,21 @@ const PostFeed = ({ feed }) => {
                       />
                     </video>
                   )}
+                  {copyOfFeed.IsCampaign === true &&
+                    copyOfFeed.Links[index] !== "" && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        style={{ width: "100%", height: "40px" }}
+                      >
+                        <a
+                          href={copyOfFeed.Links[index]}
+                          style={{ textDecoration: "none", color: "white" }}
+                        >
+                          Visit on web site
+                        </a>
+                      </Button>
+                    )}
                 </div>
               ))}
             </Slider>
