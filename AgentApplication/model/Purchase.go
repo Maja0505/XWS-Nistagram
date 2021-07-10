@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-type ShoppingCart struct {
+type Purchase struct {
 	ID  uuid.UUID `json:"id"`
-	Orders []Order `json:"orders" gorm:"foreignKey:ShoppingCartID"`
+	Orders []Order `json:"orders" gorm:"-"`
 	TotalPrice float64 `json:"totalPrice" gorm:"not null"`
 	UserID uuid.UUID `json:"user_id"`
 	User User
@@ -17,10 +17,9 @@ type ShoppingCart struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
 
- }
-
-func (shoppingCart *ShoppingCart) BeforeCreate(scope *gorm.DB) error {
-	shoppingCart.ID = uuid.New()
+func (purchase *Purchase) BeforeCreate(scope *gorm.DB) error {
+	purchase.ID = uuid.New()
 	return nil
 }
