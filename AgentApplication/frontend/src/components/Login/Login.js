@@ -16,19 +16,17 @@ const Login = () => {
       .post("/users/login" , user)
       .then((res) => {
         console.log(res.data)
-      
         localStorage.setItem("username", res.data.email);
         localStorage.setItem("id", res.data.id);
         console.log(res.data.id)
         localStorage.setItem("role", res.data.role)
-        localStorage.setItem("loggedIn", "true")
+        localStorage.setItem("loggedIn", "true") 
         setRedirect(true)
-        console.log(localStorage.getItem("role"))
-       
-      })
-      .catch((error) => {
-        alert("Wrong username or password");
+        console.log(localStorage.getItem("role"))})
+        .catch((error) => {
+          alert("Wrong username or password");
       });
+    
   };
 
   return (

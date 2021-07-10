@@ -105,3 +105,15 @@ func (repository *ShoppingCartRepository) CreatePurchase(purchase *model.Purchas
 	fmt.Println("Shopping cart Created")
 	return nil
 }
+
+func (repository *ShoppingCartRepository) EmptyShoppingCart(shoppingCartId string) (error,*model.ShoppingCart) {
+	shoppingCart,err:=repository.FindById(shoppingCartId)
+	if err!=nil{
+		return err,nil
+	}
+	repository.Database.Model(&shoppingCart).Association("Orders").Replace([]model.Order{})
+	//repository.Database.Model(&shoppingCart).Association("Orders").Append(&order)
+
+	return nil,shoppingCart
+}
+

@@ -129,3 +129,19 @@ func (handler *ShoppingCartHandler) CreatePurchase(c *gin.Context){
 
 }
 
+func (handler *ShoppingCartHandler) EmptyShoppingCart(c *gin.Context){
+	var shoppingCartID =c.Query("shoppingCartId")
+	if shoppingCartID ==""{
+		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+		return
+	}
+
+	err,shoppingCart := handler.Service.EmptyShoppingCart(shoppingCartID)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK,shoppingCart)
+
+}
+

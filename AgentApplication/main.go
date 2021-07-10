@@ -139,7 +139,7 @@ func handleFunctions(userHandler *handler.UserHandler,productHandler *handler.Pr
 	router.POST("/shoppingCart/updateOrderQuantity", shoppingCartHandler.UpdateOrderQuantity)
 	router.POST("/address/createAddress", addressHandler.CreateAddress)
 	router.POST("/purchase/createPurchase", shoppingCartHandler.CreatePurchase)
-
+	router.POST("/shoppingCart/emptyShoppingCart", shoppingCartHandler.EmptyShoppingCart)
 	log.Fatal(router.Run(":8070"))
 
 }

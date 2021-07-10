@@ -67,6 +67,13 @@ func (service *ShoppingCartService) CreatePurchase(purchase dto.PurchaseDTO) err
 
 }
 
+func (service *ShoppingCartService) EmptyShoppingCart(shoppingCartID string) (error,*model.ShoppingCart) {
+	return service.Repository.EmptyShoppingCart(shoppingCartID)
+
+
+}
+
+
 
 
 

@@ -60,7 +60,7 @@ const App = () => {
   };
 
 
-  const handleDeleteProduct =  (productId) => {
+  const handleDeleteProduct = async (productId) => {
     axios
     .post("/products/delete/?id="+productId)
     .then((res) => {
@@ -119,6 +119,16 @@ const App = () => {
     .then((res) => {
       alert("Items successfully purchased")
       setRedirectToProductList(true)
+      axios
+      .post("/shoppingCart/emptyShoppingCart?shoppingCartId="+cart.id)
+      .then((res) => {
+        setCart(res.data)
+  
+      })
+      .catch((error) => {
+        alert(error)
+      });
+  
 
     })
     .catch((error) => {
