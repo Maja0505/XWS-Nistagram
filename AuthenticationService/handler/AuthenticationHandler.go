@@ -15,45 +15,40 @@ type AuthenticationHandler struct{
 	Service *service.AuthenticationService
 }
 
-var user = authentication.User{
-	ID:            900,
-	Username: "username",
-	Password: "password",
-	Phone: "49123454322", //this is a random number
-	Role: "admin",
-}
 
-var user2 = authentication.User{
-	ID:            2,
-	Username: "username2",
-	Password: "password2",
-	Phone: "49123454322", //this is a random number
-	Role:"user",
-}
 
 func (handler *AuthenticationHandler) Login(c *gin.Context) {
+	fmt.Println("")
 	var u authentication.User
 	if err := c.ShouldBindJSON(&u); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 		return
 	}
+
 	//compare the user from the request, with the one we defined:
-	if user.Username != u.Username || user.Password != u.Password {
-		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
+	found,credentialsValid :=handler.Service.CheckCredentials(u.Username,u.Password)
+	if !found{
+		c.JSON(http.StatusUnauthorized, "User not found")
 		return
 	}
-	ts, err := handler.Service.CreateToken(user.ID,user.Role)
+	user:=handler.Service.GetByUsername(u.Username)
+	fmt.Println("uloga", user.Role)
+	if !credentialsValid{
+		c.JSON(http.StatusUnauthorized, "Please provide valid credentials")
+		return
+	}
+	tokenDetails, err := handler.Service.CreateToken(user.ID,user.Role)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	saveErr := handler.Service.CreateAuth(user.ID, ts)
+	saveErr := handler.Service.CreateAuth(u.ID, tokenDetails)
 	if saveErr != nil {
 		c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
 	}
 	tokens := map[string]string{
-		"access_token":  ts.AccessToken,
-		"refresh_token": ts.RefreshToken,
+		"access_token":  tokenDetails.AccessToken,
+		"refresh_token": tokenDetails.RefreshToken,
 	}
 	c.JSON(http.StatusOK, tokens)
 }

@@ -18,9 +18,28 @@ type UserHandler struct {
 	Service *service.UserService
 }
 
+func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request){
+	client := &http.Client{}
+	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
+	req,err := http.NewRequest("POST",reqUrl,nil)
+	req.Header.Add("Authorization",r.Header.Get("Authorization"))
+	req.Header.Add("path","/api/user" + r.URL.Path)
+	req.Header.Add("method",r.Method)
+
+	fmt.Println(r.Method)
+	resp,err := client.Do(req)
+	if err != nil{
+		fmt.Println(err)
+	}
+	fmt.Println(resp.Body)
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Header)
+
+}
 
 
 func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	users,err := handler.Service.FindAll()
 	if err != nil{
@@ -42,15 +61,26 @@ func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.
 		json.NewEncoder(w).Encode(err)
 		return
 	}
-	idString,err := handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
+	username,password,isAgent,idString,err := handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
 	if err != nil{
 		fmt.Println(err)
 		http.Error(w,err.Error(),417)
 		return
 	}
+	var role string
 
-	m := saga.Message{Service: saga.ServiceUserFollower, SenderService: saga.ServiceUser, Action: saga.ActionStart, UserId: idString }
-	handler.Service.Orchestrator.Next(saga.UserFollowerChannel,saga.ServiceUserFollower,m)
+	if isAgent {
+		role = "AGENT"
+	}else{
+		role = "USER"
+	}
+
+	if username == "admin"{
+		role = "ADMIN"
+	}
+	fmt.Println("Treba da posalje na auth kanal  za upis usera u auth!")
+	m := saga.Message{Service: saga.ServiceAuthentication, SenderService: saga.ServiceUser, Action: saga.ActionStart, UserId: idString , Username: username,Password: password,Role: role}
+	handler.Service.Orchestrator.Next(saga.AuthenticationChannel,saga.ServiceAuthentication,m)
 
 	w.WriteHeader(http.StatusCreated)
 

@@ -28,7 +28,7 @@ function App() {
       <Router>
         <div className="App">
           <NavBar></NavBar>
-          <Switch>
+          <Switch> 
             <Route exact path="/" component={StartPage}></Route>
             <Route
               exact
