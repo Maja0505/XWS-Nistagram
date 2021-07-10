@@ -14,6 +14,8 @@ import {
   MenuList,
   } from "@material-ui/core";
   import AddStory from "./AddStoryDialog"
+  import AddStoryCampaign from "./AddStoryCampaign"
+
 import axios from "axios";
 
 
@@ -25,6 +27,9 @@ export default function ContentDetails() {
   const loggedUserId = localStorage.getItem("id");
   const [haveProfileImage,setHaveProfileImage] = useState(false)
   const [haveStory,setHaveStory] = useState(false)
+  const isAgent = localStorage.getItem("isAgent");
+  const [openDialogForCampaign,setOpenDialogForCampaign] = useState(false)
+
 
   useEffect(() => {
     axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId)
@@ -32,6 +37,8 @@ export default function ContentDetails() {
       if(res.data){
         setUsers(res.data)
       }
+    }).catch((error) =>{
+
     })
    axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
     .then((res) => {
@@ -41,12 +48,16 @@ export default function ContentDetails() {
         setHaveStory(true)
       }
      
+    }).catch((error) =>{
+      
     })
 
-    axios.get("api/media/get-profile-picture/" + loggedUserId + ".jpg").then((res) => {
+    axios.get("/api/media/get-profile-picture/" + loggedUserId + ".jpg").then((res) => {
       setHaveProfileImage(true)
     }).catch(error =>{
      
+    }).catch((error) =>{
+      
     })
 
   }, [])
@@ -63,9 +74,6 @@ export default function ContentDetails() {
 
   const [storiesOpen, setStoriesOpen] = useState(false);
   
-
-
-
   const openStories = (username:any) => {
    
     setUsername(username)
@@ -81,6 +89,8 @@ export default function ContentDetails() {
               .then((res) => {
                 setStories(res.data)
                 setStoriesOpen(true)
+              }).catch((error) =>{
+      
               })
           }else{
             axios.get("/api/post/story/all-not-expired/" + username)
@@ -88,6 +98,8 @@ export default function ContentDetails() {
               setStories(res.data)
               setStoriesOpen(true)
 
+            }).catch((error) =>{
+      
             })
           }
         })
@@ -114,6 +126,11 @@ export default function ContentDetails() {
     setOpen((prevOpen) => !prevOpen);
   };
 
+  const handleClickAddStoryCampaign = () => {
+    setOpenDialogForCampaign(true)
+    setOpen((prevOpen) => !prevOpen);
+  };
+
   const handleClickOpenMyStories = () => {
     axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
     .then((res) => {
@@ -121,6 +138,8 @@ export default function ContentDetails() {
       setStories(res.data)
       setStoriesOpen(true);
       setOpen((prevOpen) => !prevOpen);
+    }).catch((error) =>{
+      
     })
    
     }
@@ -171,6 +190,18 @@ export default function ContentDetails() {
                     </Grid>
                   </Grid>
                 </MenuItem>
+                {isAgent &&
+                <MenuItem onClick={handleClickAddStoryCampaign}>
+                <Grid container>
+                  <Grid item xs={3}></Grid>
+                  <Grid item xs={9}>
+                    <div style={{ width: "100%",color: "red"  }}>
+                      Create campaign
+                    </div>
+                  </Grid>
+                </Grid>
+               </MenuItem>    
+                }
               </MenuList>
             </ClickAwayListener>
           </Paper>
@@ -207,6 +238,7 @@ export default function ContentDetails() {
                           </Grid>
                           
                           <AddStory open={openDialog} setOpen={setOpenDialog} setHaveStory={setHaveStory}></AddStory>
+                          <AddStoryCampaign open={openDialogForCampaign} setOpen={setOpenDialogForCampaign} setHaveStory={setHaveStory}></AddStoryCampaign>
                         </div>)
         
   const showStories=(<div>{stories !== undefined && stories !== null && stories.length !== 0 &&  <Story stories={stories} onClose={closeStory} user={username}></Story>}</div>)

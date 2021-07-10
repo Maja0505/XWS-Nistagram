@@ -7,4 +7,5 @@ export interface Story {
 	ID:string
 	ForCloseFriends:boolean
 	Highlights:boolean
+	Link:string
 }

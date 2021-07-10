@@ -12,6 +12,7 @@ import StarIcon from '@material-ui/icons/Star';
 import {Grid } from "@material-ui/core"
 import avatar from "../images/nistagramAvatar.jpg";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 
 
@@ -98,6 +99,7 @@ export default function Story({ onClose, stories, user }: Props ){
           <div className="details">
             <span>{username}</span>
             <span>{stories[storyIndex].Subheading}</span>
+            {stories[storyIndex].Link === "" && <span><Link to={stories[storyIndex].Link}>Shop now</Link></span>}
 
           </div>
 
