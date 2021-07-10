@@ -11,4 +11,5 @@ type StoryDTO struct {
 	ID 				gocql.UUID 	`json:"ID"`
 	ForCloseFriends	bool 		`json:"ForCloseFriends"`
 	Highlights		bool		`json:"Highlights"`
+	Link 			string       `json:"Link"`
 }

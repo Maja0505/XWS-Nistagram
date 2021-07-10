@@ -101,7 +101,7 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
         .then((res) => {
           axios
             .post(
-              "/api/user/media/upload-verification-doc/" + loggedUserId,
+              "/api/media/upload-verification-doc/" + loggedUserId,
               image,
               {
                 headers: { "Content-Type": "multipart/form-data" },

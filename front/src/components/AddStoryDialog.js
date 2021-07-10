@@ -101,6 +101,7 @@ const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
             Image: imageString + ".jpg",
             Highlights: highlights,
             ForCloseFriends: close,
+            Link:''
           };
           axios.post("/api/post/story/create", story).then((res) => {
             console.log("uspesno");
@@ -129,6 +130,7 @@ const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
             Image: imageString + ".mp4",
             Highlights: highlights,
             ForCloseFriends: close,
+            Link:''
           };
           axios.post("/api/post/story/create", story).then((res) => {
             console.log("uspesno");

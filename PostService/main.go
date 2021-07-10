@@ -85,7 +85,7 @@ func init() {
 		fmt.Println(err)
 	}
 
-	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id timeuuid, userid text, available boolean, image text, highlights boolean, for_close_friends boolean, createdat timestamp, links list<text>, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
+	if err := Session.Query("CREATE TABLE if not exists postkeyspace.stories(id timeuuid, userid text, available boolean, image text, highlights boolean, for_close_friends boolean, createdat timestamp, link text, PRIMARY KEY((userid), id)) WITH CLUSTERING ORDER BY (id DESC);").Exec(); err != nil {
 		fmt.Println("Error while creating tables!")
 		fmt.Println(err)
 	}
