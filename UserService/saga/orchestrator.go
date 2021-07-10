@@ -2,16 +2,17 @@ package saga
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-redis/redis"
 	"log"
 )
 
 const (
 	UserChannel    			string = "UserChannel"
+	AuthenticationChannel   string = "AuthenticationChannel"
 	UserFollowerChannel    	string = "UserFollowerChannel"
 	ReplyChannel    		string = "ReplyChannel"
 	ServiceUser    			string = "User"
+	ServiceAuthentication   string = "Authentication"
 	ServiceUserFollower    	string = "UserFollower"
 	ActionStart     		string = "Start"
 	ActionDone      		string = "DoneMsg"
@@ -35,7 +36,7 @@ func NewOrchestrator() *Orchestrator {
 	// initialize and start the orchestrator in the background
 	o := &Orchestrator{
 		c: client,
-		r: client.Subscribe(UserChannel, UserFollowerChannel, ReplyChannel),
+		r: client.Subscribe(UserChannel, AuthenticationChannel,UserFollowerChannel, ReplyChannel),
 	}
 
 	return o
@@ -73,7 +74,7 @@ func (o Orchestrator) Start() {
 				case ServiceUser:
 					o.Next(UserChannel,ServiceUser,m)
 				case ServiceUserFollower:
-					fmt.Println("Nije odradjen rollback")
+					o.Next(UserFollowerChannel,ServiceUserFollower,m)
 				}
 			}
 		}
@@ -97,7 +98,10 @@ func (o Orchestrator) Rollback(m Message) {
 	switch m.Service {
 	case ServiceUser:
 		channel = UserChannel
+	case ServiceAuthentication:
+		channel = AuthenticationChannel
 	}
+
 	m.Action = ActionRollback
 	if err = o.c.Publish(channel, m).Err(); err != nil {
 		log.Printf("error publishing rollback message to %s channel", UserChannel)

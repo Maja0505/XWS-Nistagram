@@ -2,6 +2,7 @@ package repository
 
 import (
 	"XWS-Nistagram/AuthenticationService/model/authentication"
+	"fmt"
 	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 	"strconv"
@@ -63,4 +64,32 @@ func (repository *AuthenticationRepository)  DeleteAuth(givenUuid string) (int64
 		return 0, err
 	}
 	return deleted, nil
+}
+
+func (repository *AuthenticationRepository) CreateUser(user *authentication.User) (*authentication.User,error) {
+	result := repository.UserDatabase.Create(&user)
+	fmt.Println(result.RowsAffected)
+	if result.RowsAffected == 0 {
+		return nil,fmt.Errorf("ticket not created")
+	}
+	fmt.Println("Shopping cart Created")
+	return user,nil
+}
+
+func (repository *AuthenticationRepository) FindUserById(username string) (*authentication.User,error){
+	var user authentication.User
+	if err:=repository.UserDatabase.First(&user, "username = ?", username).Error; err != nil {
+		return nil,err
+	}
+	return &user,nil
+}
+
+func (repository *AuthenticationRepository) DeleteUser(username string) error {
+	user,err:=repository.FindUserById(username)
+	if err!=nil{
+		fmt.Println(err)
+		return err
+	}
+	repository.UserDatabase.Delete(&user)
+	return nil
 }

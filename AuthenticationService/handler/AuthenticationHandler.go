@@ -18,13 +18,13 @@ type AuthenticationHandler struct{
 
 
 func (handler *AuthenticationHandler) Login(c *gin.Context) {
+	fmt.Println("")
 	var u authentication.User
 	if err := c.ShouldBindJSON(&u); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 		return
 	}
 
-	handler.Service.Repository.GetByUsername(u.Username)
 	//compare the user from the request, with the one we defined:
 	found,credentialsValid :=handler.Service.CheckCredentials(u.Username,u.Password)
 	if !found{

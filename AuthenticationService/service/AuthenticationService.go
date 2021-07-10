@@ -3,10 +3,14 @@ package service
 import (
 	"XWS-Nistagram/AuthenticationService/model/authentication"
 	"XWS-Nistagram/AuthenticationService/repository"
+	"XWS-Nistagram/AuthenticationService/saga"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis"
 	"github.com/twinj/uuid"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -145,6 +149,84 @@ func (service *AuthenticationService)  GetByUsername(username string) (authentic
 	return user
 }
 
+
+//saga deo
+
+
+func (service *AuthenticationService) RedisConnection() {
+	// create client and ping redis
+	var err error
+	client := redis.NewClient(&redis.Options{Addr: "redis:6379"})
+	if _, err = client.Ping().Result(); err != nil {
+		log.Fatalf("error creating redis client %s", err)
+	}
+
+	// subscribe to the required channels
+	pubsub := client.Subscribe(saga.AuthenticationChannel, saga.ReplyChannel)
+	if _, err = pubsub.Receive(); err != nil {
+		log.Fatalf("error subscribing %s", err)
+	}
+	defer func() { _ = pubsub.Close() }()
+	ch := pubsub.Channel()
+
+	log.Println("starting the authentication-service service")
+	for {
+		select {
+		case msg := <-ch:
+			m := saga.Message{}
+			err := json.Unmarshal([]byte(msg.Payload), &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			switch msg.Channel {
+			case saga.AuthenticationChannel:
+
+				// Happy Flow
+				if m.Action == saga.ActionStart {
+
+					fmt.Println("Stigao zahtev sa user service  !")
+					var user authentication.User
+					user.Username = m.Username
+					user.Password = m.Password
+					user.Role = m.Role
+					fmt.Println("Upisuje se user ",user.Username, "  ",user.Password,  " ",user.Role)
+					_,err := service.Repository.CreateUser(&user)
+					if err != nil{
+						fmt.Println("Neuspesno upisao u bazu authentication")
+						sendToReplyChannel(client, &m, saga.ActionRollback, saga.ServiceUser, saga.ServiceAuthentication)
+					}else{
+						fmt.Println("Uspesno upisao u bazu authentication")
+						sendToReplyChannel(client, &m, saga.ActionDone, saga.ServiceUserFollower, saga.ServiceAuthentication)
+					}
+
+				}
+
+				// Rollback flow
+				if m.Action == saga.ActionRollback {
+					err := service.Repository.DeleteUser(m.Username)
+					if err != nil{
+						fmt.Println("Neuspesan rolback err : ", err)
+					}
+					sendToReplyChannel(client, &m, saga.ActionRollback, saga.ServiceUser, saga.ServiceAuthentication)
+				}
+
+			}
+		}
+	}
+}
+
+func sendToReplyChannel(client *redis.Client, m *saga.Message, action string, service string, senderService string) {
+	var err error
+	m.Action = action
+	m.Service = service
+	m.SenderService = senderService
+	if err = client.Publish(saga.ReplyChannel, m).Err(); err != nil {
+		log.Printf("error publishing done-message to %s channel", saga.ReplyChannel)
+	}
+	log.Printf("done message published to channel :%s", saga.ReplyChannel)
+}
 
 
 

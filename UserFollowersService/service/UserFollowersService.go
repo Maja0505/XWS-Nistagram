@@ -484,7 +484,7 @@ func (service *UserFollowersService) RedisConnection() {
 					err := service.Repository.CreateUserNodeIfNotExist(m.UserId)
 					if err != nil{
 						fmt.Println("Neuspesno upisao u neo4j")
-						sendToReplyChannel(client, &m, saga.ActionRollback, saga.ServiceUser, saga.ServiceUserFollower)
+						sendToReplyChannel(client, &m, saga.ActionRollback, saga.ServiceAuthentication, saga.ServiceUserFollower)
 					}else{
 						fmt.Println("Uspesno upisao u neo4j")
 						sendToReplyChannel(client, &m, saga.ActionDone, saga.ServiceUser, saga.ServiceUserFollower)

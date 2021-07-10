@@ -2,13 +2,13 @@ package main
 
 import (
 	"XWS-Nistagram/AuthenticationService/handler"
-	"XWS-Nistagram/AuthenticationService/model"
 	"XWS-Nistagram/AuthenticationService/model/authentication"
 	"XWS-Nistagram/AuthenticationService/repository"
 	"XWS-Nistagram/AuthenticationService/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,8 +26,6 @@ func initDB() *redis.Client {
 	}
 	client = redis.NewClient(&redis.Options{
 		Addr: "redis:6379",
-		Password: "",
-		DB: 0,
 	})
 	return client
 }
@@ -62,27 +60,37 @@ func handleFunc(authenticationHandler *handler.AuthenticationHandler,authorizati
 		authorized.POST("/logout", authenticationHandler.Logout)
 		authorized.POST("/refreshToken", authenticationHandler.RefreshToken)
 	}
-	log.Fatal(router.Run(":8070"))
+	log.Fatal(router.Run(":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")))
+
+}
+
+func init() {
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 }
 
 
 
 func initPostgreDB() *gorm.DB{
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", "localhost", "postgres","root", "authdetailsdb", "5432")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", "postgres", "postgres","root", "authdetailsdb", "5432")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	db.Migrator().DropTable(&model.User{})
+	//db.Migrator().DropTable(&model.User{})
 	db.AutoMigrate(&authentication.User{})
-	user := authentication.User{ID: 1,Username: "Pera",Password: "pera",Role:"Admin"}
-	user1 := authentication.User{ID: 2,Username: "Marko",Password: "marko",Role:"User"}
-	user2:= authentication.User{ID: 3,Username: "Dana",Password: "dana",Role:"Agent"}
+	/*user := authentication.User{Username: "Pera",Password: "pera",Role:"Admin"}
+	user1 := authentication.User{Username: "Marko",Password: "marko",Role:"User"}
+	user2:= authentication.User{Username: "Dana",Password: "dana",Role:"Agent"}
 	db.Create(&user)
 	db.Create(&user1)
-	db.Create(&user2)
+	db.Create(&user2)*/
 
 	fmt.Println("Successfully connected!")
 	return db
@@ -94,6 +102,9 @@ func main(){
 	postgres:=initPostgreDB()
 	repository:=initRepo(redis,postgres)
 	service:=initService(repository)
+
+	go service.RedisConnection()
+
 	authenticationHandler:=initAuthenticationHandler(service)
 	authorizationHandler:=initAuthorizationHandler(service)
 	handleFunc(authenticationHandler,authorizationHandler)

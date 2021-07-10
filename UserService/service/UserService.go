@@ -26,25 +26,25 @@ func (service *UserService) FindAll() (*[]model.User, error) {
 	return users,nil
 }
 
-func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.UserForRegistrationDTO) (string,error) {
+func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.UserForRegistrationDTO) (string,string,bool,string,error) {
 
 	if userForRegistrationDTO.Password != userForRegistrationDTO.ConfirmedPassword{
-		return "",errors.New("Password and confirmed password are not same!")
+		return "","",false,"",errors.New("Password and confirmed password are not same!")
 	}
 	
 	existingUser,_ := service.Repo.FindUserByUsername(userForRegistrationDTO.Username)
 
 	if existingUser != nil{
-		return "",errors.New("User with same name aleready exist!")
+		return "","",false,"",errors.New("User with same name aleready exist!")
 	}
 
 	userForRegistration := mapper.ConvertUserForRegistrationDTOToRegisteredUser(userForRegistrationDTO)
-	idString,err := service.Repo.CreateRegisteredUser(userForRegistration)
+	username,password,isAgent,idString,err := service.Repo.CreateRegisteredUser(userForRegistration)
 	if err != nil{
 		fmt.Println(err)
-		return  idString,err
+		return  username,password,isAgent,idString,err
 	}
-	return idString,nil
+	return username,password,isAgent,idString,nil
 }
 
 func (service *UserService) UpdateRegisteredUserProfile(username string, registeredUserDto *dto.RegisteredUserProfileInfoDTO) error {
@@ -232,7 +232,7 @@ func (service *UserService) RedisConnection() {
 					fmt.Println("potrebno pozvati metodu za rollback tj da se obrise user koji se kreirau u bazu")
 					err := service.Repo.DeleteUserByUserId(m.UserId)
 					if err != nil {
-						sendToReplyChannel(client, &m, saga.ActionError, saga.ServiceUserFollower, saga.ServiceUser)
+						sendToReplyChannel(client, &m, saga.ActionError, saga.ServiceAuthentication, saga.ServiceUser)
 					}
 					fmt.Println("Uspesno odradio rollback")
 				}
