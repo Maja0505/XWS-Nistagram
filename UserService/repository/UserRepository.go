@@ -38,21 +38,23 @@ func (repo *UserRepository) FindAll() (*[]model.User, error) {
 }
 
 
-func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.RegisteredUser) (string,error) {
+func (repo *UserRepository) CreateRegisteredUser(userForRegistration *model.RegisteredUser) (string,string,bool,string,error) {
 	db := repo.Database.Database("user-service-database")
 	collection := db.Collection("users")
 	user, err := collection.InsertOne(context.TODO(), &userForRegistration)
 	if err != nil {
 		fmt.Println(err)
-		return "",err
+		return "","",false,"",err
 	}
 	_,err = collection.UpdateOne(context.TODO(),bson.M{"username":userForRegistration.Username},bson.D{{"$set",bson.D{{"id_string",user.InsertedID.(primitive.ObjectID).Hex()}}}})
 	if err != nil {
 		fmt.Println(err)
-		return "",err
+		return "","",false,"",err
 	}
 	idString := user.InsertedID.(primitive.ObjectID).Hex()
-	return idString,nil
+	createdUser,_ := repo.FindUserByUserId(idString)
+
+	return createdUser.Username,createdUser.Password,createdUser.IsAgent,idString,nil
 }
 
 func (repo *UserRepository) UpdateRegisteredUserProfile(username string, registeredUser *model.RegisteredUser) error {
