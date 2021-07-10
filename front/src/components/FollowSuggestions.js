@@ -13,6 +13,8 @@ const FollowSuggestions = () => {
       .get("/api/user-follow/followSuggestions/" + loggedUserID)
       .then((res) => {
         setFollowSuggestions(res.data);
+      }).catch((error) => {
+        //console.log(error);
       });
   }, []);
 

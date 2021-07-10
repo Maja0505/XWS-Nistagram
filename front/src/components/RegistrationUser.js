@@ -26,7 +26,7 @@ const RegistrationUser = ({ setRedirection }) => {
         setRedirection(true);
       })
       .catch((error, res) => {
-        alert(error);
+        //alert(error);
         console.log(error.message);
       });
   };

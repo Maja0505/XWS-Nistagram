@@ -95,7 +95,6 @@ const AddCampaign = ({ setTabValue }) => {
       )
       .then((res) => {})
       .catch((error) => {
-        alert(error);
         setPuklaSlika(true);
       });
   };
@@ -119,7 +118,7 @@ const AddCampaign = ({ setTabValue }) => {
       )
       .then((res) => {})
       .catch((error) => {
-        alert(error);
+        //alert(error);
         setPuklaSlika(true);
       });
   };
@@ -181,7 +180,7 @@ const AddCampaign = ({ setTabValue }) => {
           setPuklaSlika(false);
         })
         .catch((error) => {
-          console.log(error);
+          //console.log(error);
           setPuklaSlika(false);
         });
     }

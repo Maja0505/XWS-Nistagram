@@ -23,6 +23,8 @@ const ViewCampaignRequestsForInfluencerDialog = ({ label, open, setOpen }) => {
       .get("/api/agent/get-campaign-requests/" + loggedUserId)
       .then((res) => {
         setCampaignRequests(res.data);
+      }).catch((error) => {
+        //console.log(error);
       });
   }, []);
 

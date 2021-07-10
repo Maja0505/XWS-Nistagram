@@ -93,7 +93,11 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
               setOpen(true);
               setMessage("Successfully update verification request");
               setUpdateMode(true);
+            }).catch((error) => {
+              //console.log(error);
             });
+        }).catch((error) => {
+          //console.log(error);
         });
     } else {
       axios
@@ -111,7 +115,11 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
               setOpen(true);
               setMessage("Successfully sent verification request");
               setUpdateMode(true);
+            }).catch((error) => {
+              //console.log(error);
             });
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   };

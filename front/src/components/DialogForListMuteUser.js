@@ -82,7 +82,9 @@ export default function DialogForListMuteUser({loggedUserId,open, setOpen }) {
         if(res.data){
             setAllMuted(res.data)
         }
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }, []);
 
   const handleClose = () => {
@@ -107,7 +109,9 @@ export default function DialogForListMuteUser({loggedUserId,open, setOpen }) {
         array.splice(index, 1);
         setAllMuted(array)
       }
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }
 
 

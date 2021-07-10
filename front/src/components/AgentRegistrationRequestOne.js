@@ -33,7 +33,9 @@ const AgentRegistrationRequestOne = ({
       )
       .then((res) => {
         deleteFromArray();
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   };
 
   const rejectRequest = () => {
@@ -44,7 +46,9 @@ const AgentRegistrationRequestOne = ({
       )
       .then((res) => {
         deleteFromArray();
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   };
 
   const deleteFromArray = () => {

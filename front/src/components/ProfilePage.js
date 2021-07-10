@@ -71,6 +71,8 @@ const ProfilePage = ({
         })
         .then((res) => {
           console.log("Uspesno upload-ovao sliku");
+        }).catch((error) => {
+          //console.log(error);
         });
     }
 
@@ -100,6 +102,8 @@ const ProfilePage = ({
       });
       setUser({ ...user, ProfilePicture: loggedUserId + ".jpg" });
       localStorage.setItem("username", user.Username);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 

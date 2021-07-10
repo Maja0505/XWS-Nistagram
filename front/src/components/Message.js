@@ -95,7 +95,9 @@ const Message = () => {
             .then((res) => {
                 setFromUsersMessage(res.data)
                 
-            })
+            }).catch((error) => {
+              //console.log(error);
+            });
             let socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
     
           
@@ -155,7 +157,7 @@ const Message = () => {
 
         })
         .catch((error) => {
-          alert(error);
+          //alert(error);
           setPuklaSlika(true);
         });
     };
@@ -201,7 +203,7 @@ const Message = () => {
             setNewComment("")
         })
         .catch((error) => {
-          alert(error);
+          //alert(error);
           setPuklaSlika(true);
         });
     };
@@ -229,7 +231,9 @@ const Message = () => {
                 }                   
 
                 setOpenChat(true)
-            })
+            }).catch((error) => {
+              //console.log(error);
+            });
     }
 
     const HandleUploadMedia = (event) => {

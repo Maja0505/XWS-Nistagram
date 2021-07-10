@@ -14,6 +14,8 @@ const ReportedContents = () => {
       if (res.data !== null) {
         setReportedContents(res.data);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   }, []);
 

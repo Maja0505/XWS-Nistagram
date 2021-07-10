@@ -137,7 +137,7 @@ const AddPost = ({ setTabValue }) => {
       )
       .then((res) => {})
       .catch((error) => {
-        alert(error);
+        //alert(error);
         setPuklaSlika(true);
       });
   };

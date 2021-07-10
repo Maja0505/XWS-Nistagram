@@ -76,7 +76,9 @@ export default function OneTimeMessage({open, setOpen,message,user}) {
       axios.put("/api/message/user/" + user + "/channels/" + message.channel + "/update",message)
         .then((res) => {
             setOpen(false);
-        })
+        }).catch((error) => {
+          //console.log(error);
+        });
   };
   const handleClickCancel = () => {
     setOpen(false);

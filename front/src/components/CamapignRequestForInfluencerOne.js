@@ -21,7 +21,9 @@ const CamapignRequestForInfluencerOne = ({ campaignId }) => {
       })
       .then((res) => {
         alert("Success accept camapign request !");
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   };
 
   return (

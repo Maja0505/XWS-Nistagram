@@ -123,7 +123,7 @@ const AddStoryCampaign = ({ open, setOpen,setHaveStory }) => {
         .then((res) => {
           
         }).catch((error) => {
-          alert(error)
+         // alert(error)
         });;
     } else {
       var imageString = "" + loggedUserId + "-" + uuid();
@@ -145,7 +145,7 @@ const AddStoryCampaign = ({ open, setOpen,setHaveStory }) => {
          
         
         }).catch((error) => {
-          alert(error)
+          //alert(error)
         });
     }
   };

@@ -15,6 +15,8 @@ const AgentRegistrationRequests = () => {
         console.log(res.data);
         setAgentRequests(res.data);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   }, []);
 

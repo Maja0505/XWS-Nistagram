@@ -76,6 +76,8 @@ const NavBar = () => {
           axios.get("/api/post/get-all-tags").then((res) => {
             console.log(res.data);
             setSearchedContent(res.data);
+          }).catch((error) => {
+            //console.log(error);
           });
         }
       } else {
@@ -183,6 +185,8 @@ const NavBar = () => {
         setOpen(false);
         localStorage.setItem("invisibleNotification", true);
         setInvisible(localStorage.getItem("invisibleNotification"));
+      }).catch((error) => {
+        //console.log(error);
       });
     }
   };

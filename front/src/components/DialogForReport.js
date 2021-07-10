@@ -81,6 +81,8 @@ export default function DialogForReport({ loggedUserId, post, open, setOpen }) {
       console.log(reportedContentDto);
       setInappropriate(false);
       setOpen(false);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 

@@ -42,6 +42,8 @@ const FollowSuggestionOne = ({ suggestion }) => {
       )
       .then((res) => {
         setRequested(res.data);
+      }).catch((error) => {
+        //console.log(error);
       });
   }, []);
 
@@ -68,6 +70,8 @@ const FollowSuggestionOne = ({ suggestion }) => {
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
         console.log("uspesno");
+      }).catch((error) => {
+        //console.log(error);
       });
       setButtonState("requested");
     }
@@ -84,6 +88,8 @@ const FollowSuggestionOne = ({ suggestion }) => {
     };
     axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
       console.log("uspesno");
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -98,6 +104,8 @@ const FollowSuggestionOne = ({ suggestion }) => {
       .put("/api/user-follow/cancelFollowRequest", requestDto)
       .then((res) => {
         console.log("uspelo");
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 

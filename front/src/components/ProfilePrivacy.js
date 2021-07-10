@@ -38,7 +38,9 @@ const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
             axios.put("/api/user/" + username + "/public-profile/true" )
             .then((res)=> {
               setProfileSettings({...profileSettings, Public:true})
-            })
+            }).catch((error) => {
+              //console.log(error);
+            });
           }
 
           
@@ -54,7 +56,9 @@ const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
           axios.put("/api/user/" + username + "/message-request/true" )
           .then((res)=> {
             setProfileSettings({...profileSettings, MessageRequest:true})
-          })
+          }).catch((error) => {
+            //console.log(error);
+          });
         }
     }
 
@@ -68,7 +72,9 @@ const ProfilePrivacy = ({profileSettings,setProfileSettings,load}) => {
           axios.put("/api/user/" + username + "/allow-tags/true" )
           .then((res)=> {
             setProfileSettings({...profileSettings, AllowTags:true})
-          })
+          }).catch((error) => {
+            //console.log(error);
+          });
         }
     }
   return (

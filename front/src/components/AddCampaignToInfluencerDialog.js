@@ -28,6 +28,8 @@ const AddCampaignToInfluencerDialog = ({
     axios.get("/api/agent/get-campaigns-for-user/" + agent).then((res) => {
       console.log(res.data);
       setAgentCamapigns(res.data);
+    }).catch((error) => {
+      //console.log(error);
     });
   }, []);
 
@@ -39,6 +41,8 @@ const AddCampaignToInfluencerDialog = ({
       })
       .then((res) => {
         alert("Success create camapign request !");
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 

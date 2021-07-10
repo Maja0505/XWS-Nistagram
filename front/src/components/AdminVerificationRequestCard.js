@@ -31,7 +31,9 @@ const AdminVerificationRequestCard = () => {
           array.splice(index, 1);
           setAllRequests(array);
         }
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   };
 
   const HandleOnClickDelete = (request) => {
@@ -45,7 +47,9 @@ const AdminVerificationRequestCard = () => {
           array.splice(index, 1);
           setAllRequests(array);
         }
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   };
 
   useEffect(() => {
@@ -54,7 +58,9 @@ const AdminVerificationRequestCard = () => {
         console.log(res.data);
         setAllRequests(res.data);
       }
-    });
+    }).catch((error) => {
+      //console.log(error);
+    });;
   }, []);
 
   return (

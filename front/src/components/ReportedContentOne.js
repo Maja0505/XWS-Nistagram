@@ -21,8 +21,12 @@ const ReportedContentOne = ({
         setPost(res.data);
         axios.get("/api/user/userid/" + res.data.UserID).then((res1) => {
           setUserWichPosted(res1.data.Username);
+        }).catch((error) => {
+          //console.log(error);
         });
       }
+    }).catch((error) => {
+      //console.log(error);
     });
 
     axios.get("/api/user/userid/" + content.UserID).then((res) => {
@@ -35,12 +39,16 @@ const ReportedContentOne = ({
       .put("/api/post/delete-post/" + post.ID + "/" + post.UserID, {})
       .then((res) => {
         deleteReportedContent();
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
   const deleteUser = () => {
     axios.put("/api/user/delete/" + post.UserID, {}).then((res) => {
       deletePost();
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -55,6 +63,8 @@ const ReportedContentOne = ({
       )
       .then((res) => {
         deleteFromArray();
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 

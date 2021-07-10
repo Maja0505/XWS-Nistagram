@@ -82,7 +82,9 @@ export default function DialogForListBlockUser({loggedUserId,open, setOpen }) {
         if(res.data){
             setAllBlocked(res.data)
         }
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }, []);
 
   const handleClose = () => {
@@ -106,7 +108,9 @@ export default function DialogForListBlockUser({loggedUserId,open, setOpen }) {
               array.splice(index, 1);
               setAllBlocked(array)
             }
-        })
+        }).catch((error) => {
+          //console.log(error);
+        });
   }
 
 

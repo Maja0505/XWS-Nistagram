@@ -12,6 +12,8 @@ const PostWhereUserTagged = ({ user }) => {
       if (res.data !== null) {
         setPosts(res.data);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   }, []);
 

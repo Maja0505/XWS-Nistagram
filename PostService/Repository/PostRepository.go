@@ -28,8 +28,10 @@ func (repo *PostRepository) Create(post *Model.Post) (gocql.UUID,error) {
 		isAlbum = true
 	}
 	ID := gocql.TimeUUID()
+	now := time.Now()
+	now = now.Add(2*time.Hour)
 	if err := repo.Session.Query("INSERT INTO postkeyspace.posts(id, description, media, userid, album, repeatcampaign, createdat, iscampaign) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-		ID, post.Description, post.Media, post.UserID, isAlbum, post.RepeatCampaign, ID.Time(), post.IsCampaign).Exec(); err != nil {
+		ID, post.Description, post.Media, post.UserID, isAlbum, post.RepeatCampaign, now, post.IsCampaign).Exec(); err != nil {
 		fmt.Println("Error while creating post!")
 		fmt.Println(err)
 		return ID,err

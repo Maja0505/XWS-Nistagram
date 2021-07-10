@@ -27,6 +27,8 @@ const PushNotificationPage = ({pushNotification, setPushNotification,load}) => {
       axios.put("/api/user/" + username + "/comment-notification/" + value).then((res) => {
         setPushNotification({...pushNotification, CommentNotification: value === 'true'})
 
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   
@@ -38,6 +40,8 @@ const HandleOnChangeMessageRequestNotification = (value) => {
       axios.put("/api/user/" + username + "/message-request-notification/" + value).then((res) => {
         setPushNotification({...pushNotification, MessageRequestNotification: value === 'true'})
 
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   
@@ -48,6 +52,8 @@ const HandleOnChangeMessageNotification = (value) => {
     if(pushNotification.MessageNotification !== value){
       axios.put("/api/user/" + username + "/message-notification/" + value).then((res) => {
         setPushNotification({...pushNotification, MessageNotification: value === 'true'})
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   
@@ -58,6 +64,8 @@ const HandleOnChangeFollowRequestNotification = (value) => {
     if(pushNotification.FollowRequestNotification !== value){
       axios.put("/api/user/" + username + "/follow-request-notification/" + value).then((res) => {
         setPushNotification({...pushNotification, FollowRequestNotification: value === 'true'})
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   
@@ -68,6 +76,8 @@ const HandleOnChangeFollowNotification = (value) => {
     if(pushNotification.FollowNotification !== value){
       axios.put("/api/user/" + username + "/follow-notification/" + value).then((res) => {
         setPushNotification({...pushNotification, FollowNotification: value === 'true'})
+        }).catch((error) => {
+          //console.log(error);
         });
     }
   

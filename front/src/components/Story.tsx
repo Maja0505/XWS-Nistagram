@@ -56,7 +56,9 @@ export default function Story({ onClose, stories, user }: Props ){
     .then((res)=> {
       setImageProfile(res.data.ProfilePicture)
       setUsername(res.data.Username)
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
    
     if(stories[storyIndex].Type === "video"){
           if (storyPaused) {

@@ -89,7 +89,9 @@ export default function DialogForBlockUser({loggedUserId, blockedUserId ,open, s
     .then((res)=> {
       console.log('uspelo')
       setOpen(false)
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }
 
 

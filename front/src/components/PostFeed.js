@@ -271,6 +271,8 @@ const PostFeed = ({ feed }) => {
           }
         }
         setIsLiked(!isLiked);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
@@ -331,6 +333,8 @@ const PostFeed = ({ feed }) => {
           }
         }
         setIsDisliked(!isDisliked);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
@@ -370,12 +374,16 @@ const PostFeed = ({ feed }) => {
         };
         axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
           setComments(res.data);
+        }).catch((error) => {
+          //console.log(error);
         });
         setCopyOfFeed({
           ...copyOfFeed,
           CommentsCount: Number(copyOfFeed.CommentsCount) + Number(1),
         });
         setNewComment("");
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
@@ -383,6 +391,8 @@ const PostFeed = ({ feed }) => {
     axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
       setComments(res.data);
       setShowComments(true);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -394,6 +404,8 @@ const PostFeed = ({ feed }) => {
     axios.get("/api/post/get-users-who-liked-post/" + feed.ID).then((res) => {
       setLikers(res.data);
       setOpenDialogForLikes(true);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -403,6 +415,8 @@ const PostFeed = ({ feed }) => {
       .then((res) => {
         setDislikers(res.data);
         setOpenDialogForDislikes(true);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 

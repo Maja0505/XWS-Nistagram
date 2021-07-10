@@ -132,7 +132,9 @@ export default function DialogForNewMessage({ open, setOpen }) {
         
         
             };
-        })
+        }).catch((error) => {
+          //console.log(error);
+        });
 
     
 

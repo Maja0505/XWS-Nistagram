@@ -15,6 +15,8 @@ const LocationTagPost = () => {
   useEffect(() => {
     axios.get("/api/post/get-all-by-location/" + location).then((res) => {
       setPosts(res.data);
+    }).catch((error) => {
+      //console.log(error);
     });
   }, [location]);
 

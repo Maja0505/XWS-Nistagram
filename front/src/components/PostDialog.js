@@ -128,7 +128,11 @@ const PostDialog = () => {
       setNewComment("");
       axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
         setCommentsForPost(res.data);
+      }).catch((error) => {
+        //console.log(error);
       });
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -145,6 +149,8 @@ const PostDialog = () => {
       axios.get("/api/user/userid/" + res.data.UserID).then((res1) => {
         console.log(res1.data);
         setUser(res1.data);
+      }).catch((error) => {
+        //console.log(error);
       });
 
       console.log(res.data);
@@ -160,6 +166,8 @@ const PostDialog = () => {
       } else if (res.data == false && res.status === 201) {
         setPostIsLiked(false);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
 
     axios.put("/api/post/dislike-exists", like).then((res) => {
@@ -168,6 +176,8 @@ const PostDialog = () => {
       } else if (res.data == false && res.status === 201) {
         setPostIsDisliked(false);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
 
     axios
@@ -178,6 +188,8 @@ const PostDialog = () => {
         } else if (res.data == false) {
           setPostSavedToFavourites(false);
         }
+      }).catch((error) => {
+        //console.log(error);
       });
 
     axios
@@ -264,6 +276,8 @@ const PostDialog = () => {
         };
         setPostIsLiked(true);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -327,6 +341,8 @@ const PostDialog = () => {
         };
         setPostIsDisliked(true);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -334,6 +350,8 @@ const PostDialog = () => {
     axios.get("/api/post/get-users-who-liked-post/" + post).then((res) => {
       setLikers(res.data);
       setOpenDialogForLikes(true);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -341,6 +359,8 @@ const PostDialog = () => {
     axios.get("/api/post/get-users-who-disliked-post/" + post).then((res) => {
       setDislikers(res.data);
       setOpenDialogForDislikes(true);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 

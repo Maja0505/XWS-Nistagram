@@ -131,7 +131,7 @@ const UserHomePage = () => {
               setLoad1(true);
             })
             .catch((error) => {
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -147,7 +147,7 @@ const UserHomePage = () => {
               setLoad2(true);
             })
             .catch((error) => {
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -163,7 +163,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -179,7 +179,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -195,7 +195,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -209,7 +209,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -223,7 +223,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error);
+              //alert(error);
             });
         } else {
           axios
@@ -237,7 +237,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error);
+              //alert(error);
             });
 
           axios
@@ -251,7 +251,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error);
+              //alert(error);
             });
           setLoad1(true);
           setLoad2(true);
@@ -263,6 +263,8 @@ const UserHomePage = () => {
             if (res.data) {
               setHighlightStories(res.data);
             }
+          }).catch((error) => {
+            //console.log(error);
           });
       })
       .catch((error) => {
@@ -280,6 +282,8 @@ const UserHomePage = () => {
       console.log("uspelo");
       setOpen((prevOpen) => !prevOpen);
       setMuted(false);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -310,6 +314,8 @@ const UserHomePage = () => {
     axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
       console.log("uspesno");
       setClose(true);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -322,6 +328,8 @@ const UserHomePage = () => {
     axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
       console.log("uspesno");
       setClose(false);
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -352,6 +360,8 @@ const UserHomePage = () => {
           );
         };
         setRequested(true);
+      }).catch((error) => {
+        //console.log(error);
       });
     } else {
       var follow = {
@@ -378,6 +388,8 @@ const UserHomePage = () => {
           );
         };
         setFollowing(true);
+      }).catch((error) => {
+        //console.log(error);
       });
     }
   };
@@ -389,6 +401,8 @@ const UserHomePage = () => {
     axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
       console.log("uspesno");
       //setUser({...user,allFollowers: user.allFollowers - 1})
+    }).catch((error) => {
+      //console.log(error);
     });
     setFollowing(false);
   };

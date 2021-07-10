@@ -40,7 +40,9 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOf
           }
         }
      
-      })
+      }).catch((error) => {
+        //console.log(error);
+      });
    
   };
 

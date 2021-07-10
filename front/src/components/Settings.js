@@ -136,6 +136,8 @@ useEffect(() => {
     setProfileSettings(res.data.ProfileSettings)
     setPushNotification(res.data.NotificationSettings)
 
+  }).catch((error) => {
+    //console.log(error);
   });
 
 }, []);

@@ -82,7 +82,9 @@ export default function FollowRequest({loggedUserId,open, setOpen }) {
         if(res.data){
             setAllRequests(res.data)
         }
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }, []);
 
   const handleClose = () => {

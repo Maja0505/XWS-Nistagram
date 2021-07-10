@@ -109,7 +109,7 @@ const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
             setHaveStory(true)
           });
         }).catch((error) => {
-          alert(error)
+          //alert(error)
         });;
     } else {
       var imageString = "" + loggedUserId + "-" + uuid();
@@ -138,7 +138,7 @@ const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
             setHaveStory(true)
           });
         }).catch((error) => {
-          alert(error)
+          //alert(error)
         });
     }
   };

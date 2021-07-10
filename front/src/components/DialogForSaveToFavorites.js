@@ -106,7 +106,9 @@ export default function DialogForSaveToFavorites({
         if (res.data) {
           setCollectionsForPost(res.data);
         }
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   }, []);
 
   const handleClickSavePost = (description) => {
@@ -128,6 +130,8 @@ export default function DialogForSaveToFavorites({
         setOpen(false);
         setSaved(true);
       }
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
@@ -140,6 +144,8 @@ export default function DialogForSaveToFavorites({
         }
         setSaveToFavorites(false);
         setSaveToCollection(true);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
@@ -170,6 +176,8 @@ export default function DialogForSaveToFavorites({
         console.log("uspenso");
         setSaved(false);
         setOpen(false);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 
@@ -185,6 +193,8 @@ export default function DialogForSaveToFavorites({
         console.log("uspenso");
 
         setOpen(false);
+      }).catch((error) => {
+        //console.log(error);
       });
   };
 

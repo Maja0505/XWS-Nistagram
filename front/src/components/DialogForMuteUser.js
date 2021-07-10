@@ -89,7 +89,9 @@ export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOp
     .then((res)=> {
       console.log('uspelo')
       setOpen(false)
-    })
+    }).catch((error) => {
+      //console.log(error);
+    });
   }
 
 

@@ -56,8 +56,6 @@ export default function ContentDetails() {
       setHaveProfileImage(true)
     }).catch(error =>{
      
-    }).catch((error) =>{
-      
     })
 
   }, [])
@@ -102,7 +100,9 @@ export default function ContentDetails() {
       
             })
           }
-        })
+        }).catch((error) => {
+          //console.log(error);
+        });
     }
   };
 

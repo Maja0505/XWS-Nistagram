@@ -15,7 +15,9 @@ const CommentOneForFeed = ({ comment }) => {
       .then((res) => {
         setUsername(res.data.Username);
         setProfilePicture(res.data.ProfilePicture);
-      });
+      }).catch((error) => {
+        //console.log(error);
+      });;
   }, []);
 
   return (

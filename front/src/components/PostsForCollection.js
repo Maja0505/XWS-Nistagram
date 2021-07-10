@@ -144,6 +144,8 @@ const PostsForCollection = () => {
   const getImage = (image) => {
     axios.get("/api/media/get-media-image/" + image).then((res) => {
       return res.data;
+    }).catch((error) => {
+      //console.log(error);
     });
   };
 
