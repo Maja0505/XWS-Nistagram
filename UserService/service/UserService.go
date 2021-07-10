@@ -1,16 +1,21 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis"
+	"log"
 	"userService/dto"
 	"userService/mapper"
 	"userService/model"
 	"userService/repository"
+	"userService/saga"
 )
 
 type UserService struct {
 	Repo *repository.UserRepository
+	Orchestrator *saga.Orchestrator
 }
 
 func (service *UserService) FindAll() (*[]model.User, error) {
@@ -21,25 +26,25 @@ func (service *UserService) FindAll() (*[]model.User, error) {
 	return users,nil
 }
 
-func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.UserForRegistrationDTO) error {
+func (service *UserService) CreateRegisteredUser(userForRegistrationDTO *dto.UserForRegistrationDTO) (string,error) {
 
 	if userForRegistrationDTO.Password != userForRegistrationDTO.ConfirmedPassword{
-		return errors.New("Password and confirmed password are not same!")
+		return "",errors.New("Password and confirmed password are not same!")
 	}
 	
 	existingUser,_ := service.Repo.FindUserByUsername(userForRegistrationDTO.Username)
 
 	if existingUser != nil{
-		return errors.New("User with same name aleready exist!")
+		return "",errors.New("User with same name aleready exist!")
 	}
 
 	userForRegistration := mapper.ConvertUserForRegistrationDTOToRegisteredUser(userForRegistrationDTO)
-	err := service.Repo.CreateRegisteredUser(userForRegistration)
+	idString,err := service.Repo.CreateRegisteredUser(userForRegistration)
 	if err != nil{
 		fmt.Println(err)
-		return  err
+		return  idString,err
 	}
-	return nil
+	return idString,nil
 }
 
 func (service *UserService) UpdateRegisteredUserProfile(username string, registeredUserDto *dto.RegisteredUserProfileInfoDTO) error {
@@ -64,6 +69,25 @@ func (service *UserService) FindUserByUsername(username string) (*model.Register
 		return nil, err
 	}
 	return user, nil
+}
+
+func (service *UserService) FindUserByUserId(userId string) (*model.RegisteredUser,error){
+	user,err := service.Repo.FindUserByUserId(userId)
+	if err != nil{
+		return nil, err
+	}
+	return user, nil
+}
+
+func (service *UserService) FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId string) (*dto.UsernameAndProfilePictureDTO,error){
+	user,err := service.Repo.FindUserByUserId(userId)
+	if err != nil{
+	return nil, err
+	}
+	var usernameAndProfilePictureDTO dto.UsernameAndProfilePictureDTO
+	usernameAndProfilePictureDTO.Username = user.Username
+	usernameAndProfilePictureDTO.ProfilePicture = user.ProfilePicture
+	return &usernameAndProfilePictureDTO, nil
 }
 
 func (service *UserService) SearchUser(username string,searchContent string) (*[]dto.UserFromSearchDTO,error){
@@ -154,3 +178,77 @@ func (service *UserService) UpdateVerificationSettings(userId string,category mo
 	return service.Repo.UpdateVerificationSettings(userId,category)
 }
 
+func (service *UserService) DeleteUserByUserId(userId string) error {
+	err := service.Repo.DeleteUserByUserId(userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+//saga deo
+
+func (service *UserService) RedisConnection() {
+	// create client and ping redis
+	var err error
+	client := redis.NewClient(&redis.Options{Addr: "redis:6379"})
+	if _, err = client.Ping().Result(); err != nil {
+		log.Fatalf("error creating redis client %s", err)
+	}
+
+	// subscribe to the required channels
+	pubsub := client.Subscribe(saga.UserChannel, saga.ReplyChannel)
+	if _, err = pubsub.Receive(); err != nil {
+		log.Fatalf("error subscribing %s", err)
+	}
+	defer func() { _ = pubsub.Close() }()
+	ch := pubsub.Channel()
+
+	log.Println("starting the user service")
+	for {
+		select {
+		case msg := <-ch:
+			m := saga.Message{}
+			err := json.Unmarshal([]byte(msg.Payload), &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			switch msg.Channel {
+			case saga.UserChannel:
+
+				// Happy Flow
+				fmt.Println("Orkesrator salje na user kanal sa akcijom ",m.Action)
+
+				if m.Action == saga.ActionStart {
+					fmt.Println("user-follower-service uspesno upisao usera sa id-em : " + m.UserId)
+				}
+
+				// Rollback flow
+				if m.Action == saga.ActionRollback {
+					fmt.Println("user-follower-service nije uspesno upisao usera sa id-em : " + m.UserId)
+					fmt.Println("potrebno pozvati metodu za rollback tj da se obrise user koji se kreirau u bazu")
+					err := service.Repo.DeleteUserByUserId(m.UserId)
+					if err != nil {
+						sendToReplyChannel(client, &m, saga.ActionError, saga.ServiceUserFollower, saga.ServiceUser)
+					}
+					fmt.Println("Uspesno odradio rollback")
+				}
+
+			}
+		}
+	}
+}
+
+func sendToReplyChannel(client *redis.Client, m *saga.Message, action string, service string, senderService string) {
+	var err error
+	m.Action = action
+	m.Service = service
+	m.SenderService = senderService
+	if err = client.Publish(saga.ReplyChannel, m).Err(); err != nil {
+		log.Printf("error publishing done-message to %s channel", saga.ReplyChannel)
+	}
+	log.Printf("done message published to channel :%s", saga.ReplyChannel)
+}

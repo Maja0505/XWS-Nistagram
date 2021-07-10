@@ -9,6 +9,8 @@ import PostDialog from "./PostDialog";
 import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axios from "axios";
+import PhotoLibraryOutlinedIcon from "@material-ui/icons/PhotoLibraryOutlined";
+import LocalMallOutlinedIcon from "@material-ui/icons/LocalMallOutlined";
 
 const images = [
   {
@@ -69,6 +71,13 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     color: theme.palette.common.white,
   },
+  imageButton2: {
+    position: "absolute",
+    top: 0,
+    marginTop: "5%",
+    marginLeft: "70%",
+    color: theme.palette.common.white,
+  },
   imageSrc: {
     position: "absolute",
     left: 0,
@@ -92,6 +101,10 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     display: "none",
   },
+  imageTitle2: {
+    position: "relative",
+    display: "flex",
+  },
   /*imageMarked: {
     height: 3,
     width: 18,
@@ -103,12 +116,11 @@ const useStyles = makeStyles((theme) => ({
   },*/
 }));
 
-const Posts = ({ userForProfile,username}) => {
+const Posts = ({ userForProfile, username }) => {
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [postID, setPostID] = useState({});
   const [posts, setPosts] = useState([]);
-
 
   const id = localStorage.getItem("id");
 
@@ -121,9 +133,10 @@ const Posts = ({ userForProfile,username}) => {
     axios
       .get("/api/post/get-all-by-userid/" + userForProfile.ID)
       .then((res) => {
-        if (res.data){
+        if (res.data) {
+          console.log(res.data);
           setPosts(res.data);
-        }else{
+        } else {
           setPosts([]);
         }
       })
@@ -133,16 +146,17 @@ const Posts = ({ userForProfile,username}) => {
   }, [userForProfile]);
 
   const getImage = (image) => {
-    axios.get("/api/post/get-image/" + image).then((res) => {
+    axios.get("/api/media/get-media-image/" + image).then((res) => {
       return res.data;
     });
   };
 
   return (
     <div className={classes.root}>
-      {redirection === true && <Redirect to={"/dialog/" + username + "/" + postID}></Redirect>}
+      {redirection === true && <Redirect to={"/dialog/" + postID}></Redirect>}
       <Grid container>
-        {posts !== null && posts !== undefined &&
+        {posts !== null &&
+          posts !== undefined &&
           posts.map((post) => (
             <Grid
               item
@@ -160,29 +174,69 @@ const Posts = ({ userForProfile,username}) => {
                 }}
                 onClick={() => handleClickImage(post)}
               >
-                {post.Image.substring(
-                  post.Image.length - 3,
-                  post.Image.length
+                {post.Media[0].substring(
+                  post.Media[0].length - 3,
+                  post.Media[0].length
                 ) === "jpg" && (
                   <img
                     width="100%"
                     height="100%"
-                    src={`http://localhost:8080/api/post/get-image/${post.Image}`}
+                    src={`http://localhost:8080/api/media/get-media-image/${post.Media[0]}`}
                   />
                 )}
-                {post.Image.substring(
-                  post.Image.length - 3,
-                  post.Image.length
+                {post.Media[0].substring(
+                  post.Media[0].length - 3,
+                  post.Media[0].length
                 ) !== "jpg" && (
                   <video width="100%" height="100%" controls>
                     <source
-                      src={`http://localhost:8080/api/post/video-get/${post.Image}`}
+                      src={`http://localhost:8080/api/media/get-video/${post.Media[0]}`}
                       type="video/mp4"
                     />
                   </video>
                 )}
 
                 <span className={classes.imageBackdrop} />
+                {post.IsCampaign === true && (
+                  <span className={classes.imageButton2}>
+                    <Typography
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle2}
+                      width="100%"
+                      height="30%"
+                    >
+                      <Grid container style={{ margin: "auto" }}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                          <LocalMallOutlinedIcon></LocalMallOutlinedIcon>
+                        </Grid>
+                      </Grid>
+                    </Typography>
+                  </span>
+                )}
+
+                {post.Media.length !== 1 && post.IsCampaign === false && (
+                  <span className={classes.imageButton2}>
+                    <Typography
+                      component="span"
+                      variant="subtitle1"
+                      color="inherit"
+                      className={classes.imageTitle2}
+                      width="100%"
+                      height="30%"
+                    >
+                      <Grid container style={{ margin: "auto" }}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                          <PhotoLibraryOutlinedIcon></PhotoLibraryOutlinedIcon>
+                        </Grid>
+                      </Grid>
+                    </Typography>
+                  </span>
+                )}
+
                 <span className={classes.imageButton}>
                   <Typography
                     component="span"
@@ -190,9 +244,9 @@ const Posts = ({ userForProfile,username}) => {
                     color="inherit"
                     className={classes.imageTitle}
                     style={{ padding: 0, width: "50%" }}
-                    width="30%"
+                    width="50%"
                   >
-                    <Grid container>
+                    <Grid container style={{ margin: "auto" }}>
                       <Grid item xs={1}>
                         <ThumbUpAltIcon></ThumbUpAltIcon>
                       </Grid>
@@ -217,21 +271,17 @@ const Posts = ({ userForProfile,username}) => {
               </ButtonBase>
             </Grid>
           ))}
-        {(posts === null || posts === undefined || posts.length === 0) &&
+        {(posts === null || posts === undefined || posts.length === 0) && (
           <Grid container>
-              <Grid item xs={3}></Grid>
-              <Grid item xs={6}>
-                <Typography variant="h5" color="textSecondary">
+            <Grid item xs={3}></Grid>
+            <Grid item xs={6}>
+              <Typography variant="h5" color="textSecondary">
                 No Posts Yet
               </Typography>
-               </Grid>
-              <Grid item xs={3}></Grid>
-
+            </Grid>
+            <Grid item xs={3}></Grid>
           </Grid>
-
-        
-        
-        }
+        )}
         {images.length % 3 === 1 && (
           <>
             <Grid item xs={4} /> <Grid item xs={4} />

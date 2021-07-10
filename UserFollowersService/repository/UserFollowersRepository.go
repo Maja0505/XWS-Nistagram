@@ -11,6 +11,8 @@ type UserFollowersRepository struct{
 	Session neo4j.Session
 }
 
+
+
 func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationship) error{
 
 	err := repository.CreateUserNodeIfNotExist(fr.User)
@@ -176,7 +178,24 @@ func (repository *UserFollowersRepository) SetFriendForMute(userId string,friend
 
 }
 
+func (repository *UserFollowersRepository) GetAllUsers(userId string) (*[]interface{},error){
+	var followedUsers []interface{}
 
+	result,err := repository.Session.Run("match (u:User) where u.userId <> $userId return u.userId;",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
 
 func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId string) (*[]interface{},error){
 	var followedUsers []interface{}
@@ -197,7 +216,6 @@ func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId stri
 	return &followedUsers,nil
 }
 
-
 func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}
 
@@ -217,6 +235,43 @@ func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) 
 	return &followedUsers,nil
 }
 
+func (repository *UserFollowersRepository) GetAllNotMutedFollowedUsersByUser(userId string) (*[]interface{}, error){
+	var followedUsers []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u1.userId = $userId and r.mute=FALSE RETURN u2.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		followedUsers = append(followedUsers, user)
+	}
+
+	return &followedUsers,nil
+}
+
+func (repository *UserFollowersRepository) GetAllFollowsWhomUserIsCloseFriend(userId string) (*[]interface{}, error){
+	var follows []interface{}
+
+	result,err := repository.Session.Run("MATCH (u1)-[r:follow]->(u2) WHERE u2.userId = $userId and r.close_friend=TRUE RETURN u1.userId",map[string]interface{}{
+		"userId" : userId ,
+	})
+
+	if err != nil{
+		return nil, err
+	}
+
+	for result.Next() {
+		user := result.Record().Values[0]
+		follows = append(follows, user)
+	}
+
+	return &follows,nil
+}
 
 func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}

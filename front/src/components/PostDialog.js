@@ -1,9 +1,6 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { deepOrange } from "@material-ui/core/colors";
 import Avatar from "@material-ui/core/Avatar";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SentimentSatisfiedRoundedIcon from "@material-ui/icons/SentimentSatisfiedRounded";
-import InputBase from "@material-ui/core/InputBase";
 import {
   Grid,
   Paper,
@@ -12,48 +9,44 @@ import {
   Popper,
   MenuItem,
   MenuList,
+  InputBase,
 } from "@material-ui/core";
 import { Button } from "@material-ui/core";
-import BookmarkBorderSharpIcon from "@material-ui/icons/BookmarkBorderSharp";
-import BookmarkSharpIcon from "@material-ui/icons/BookmarkSharp";
-import FavoriteBorderSharpIcon from "@material-ui/icons/FavoriteBorderSharp";
-import SendOutlinedIcon from "@material-ui/icons/SendOutlined";
-import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
+import {
+  BookmarkBorderRounded,
+  BookmarkRounded,
+  SendRounded,
+  PersonRounded,
+} from "@material-ui/icons";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
 import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
 import ThumbDownAltOutlinedIcon from "@material-ui/icons/ThumbDownAltOutlined";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import React, { useState, useEffect, useRef } from "react";
-import CommentsForPost from "./CommentsForPost";
+import { useState, useEffect, useRef } from "react";
+import CommentsForPost from "./CommentsForPost.js";
 import { Link } from "react-router-dom";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import DialogForReport from "./DialogForReport";
 import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 import UsersList from "./UsersList";
-import Picker from 'emoji-picker-react';
+import Picker from "emoji-picker-react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import SendContentDialog from "./SendContentDialog.js";
 
-
-
-const useStyles = makeStyles((theme) => ({
-  orange: {
-    color: theme.palette.getContrastText(deepOrange[500]),
-    backgroundColor: deepOrange[500],
-    marginLeft: "auto",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-}));
+import avatar from "../images/nistagramAvatar.jpg";
 
 const PostDialog = () => {
-  const classes = useStyles();
   const loggedUserId = localStorage.getItem("id");
+  const loggedUsername = localStorage.getItem("username");
+
   const [newComment, setNewComment] = useState("");
 
   const { post } = useParams();
-  const { username } = useParams();
+  const [user, setUser] = useState();
 
   const [imagePost, setImagePost] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
@@ -65,13 +58,15 @@ const PostDialog = () => {
   const anchorRef = useRef(null);
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
   const [postSavedToFavourites, setPostSavedToFavourites] = useState(false);
-  const [openDialogForLikes,setOpenDialogForLikes] = useState(false)
-  const [openDialogForDislikes,setOpenDialogForDislikes] = useState(false)
-  const [likers,setLikers] = useState([])
-  const [dislikers,setDislikers] = useState([])
-  const [openPicker,setOpenPicker] = useState(false);
-
-
+  const [openDialogForLikes, setOpenDialogForLikes] = useState(false);
+  const [openDialogForDislikes, setOpenDialogForDislikes] = useState(false);
+  const [likers, setLikers] = useState([]);
+  const [dislikers, setDislikers] = useState([]);
+  const [openPicker, setOpenPicker] = useState(false);
+  const [location, setLocation] = useState();
+  const [taggedUsers, setTaggedUsers] = useState([]);
+  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] = useState(false);
+  const [openSendContentDialog,setOpenSendContentDialog] = useState(false)
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -104,6 +99,32 @@ const PostDialog = () => {
     };
     axios.post("/api/post/add-comment", comment).then((res) => {
       console.log("upisan komentar");
+      let socket = new WebSocket(
+        "ws://localhost:8080/api/notification/chat/" + loggedUserId
+      );
+      socket.onopen = () => {
+        console.log("Successfully Connected");
+        socket.send(
+          '{"user_who_follow":' +
+            '"' +
+            loggedUsername +
+            '"' +
+            ',"command": 2, "channel": ' +
+            '"' +
+            imagePost.UserID +
+            '"' +
+            ', "content": "commented your post:"' +
+            ', "media": "' +
+            imagePost.Media[0] +
+            '"' +
+            ', "comment": "' +
+            newComment +
+            '"}' +
+            ', "post_id": "' +
+            imagePost.ID +
+            '"}'
+        );
+      };
       setNewComment("");
       axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
         setCommentsForPost(res.data);
@@ -121,6 +142,10 @@ const PostDialog = () => {
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
       makeDescriptionFromPost(res.data.Description);
+      axios.get("/api/user/userid/" + res.data.UserID).then((res1) => {
+        console.log(res1.data);
+        setUser(res1.data);
+      });
 
       console.log(res.data);
     });
@@ -154,6 +179,29 @@ const PostDialog = () => {
           setPostSavedToFavourites(false);
         }
       });
+
+    axios
+      .get("/api/post/get-comments-for-post/" + post)
+      .then((res) => {
+        setCommentsForPost(res.data);
+      })
+      .catch((error) => {});
+
+    axios
+      .get("/api/post/get-location-for-post/" + post)
+      .then((res) => {
+        setLocation(res.data.Location);
+      })
+      .catch((error) => {});
+
+    axios
+      .get("/api/post/get-users-tagged-on-post/" + post)
+      .then((res) => {
+        if (res.data !== null) {
+          setTaggedUsers(res.data);
+        }
+      })
+      .catch((error) => {});
   }, [open]);
 
   const HandleClickLike = () => {
@@ -162,12 +210,58 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/like-post", like).then((res) => {
-      if (postIsDisliked) {
-        setPostIsDisliked(false);
-      }
       if (postIsLiked) {
+        if (postIsDisliked) {
+          setImagePost({
+            ...imagePost,
+            LikesCount: Number(imagePost.LikesCount) + Number(1),
+            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+          });
+          setPostIsDisliked(false);
+        } else {
+          setImagePost({
+            ...imagePost,
+            LikesCount: Number(imagePost.LikesCount) - Number(1),
+          });
+        }
         setPostIsLiked(false);
       } else {
+        if (postIsDisliked) {
+          setImagePost({
+            ...imagePost,
+            LikesCount: Number(imagePost.LikesCount) + Number(1),
+            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+          });
+          setPostIsDisliked(false);
+        } else {
+          setImagePost({
+            ...imagePost,
+            LikesCount: Number(imagePost.LikesCount) + Number(1),
+          });
+        }
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              imagePost.UserID +
+              '"' +
+              ', "content": "liked your photo."' +
+              ', "media": "' +
+              imagePost.Media[0] +
+              '"' +
+              ', "post_id": "' +
+              imagePost.ID +
+              '"}'
+          );
+        };
         setPostIsLiked(true);
       }
     });
@@ -179,12 +273,58 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     axios.post("/api/post/dislike-post", dislike).then((res) => {
-      if (postIsLiked) {
-        setPostIsLiked(false);
-      }
       if (postIsDisliked) {
+        if (postIsLiked) {
+          setImagePost({
+            ...imagePost,
+            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+            LikesCount: Number(imagePost.LikesCount) - Number(1),
+          });
+          setPostIsLiked(false);
+        } else {
+          setImagePost({
+            ...imagePost,
+            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+          });
+        }
         setPostIsDisliked(false);
       } else {
+        if (postIsLiked) {
+          setImagePost({
+            ...imagePost,
+            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+            LikesCount: Number(imagePost.LikesCount) - Number(1),
+          });
+          setPostIsLiked(false);
+        } else {
+          setImagePost({
+            ...imagePost,
+            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+          });
+        }
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              imagePost.UserID +
+              '"' +
+              ', "content": "disliked your photo."' +
+              ', "media": "' +
+              imagePost.Media[0] +
+              '"' +
+              ', "post_id": "' +
+              imagePost.ID +
+              '"}'
+          );
+        };
         setPostIsDisliked(true);
       }
     });
@@ -192,16 +332,15 @@ const PostDialog = () => {
 
   const handleClickAllLikes = () => {
     axios.get("/api/post/get-users-who-liked-post/" + post).then((res) => {
-      setLikers(res.data)
-      setOpenDialogForLikes(true)
+      setLikers(res.data);
+      setOpenDialogForLikes(true);
     });
   };
 
   const handleClickAllDislikes = () => {
     axios.get("/api/post/get-users-who-disliked-post/" + post).then((res) => {
-      setDislikers(res.data)
-      setOpenDialogForDislikes(true)
-
+      setDislikers(res.data);
+      setOpenDialogForDislikes(true);
     });
   };
 
@@ -274,32 +413,66 @@ const PostDialog = () => {
     </Popper>
   );
 
-
-
   const addToComment = (event, emojiObject) => {
-    setNewComment(newComment + emojiObject.emoji)
+    setNewComment(newComment + emojiObject.emoji);
   };
 
   const Emojis = (
     <>
-    {openPicker &&
-    <Grid container>
-      <Grid item xs={7}></Grid>
-      <Grid item xs={5}><Picker onEmojiClick={addToComment} /></Grid>
-
-		</Grid>
-    }
+      {openPicker && (
+        <Grid container>
+          <Grid item xs={7}></Grid>
+          <Grid item xs={5}>
+            <Picker onEmojiClick={addToComment} />
+          </Grid>
+        </Grid>
+      )}
     </>
-  )
+  );
 
   const handleClickOpenPicker = () => {
-    if(openPicker){
-      setOpenPicker(false)
-    }else{
-      setOpenPicker(true)
-
+    if (openPicker) {
+      setOpenPicker(false);
+    } else {
+      setOpenPicker(true);
     }
+  };
+
+  const HandleClickOpenSendContentDialog = () => {
+    setOpenSendContentDialog(true)
   }
+
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, right: 0, width: 30, height: 30 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, zIndex: 1, left: 0 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+  };
 
   return (
     <div>
@@ -309,7 +482,7 @@ const PostDialog = () => {
           <Paper
             style={{
               width: "100%",
-              height: 600,
+              height: "600px",
               marginTop: "5%",
             }}
             variant="outlined"
@@ -317,90 +490,168 @@ const PostDialog = () => {
             <Grid container style={{ width: "100%", height: "100%" }}>
               {imagePost !== undefined && imagePost !== null && (
                 <Grid item xs={7}>
-                  {imagePost.Image.substring(
-                    imagePost.Image.length - 3,
-                    imagePost.Image.length
-                  ) === "jpg" && (
-                    <img
-                      src={
-                        "http://localhost:8080/api/post/get-image/" +
-                        imagePost.Image
-                      }
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  )}
-                  {imagePost.Image.substring(
-                    imagePost.Image.length - 3,
-                    imagePost.Image.length
-                  ) !== "jpg" && (
-                    <video width="100%" height="100%" controls>
-                      <source
-                        src={
-                          "http://localhost:8080/api/post/get-image/" +
-                          imagePost.Image
-                        }
+                  <Slider {...settings}>
+                    {imagePost.Media.map((media, index) => (
+                      <div
                         style={{ width: "100%", height: "100%" }}
-                        type="video/mp4"
-                      />
-                    </video>
-                  )}
+                        key={index}
+                      >
+                        {media.substring(media.length - 3, media.length) ===
+                          "jpg" && (
+                          <img
+                            src={
+                              "http://localhost:8080/api/media/get-media-image/" +
+                              media
+                            }
+                            style={{ width: "100%", height: "600px" }}
+                          />
+                        )}
+                        {media.substring(media.length - 3, media.length) !==
+                          "jpg" && (
+                          <video
+                            width="100%"
+                            height="100%"
+                            style={{ marginTop: "25%" }}
+                            controls
+                          >
+                            <source
+                              src={
+                                "http://localhost:8080/api/media/get-video/" +
+                                media
+                              }
+                              style={{ width: "100%", height: "100%" }}
+                              type="video/mp4"
+                            />
+                          </video>
+                        )}
+                        {imagePost.IsCampaign === true &&
+                          imagePost.Links[index] !== "" && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              style={{ width: "100%", height: "40px" }}
+                            >
+                              <a
+                                href={imagePost.Links[index]}
+                                style={{
+                                  textDecoration: "none",
+                                  color: "white",
+                                }}
+                              >
+                                Visit on web site
+                              </a>
+                            </Button>
+                          )}
+                      </div>
+                    ))}
+                  </Slider>
                 </Grid>
               )}
 
               <Grid item xs={5}>
-                <Grid container style={{ height: "15%" }}>
-                  <Grid item xs={3}>
-                    <Avatar
-                      className={classes.orange}
-                      style={{ margin: "auto", marginTop: "25%" }}
-                    >
-                      N
-                    </Avatar>
+                <Grid container>
+                  <Grid
+                    item
+                    xs={3}
+                    style={{
+                      margin: "auto",
+                      marginTop: "2%",
+                      textAlign: "center",
+                    }}
+                  >
+                    {user !== undefined &&
+                    user !== null &&
+                    user.ProfilePicture !== "" ? (
+                      <Avatar
+                        alt="N"
+                        style={{ margin: "auto", border: "1px solid black" }}
+                        src={
+                          "http://localhost:8080/api/media/get-profile-picture/" +
+                          user.ProfilePicture
+                        }
+                      ></Avatar>
+                    ) : (
+                      <Avatar
+                        style={{ margin: "auto", border: "1px solid black" }}
+                        alt="N"
+                        src={avatar}
+                      ></Avatar>
+                    )}
                   </Grid>
-                  <Grid item xs={7}>
-                    <h4 style={{ marginTop: "10%", textAlign: "left" }}>
-                      {username}
-                    </h4>
+                  <Grid
+                    item
+                    xs={7}
+                    style={{ margin: "auto", textAlign: "left" }}
+                  >
+                    {user !== undefined && user !== null && (
+                      <Link
+                        to={"/homePage/" + user.Username}
+                        style={{ textDecoration: "none", color: "black" }}
+                      >
+                        <b>{user.Username}</b>
+                      </Link>
+                    )}
+                    <br />
+                    {location && (
+                      <Link
+                        to={"/explore/locations/" + location + "/"}
+                        style={{ textDecoration: "none", color: "gray" }}
+                      >
+                        {location ? location : ""}
+                      </Link>
+                    )}
                   </Grid>
                   <Grid item xs={2}>
-                    {imagePost && loggedUserId !== imagePost.UserID && 
-                    <MoreHorizIcon
-                      style={{
-                        marginTop: "50%",
-                        textAlign: "right",
-                        cursor: "pointer",
-                      }}
-                      aria-controls={open ? "menu-list-grow" : undefined}
-                      aria-haspopup="true"
-                      ref={anchorRef}
-                      onClick={handleToggle}
-                    ></MoreHorizIcon>
-                    }
+                    {imagePost && loggedUserId !== imagePost.UserID && (
+                      <MoreHorizIcon
+                        style={{
+                          marginTop: "50%",
+                          textAlign: "right",
+                          cursor: "pointer",
+                        }}
+                        aria-controls={open ? "menu-list-grow" : undefined}
+                        aria-haspopup="true"
+                        ref={anchorRef}
+                        onClick={handleToggle}
+                      ></MoreHorizIcon>
+                    )}
                     {dropDowMenuForPost}
                   </Grid>
                 </Grid>
-                <Grid container style={{ height: "60%", overflow: "auto" }}>
-                  <div>
-                    {descriptionArray.map((word) =>
-                      word.charAt(0) === "#" ? (
-                        <>
+
+                <Grid
+                  container
+                  style={{
+                    height: "10%",
+                    overflow: "auto",
+                    paddingLeft: "8%",
+                    paddingRight: "5%",
+                    paddingTop: "1%",
+                  }}
+                >
+                  {imagePost && imagePost.Description.length !== 0 && (
+                    <label style={{ textAlign: "left" }}>
+                      {descriptionArray.map((word, index) =>
+                        word.charAt(0) === "#" ? (
                           <Link
                             to={`/explore/tags/${word.substring(1)}/`}
                             style={{ textDecoration: "none" }}
+                            key={index}
                           >
                             {word}
                           </Link>
-                        </>
-                      ) : (
-                        `${word}`
-                      )
-                    )}
-                  </div>
-                  <CommentsForPost
-                    commentsForPost={commentsForPost}
-                    setCommentsForPost={setCommentsForPost}
-                  ></CommentsForPost>
+                        ) : (
+                          `${word}`
+                        )
+                      )}
+                    </label>
+                  )}
                 </Grid>
+
+                <Grid container style={{ height: "335px", overflow: "auto" }}>
+                  <CommentsForPost comments={commentsForPost}></CommentsForPost>
+                </Grid>
+
                 <Grid container style={{ height: "25%" }}>
                   <Grid container style={{ height: "70%" }}>
                     <Grid container style={{ height: "30%" }}>
@@ -410,13 +661,13 @@ const PostDialog = () => {
                           <ThumbUpAltIcon
                             onClick={HandleClickLike}
                             fontSize="large"
-                            style={{ cursor: "pointer", color: "blue" }}
+                            style={{ cursor: "pointer" }}
                           ></ThumbUpAltIcon>
                         ) : (
                           <ThumbUpAltOutlinedIcon
                             onClick={HandleClickLike}
                             fontSize="large"
-                            style={{ cursor: "pointer", color: "blue" }}
+                            style={{ cursor: "pointer" }}
                           ></ThumbUpAltOutlinedIcon>
                         )}
                       </Grid>
@@ -427,71 +678,83 @@ const PostDialog = () => {
                           <ThumbDownIcon
                             onClick={HandleClickDislike}
                             fontSize="large"
-                            style={{ cursor: "pointer", color: "blue" }}
+                            style={{ cursor: "pointer" }}
                           ></ThumbDownIcon>
                         ) : (
                           <ThumbDownAltOutlinedIcon
                             onClick={HandleClickDislike}
                             fontSize="large"
-                            style={{ cursor: "pointer", color: "blue" }}
+                            style={{ cursor: "pointer" }}
                           ></ThumbDownAltOutlinedIcon>
                         )}
                       </Grid>
 
-                  <Grid item xs={2}>
-                      <Divider />
-                    <SendOutlinedIcon
-                      fontSize="large"
-                      style={{ cursor: "pointer" }}
-                    ></SendOutlinedIcon>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Divider />
-
-                    {postSavedToFavourites ? (
-                      <BookmarkSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkSharpIcon>
-                    ) : (
-                      <BookmarkBorderSharpIcon
-                        onClick={openSaveToFavoritesDialog}
-                        style={{ marginLeft: "80%", cursor: "pointer" }}
-                        fontSize="large"
-                      ></BookmarkBorderSharpIcon>
-                    )}
-                  </Grid>
+                      <Grid item xs={2}>
+                        <Divider />
+                        <SendRounded
+                          fontSize="large"
+                          style={{ cursor: "pointer" }}
+                          onClick = {HandleClickOpenSendContentDialog}
+                        ></SendRounded>
+                      </Grid>
+                      <Grid item xs={2}>
+                        <Divider />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <Divider />
+                        {taggedUsers.length !== 0 && (
+                          <PersonRounded
+                            fontSize="large"
+                            style={{ margin: "auto", cursor: "pointer" }}
+                            onClick={() => setOpenDialogForTaggedUsers(true)}
+                          />
+                        )}
+                      </Grid>
+                      <Grid item xs={2}>
+                        <Divider />
+                        {postSavedToFavourites ? (
+                          <BookmarkRounded
+                            onClick={openSaveToFavoritesDialog}
+                            style={{ margin: "auto", cursor: "pointer" }}
+                            fontSize="large"
+                          ></BookmarkRounded>
+                        ) : (
+                          <BookmarkBorderRounded
+                            onClick={openSaveToFavoritesDialog}
+                            style={{ margin: "auto", cursor: "pointer" }}
+                            fontSize="large"
+                          ></BookmarkBorderRounded>
+                        )}
+                      </Grid>
                     </Grid>
                     <Grid container style={{ height: "70%" }}>
                       <Grid item xs={5}>
-                      {imagePost !== undefined && imagePost !== null &&
-                        <h5
-                          onClick={handleClickAllLikes}
-                          style={{ cursor: "pointer" }}
-                        >
-                        {imagePost.LikesCount}{" "} Likes
-                        </h5>
-                        }
+                        {imagePost !== undefined && imagePost !== null && (
+                          <h5
+                            onClick={handleClickAllLikes}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {imagePost.LikesCount} Likes
+                          </h5>
+                        )}
                       </Grid>
                       <Grid item xs={5}>
-                      {imagePost !== undefined && imagePost !== null &&
-
-                        <h5
-                          onClick={handleClickAllDislikes}
-                          style={{ cursor: "pointer" }}
-                        >
-                        {imagePost.DislikesCount}{" "}  Dislikes
-                        </h5>
-                        }
+                        {imagePost !== undefined && imagePost !== null && (
+                          <h5
+                            onClick={handleClickAllDislikes}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {imagePost.DislikesCount} Dislikes
+                          </h5>
+                        )}
                       </Grid>
                       <Grid item xs={2}></Grid>
                     </Grid>
                   </Grid>
+
                   <Grid container style={{ height: "30%" }}>
                     <Grid item xs={3}>
                       <Divider />
-
                       <SentimentSatisfiedRoundedIcon
                         style={{
                           margin: "auto",
@@ -504,9 +767,7 @@ const PostDialog = () => {
                     </Grid>
                     <Grid item xs={7}>
                       <Divider />
-
                       <InputBase
-                        className={classes.margin}
                         placeholder="Add a comment..."
                         inputProps={{ "aria-label": "naked" }}
                         value={newComment}
@@ -525,25 +786,16 @@ const PostDialog = () => {
                       </Button>
                     </Grid>
                   </Grid>
-
                 </Grid>
-
               </Grid>
-
             </Grid>
           </Paper>
           {Emojis}
-
         </Grid>
         <Grid item xs={2}></Grid>
-
       </Grid>
-      <DialogForReport
-        loggedUserId={loggedUserId}
-        post={post}
-        open={openDialogForReport}
-        setOpen={setOpenDialogForReport}
-      ></DialogForReport>
+      <Grid container style={{ marginBottom: "2%" }} />
+
       {openDialogForReport && (
         <DialogForReport
           loggedUserId={loggedUserId}
@@ -552,6 +804,7 @@ const PostDialog = () => {
           setOpen={setOpenDialogForReport}
         ></DialogForReport>
       )}
+
       {saveToFavoritesDialog && (
         <DialogForSaveToFavorites
           loggedUserId={loggedUserId}
@@ -563,21 +816,36 @@ const PostDialog = () => {
         ></DialogForSaveToFavorites>
       )}
 
+      {openSendContentDialog && (
+        <SendContentDialog open={openSendContentDialog} setOpen={setOpenSendContentDialog} userForPost={imagePost.UserID} postId = {imagePost.ID}>
+
+        </SendContentDialog>
+      )}
+
       {openDialogForLikes && (
         <UsersList
-        label = "People who like post"
+          label="People who like post"
           users={likers}
           open={openDialogForLikes}
           setOpen={setOpenDialogForLikes}
         ></UsersList>
-      )}  
+      )}
 
-    {openDialogForDislikes && (
+      {openDialogForDislikes && (
         <UsersList
-        label = "People who dislike post"
+          label="People who dislike post"
           users={dislikers}
           open={openDialogForDislikes}
           setOpen={setOpenDialogForDislikes}
+        ></UsersList>
+      )}
+
+      {openDialogForTaggedUsers && (
+        <UsersList
+          label="People tagged on post"
+          users={taggedUsers}
+          open={openDialogForTaggedUsers}
+          setOpen={setOpenDialogForTaggedUsers}
         ></UsersList>
       )}
     </div>

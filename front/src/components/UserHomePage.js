@@ -12,6 +12,8 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
+import highlights from "../images/highlights.jpg";
+
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Posts from "./Posts";
@@ -20,6 +22,7 @@ import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import { Grow, Popper, MenuItem, MenuList } from "@material-ui/core";
 import { useRef } from "react";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import LocalMallOutlinedIcon from "@material-ui/icons/LocalMallOutlined";
 import DialogForBlockUser from "./DialogForBlockUser";
 import DialogForMuteUser from "./DialogForMuteUser";
 import FollowRequest from "./FollowRequests";
@@ -32,6 +35,11 @@ import {
 } from "@material-ui/icons";
 import UsersList from "./UsersList";
 import AddPost from "./AddPost";
+import Story from "./Story";
+import PostWhereUserTagged from "./PostWhereUserTagged.js";
+import AddCampaign from "./AddCampaign";
+import AddCampaignToInfluencerDialog from "./AddCampaignToInfluencerDialog";
+import ViewCampaignRequestsForInfluencerDialog from "./ViewCampaignRequestsForInfluencerDialog";
 
 const UserHomePage = () => {
   const [user, setUser] = useState();
@@ -46,6 +54,7 @@ const UserHomePage = () => {
 
   const loggedUsername = localStorage.getItem("username");
   const loggedInId = localStorage.getItem("id");
+  const loggedIsAgent = localStorage.getItem("isAgent");
   const [load1, setLoad1] = useState(false);
   const [load2, setLoad2] = useState(false);
   const [load3, setLoad3] = useState(false);
@@ -59,6 +68,18 @@ const UserHomePage = () => {
   const [openDialogForFollowers, setOpenDialogForFollowers] = useState(false);
   const [openDialogForFollowRequests, setOpenDialogForFollowRequests] =
     useState(false);
+  const [openHighlightsDialog, setOpenHighlightsDialog] = useState(false);
+  const [highlightStories, setHighlightStories] = useState([]);
+
+  const [
+    openDialogForAddCamapignToInfluencer,
+    setOpenDialogForAddCamapignToInfluencer,
+  ] = useState(false);
+
+  const [
+    openDialogForViewInfluencerCampaignRequests,
+    setOpenDialogForViewInfluencerCampaignRequests,
+  ] = useState(false);
 
   const loggedUserId = localStorage.getItem("id");
 
@@ -85,41 +106,9 @@ const UserHomePage = () => {
     }
   }
 
-  const prevOpen = useRef(open);
-
-  const users = [
-    {
-      Username: "Perica",
-      FirstName: "Perica",
-      LastName: "Peric",
-      DateOfBirth: "krdlkjf",
-      Email: "Peric.peric@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Female",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-
-    {
-      Username: "marko",
-      FirstName: "Marko",
-      LastName: "Markovic",
-      DateOfBirth: "krdlkjf",
-      Email: "marko.markovic@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Male",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-  ];
-
   useEffect(() => {
     console.log(username);
     console.log(loggedUsername);
-    //setUser(users.filter(user => user.Username === username)[0])
-
-    //setFollowing(false)
-    //setPrivateProfile(true)
 
     axios
       .get("/api/user/" + username)
@@ -142,7 +131,7 @@ const UserHomePage = () => {
               setLoad1(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -158,7 +147,7 @@ const UserHomePage = () => {
               setLoad2(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -174,7 +163,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -190,7 +179,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -206,7 +195,7 @@ const UserHomePage = () => {
               setLoad3(true);
             })
             .catch((error) => {
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -220,7 +209,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -234,7 +223,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error.response.status);
+              alert(error);
             });
         } else {
           axios
@@ -248,7 +237,7 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollows([]);
-              alert(error.response.status);
+              alert(error);
             });
 
           axios
@@ -262,12 +251,19 @@ const UserHomePage = () => {
             })
             .catch((error) => {
               setAllFollowers([]);
-              alert(error.response.status);
+              alert(error);
             });
           setLoad1(true);
           setLoad2(true);
           setLoad3(true);
         }
+        axios
+          .get("/api/post/story/all-highlights/" + res.data.IdString)
+          .then((res) => {
+            if (res.data) {
+              setHighlightStories(res.data);
+            }
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -338,8 +334,25 @@ const UserHomePage = () => {
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
         console.log("uspesno");
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              user.IdString +
+              '"' +
+              ', "content": "requested to following you."}'
+          );
+        };
+        setRequested(true);
       });
-      setRequested(true);
     } else {
       var follow = {
         User: loggedInId,
@@ -347,9 +360,25 @@ const UserHomePage = () => {
         Private: false,
       };
       axios.post("/api/user-follow/followUser", follow).then((res) => {
-        console.log("uspesno");
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
+        );
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              user.IdString +
+              '"' +
+              ', "content": "started following you."}'
+          );
+        };
+        setFollowing(true);
       });
-      setFollowing(true);
     }
   };
   const unfollowClicked = () => {
@@ -359,6 +388,7 @@ const UserHomePage = () => {
     };
     axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
       console.log("uspesno");
+      //setUser({...user,allFollowers: user.allFollowers - 1})
     });
     setFollowing(false);
   };
@@ -419,6 +449,9 @@ const UserHomePage = () => {
       </Link>
     </Button>
   );
+  function closeStory() {
+    setOpenHighlightsDialog(false);
+  }
 
   const dropDowMenuForProfile = (
     <Popper
@@ -510,155 +543,218 @@ const UserHomePage = () => {
     </Popper>
   );
 
+  const handleClickOpen = () => {
+    setOpenHighlightsDialog(true);
+  };
+
   const userDetails = (
     <Grid container style={{ marginTop: "3%" }}>
-      <Grid item xs={2}></Grid>
-      <Grid container item xs={8}>
-        <Grid item xs={4}>
-          {user !== undefined && user.ProfilePicture !== "" && (
-            <img
-              src={
-                "http://localhost:8080/api/user/get-image/" +
-                user.ProfilePicture
-              }
-              alt="Not founded"
-              style={{
-                borderRadius: "50%",
-                border: "1px solid",
-                width: "150px",
-                height: "150px",
-              }}
-            />
-          )}
-          {user !== undefined && user.ProfilePicture === "" && (
-            <img
-              src={avatar}
-              alt="Not founded"
-              style={{
-                borderRadius: "50%",
-                border: "1px solid",
-                width: "150px",
-                height: "150px",
-              }}
-            />
+      <Grid container style={{ margin: "auto" }}>
+        <Grid item xs={2}></Grid>
+        <Grid container item xs={8}>
+          <Grid item xs={4}>
+            {user !== undefined && user.ProfilePicture !== "" && (
+              <img
+                src={
+                  "http://localhost:8080/api/media/get-profile-picture/" +
+                  user.ProfilePicture
+                }
+                alt="Not founded"
+                style={{
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  width: "150px",
+                  height: "150px",
+                }}
+              />
+            )}
+            {user !== undefined && user.ProfilePicture === "" && (
+              <img
+                src={avatar}
+                alt="Not founded"
+                style={{
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  width: "150px",
+                  height: "150px",
+                }}
+              />
+            )}
+          </Grid>
+          {user !== undefined && (
+            <Grid item xs={7}>
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <Grid
+                      item
+                      xs={3}
+                      style={{
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography variant="h6" style={{ margin: "auto" }}>
+                        {user.Username} {"  "}
+                        {user.VerificationSettings.Verified && (
+                          <img
+                            src={verification}
+                            style={{
+                              height: "20px",
+                              width: "20px",
+                              marginTop: "2%",
+                            }}
+                          ></img>
+                        )}
+                      </Typography>
+                    </Grid>
+                  </>
+                )}
+
+                <Grid item xs={3}>
+                  {loggedUsername === username && buttonForEditProfile}
+                  {requested &&
+                    loggedUsername !== username &&
+                    buttonForRequested}
+                  {following &&
+                    loggedUsername !== username &&
+                    !requested &&
+                    buttonForUnfollow}
+                  {!following &&
+                    loggedUsername !== username &&
+                    !requested &&
+                    buttonForFollow}
+                </Grid>
+
+                <Grid item xs={3}>
+                  {loggedUsername !== username &&
+                    loggedIsAgent === "true" &&
+                    user.VerificationSettings.Category === 0 &&
+                    (following || !user.ProfileSettings.Public) && (
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={(e) =>
+                          setOpenDialogForAddCamapignToInfluencer(true)
+                        }
+                      >
+                        Send campaign
+                      </Button>
+                    )}
+                  {loggedUsername === username &&
+                    user.VerificationSettings.Category === 0 &&
+                    loggedIsAgent === "false" && (
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={(e) =>
+                          setOpenDialogForViewInfluencerCampaignRequests(true)
+                        }
+                      >
+                        Campaign requests
+                      </Button>
+                    )}
+                </Grid>
+
+                <Grid
+                  item
+                  xs={3}
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  {loggedUsername !== username && (
+                    <>
+                      <MoreHorizIcon
+                        style={{
+                          textAlign: "right",
+                          cursor: "pointer",
+                        }}
+                        aria-controls={open ? "menu-list-grow" : undefined}
+                        aria-haspopup="true"
+                        ref={anchorRef}
+                        onClick={handleToggle}
+                      ></MoreHorizIcon>
+                      {dropDowMenuForProfile}
+                    </>
+                  )}
+
+                  {loggedUsername === username && user.ProfileSettings.Public && (
+                    <>
+                      <Button onClick={clickShowFollowRequests}>
+                        View follow request
+                      </Button>
+                    </>
+                  )}
+                </Grid>
+              </Grid>
+              <br></br>
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <FormLabel>0 posts</FormLabel>
+                    <FormLabel
+                      style={{ marginLeft: "auto", cursor: "pointer" }}
+                      onClick={handleClickOnFollowers}
+                    >
+                      {allFollowers.length} followers
+                    </FormLabel>
+                    <FormLabel
+                      style={{ marginLeft: "auto", cursor: "pointer" }}
+                      onClick={handleClickOnFollows}
+                    >
+                      {allFollows.length} following
+                    </FormLabel>{" "}
+                  </>
+                )}
+              </Grid>
+              {user !== undefined && (
+                <Grid container style={{ marginTop: "1%" }}>
+                  <Typography variant="inherit" align="left">
+                    {user.FirstName} {user.LastName}
+                  </Typography>
+                </Grid>
+              )}
+              <Grid container>
+                {user !== undefined && (
+                  <>
+                    <Typography style={{ textAlign: "left" }}>
+                      {user.Biography}
+                    </Typography>
+                  </>
+                )}
+              </Grid>
+            </Grid>
           )}
         </Grid>
-        {user !== undefined && (
-          <Grid item xs={7}>
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <Grid
-                    item
-                    xs={3}
-                    style={{
-                      textAlign: "left",
-                    }}
-                  >
-                    <Typography variant="h6" style={{ margin: "auto" }}>
-                      {user.Username} {"  "}
-                      {user.VerificationSettings.Verified && (
-                        <img
-                          src={verification}
-                          style={{
-                            height: "20px",
-                            width: "20px",
-                            marginTop: "2%",
-                          }}
-                        ></img>
-                      )}
-                    </Typography>
-                  </Grid>
-                </>
-              )}
-
-              <Grid item xs={3}>
-                {loggedUsername === username && buttonForEditProfile}
-                {requested && loggedUsername !== username && buttonForRequested}
-                {following &&
-                  loggedUsername !== username &&
-                  !requested &&
-                  buttonForUnfollow}
-                {!following &&
-                  loggedUsername !== username &&
-                  !requested &&
-                  buttonForFollow}
-              </Grid>
-
-              <Grid item xs={2}></Grid>
-
-              <Grid
-                item
-                xs={4}
-                style={{
-                  textAlign: "right",
-                }}
-              >
-                {loggedUsername !== username && (
-                  <>
-                    <MoreHorizIcon
-                      style={{
-                        textAlign: "right",
-                        cursor: "pointer",
-                      }}
-                      aria-controls={open ? "menu-list-grow" : undefined}
-                      aria-haspopup="true"
-                      ref={anchorRef}
-                      onClick={handleToggle}
-                    ></MoreHorizIcon>
-                    {dropDowMenuForProfile}
-                  </>
-                )}
-
-                {loggedUsername === username && (
-                  <>
-                    <Button onClick={clickShowFollowRequests}>
-                      View follow request
-                    </Button>
-                  </>
-                )}
-              </Grid>
-            </Grid>
-            <br></br>
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <FormLabel>0 posts</FormLabel>
-                  <FormLabel
-                    style={{ marginLeft: "auto", cursor: "pointer" }}
-                    onClick={handleClickOnFollowers}
-                  >
-                    {allFollowers.length} followers
-                  </FormLabel>
-                  <FormLabel
-                    style={{ marginLeft: "auto", cursor: "pointer" }}
-                    onClick={handleClickOnFollows}
-                  >
-                    {allFollows.length} following
-                  </FormLabel>{" "}
-                </>
-              )}
-            </Grid>
-            {user !== undefined && (
-              <Grid container style={{ marginTop: "1%" }}>
-                <Typography variant="inherit" align="left">
-                  {user.FirstName} {user.LastName}
-                </Typography>
-              </Grid>
-            )}
-            <Grid container>
-              {user !== undefined && (
-                <>
-                  <Typography style={{ textAlign: "left" }}>
-                    {user.Biography}
-                  </Typography>
-                </>
-              )}
-            </Grid>
-          </Grid>
-        )}
+        <Grid item xs={2}></Grid>
       </Grid>
-      <Grid item xs={2}></Grid>
+      <Grid container style={{ marginTop: "1%" }}></Grid>
+      {highlightStories.length !== 0 && !privateProfile && (
+        <Grid container style={{ margin: "auto" }}>
+          <Grid item xs={2}></Grid>
+          <Grid container item xs={8}>
+            <Grid item xs={4}>
+              <div onClick={handleClickOpen}>
+                <div>
+                  <img
+                    src={highlights}
+                    style={{
+                      borderRadius: "50%",
+                      border: "1px solid",
+                      width: "50px",
+                      height: "50px",
+                      cursor: "pointer",
+                    }}
+                  />
+                </div>
+                <div>{"Highlights"}</div>
+              </div>
+            </Grid>
+            <Grid item xs={7}></Grid>
+          </Grid>
+          <Grid item xs={2}></Grid>
+        </Grid>
+      )}
     </Grid>
   );
 
@@ -699,6 +795,14 @@ const UserHomePage = () => {
                       icon={<AssignmentIndOutlined />}
                       style={{ margin: "auto" }}
                     />
+
+                    {user.IsAgent && (
+                      <Tab
+                        label="Add campaign"
+                        icon={<LocalMallOutlinedIcon />}
+                        style={{ margin: "auto" }}
+                      />
+                    )}
                   </Tabs>
                 </Paper>
               </Grid>
@@ -706,33 +810,34 @@ const UserHomePage = () => {
             </Grid>
           )}
 
-          {loggedUsername !== username && !user.ProfileSettings.Public && (
-            <Grid container style={{ marginTop: "2%" }}>
-              <Grid item xs={2}></Grid>
-              <Grid item xs={8}>
-                <Paper>
-                  <Tabs
-                    value={tabValue}
-                    onChange={handleChangeTab}
-                    indicatorColor="primary"
-                    textColor="inherit"
-                  >
-                    <Tab
-                      label="Posts"
-                      icon={<GridOn />}
-                      style={{ margin: "auto" }}
-                    />
-                    <Tab
-                      label="Tagged"
-                      icon={<AssignmentIndOutlined />}
-                      style={{ margin: "auto" }}
-                    />
-                  </Tabs>
-                </Paper>
+          {loggedUsername !== username &&
+            (!user.ProfileSettings.Public || following) && (
+              <Grid container style={{ marginTop: "2%" }}>
+                <Grid item xs={2}></Grid>
+                <Grid item xs={8}>
+                  <Paper>
+                    <Tabs
+                      value={tabValue}
+                      onChange={handleChangeTab}
+                      indicatorColor="primary"
+                      textColor="inherit"
+                    >
+                      <Tab
+                        label="Posts"
+                        icon={<GridOn />}
+                        style={{ margin: "auto" }}
+                      />
+                      <Tab
+                        label="Tagged"
+                        icon={<AssignmentIndOutlined />}
+                        style={{ margin: "auto" }}
+                      />
+                    </Tabs>
+                  </Paper>
+                </Grid>
+                <Grid item xs={2}></Grid>
               </Grid>
-              <Grid item xs={2}></Grid>
-            </Grid>
-          )}
+            )}
 
           <Grid container>
             <Grid item xs={2}></Grid>
@@ -749,27 +854,36 @@ const UserHomePage = () => {
                   {user !== undefined && user !== null && tabValue === 2 && (
                     <Collections></Collections>
                   )}
+                  {user !== undefined && user !== null && tabValue === 3 && (
+                    <PostWhereUserTagged user={user}></PostWhereUserTagged>
+                  )}
+                  {user !== undefined && user !== null && tabValue === 4 && (
+                    <AddCampaign setTabValue={setTabValue} />
+                  )}
                 </Grid>
               )}
 
-            {(user !== undefined &&
+            {((user !== undefined &&
               user !== null &&
               loggedUsername !== user.Username &&
               !user.ProfileSettings.Public) ||
-              (following && user.ProfileSettings.Public && (
-                <Grid item xs={8}>
-                  {user !== undefined && user !== null && tabValue === 0 && (
-                    <Posts userForProfile={user} username={username}></Posts>
-                  )}
-                </Grid>
-              ))}
+              (following && loggedUsername !== user.Username)) && (
+              <Grid item xs={8}>
+                {user !== undefined && user !== null && tabValue === 0 && (
+                  <Posts userForProfile={user} username={username}></Posts>
+                )}
+                {user !== undefined && user !== null && tabValue === 1 && (
+                  <PostWhereUserTagged user={user}></PostWhereUserTagged>
+                )}
+              </Grid>
+            )}
 
             {user !== undefined &&
               user !== null &&
               loggedUsername !== user.Username &&
               user.ProfileSettings.Public &&
               !following && (
-                <Grid item xs={8}>
+                <Grid item xs={8} style={{ marginTop: "2%" }}>
                   {user !== undefined && user !== null && tabValue === 0 && (
                     <Paper style={{ width: "100%", height: "100%" }}>
                       <Typography variant="h5" color="textSecondary">
@@ -827,6 +941,39 @@ const UserHomePage = () => {
           )}
         </div>
       )}
+      <div>
+        {openHighlightsDialog &&
+          highlightStories !== undefined &&
+          highlightStories !== null &&
+          highlightStories.length !== 0 && (
+            <Story
+              stories={highlightStories}
+              onClose={closeStory}
+              user={user.IdString}
+            ></Story>
+          )}
+      </div>
+      <div>
+        {openDialogForAddCamapignToInfluencer && (
+          <AddCampaignToInfluencerDialog
+            label={"Send campaign request to influencer"}
+            influencer={user.IdString}
+            agent={loggedUserId}
+            open={openDialogForAddCamapignToInfluencer}
+            setOpen={setOpenDialogForAddCamapignToInfluencer}
+          ></AddCampaignToInfluencerDialog>
+        )}
+      </div>
+
+      <div>
+        {openDialogForViewInfluencerCampaignRequests && (
+          <ViewCampaignRequestsForInfluencerDialog
+            label={"Camapign requests"}
+            open={openDialogForViewInfluencerCampaignRequests}
+            setOpen={setOpenDialogForViewInfluencerCampaignRequests}
+          ></ViewCampaignRequestsForInfluencerDialog>
+        )}
+      </div>
     </>
   );
 };

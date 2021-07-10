@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"userService/dto"
+	"userService/saga"
 	"userService/service"
 )
 
@@ -41,12 +42,15 @@ func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.
 		json.NewEncoder(w).Encode(err)
 		return
 	}
-	err = handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
+	idString,err := handler.Service.CreateRegisteredUser(&userForRegistrationDTO)
 	if err != nil{
 		fmt.Println(err)
 		http.Error(w,err.Error(),417)
 		return
 	}
+
+	m := saga.Message{Service: saga.ServiceUserFollower, SenderService: saga.ServiceUser, Action: saga.ActionStart, UserId: idString }
+	handler.Service.Orchestrator.Next(saga.UserFollowerChannel,saga.ServiceUserFollower,m)
 
 	w.WriteHeader(http.StatusCreated)
 
@@ -72,6 +76,8 @@ func (handler *UserHandler) UpdateRegisteredUserProfile(w http.ResponseWriter, r
 		w.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
+
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -85,6 +91,44 @@ func (handler *UserHandler) FindUserByUsername(w http.ResponseWriter, r *http.Re
 		return
 	}
 	user,_ := handler.Service.FindUserByUsername(username)
+
+	if user == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
+func (handler *UserHandler) FindUserByUserId(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user,_ := handler.Service.FindUserByUserId(userId)
+
+	if user == nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
+func (handler *UserHandler) FindUsernameAndProfilePicture(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user,_ := handler.Service.FindUserByUserIdAndGetHisUsernameAndProfilePicture(userId)
 
 	if user == nil{
 		w.WriteHeader(http.StatusNotFound)
@@ -283,6 +327,23 @@ func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWrite
 	setting := vars["setting"]
 	username := vars["username"]
 	err := handler.Service.UpdateFollowNotificationSetting(username,setting)
+
+	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := handler.Service.DeleteUserByUserId(userId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusExpectationFailed)

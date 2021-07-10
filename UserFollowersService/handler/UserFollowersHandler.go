@@ -153,6 +153,72 @@ func (handler *UserFollowersHandler) GetAllFollowedUsers(w http.ResponseWriter, 
 
 }
 
+func (handler *UserFollowersHandler) GetAllNotMutedFollowedUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllNotMutedFollowedUsersByUser(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *UserFollowersHandler) GetAllFollowsWhomUserIsCloseFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllFollowsWhomUserIsCloseFriend(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (handler *UserFollowersHandler) GetAllFollowsWhomUserIsNotCloseFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.GetAllFollowsWhomUserIsNotCloseFriend(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
+
+}
+
 func (handler *UserFollowersHandler) GetAllFollowersByUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -326,5 +392,26 @@ func (handler *UserFollowersHandler) CheckClosed(w http.ResponseWriter, r *http.
 	}
 
 	json.NewEncoder(w).Encode(muted)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) GetFollowSuggestions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+
+	if userId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	users,err := handler.Service.FollowSuggestions(userId)
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
 	w.WriteHeader(http.StatusOK)
 }

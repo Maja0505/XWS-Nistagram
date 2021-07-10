@@ -16,6 +16,7 @@ import (
 	"time"
 	"userService/handler"
 	"userService/repository"
+	"userService/saga"
 	"userService/service"
 )
 
@@ -46,7 +47,7 @@ func initVerificationRequestRepo(database *mongo.Client) *repository.Verificatio
 }
 
 func initUserService(userRepo *repository.UserRepository) *service.UserService{
-	return &service.UserService{Repo : userRepo}
+	return &service.UserService{Repo : userRepo,Orchestrator: saga.NewOrchestrator()}
 }
 
 func initVerificationRequestService(verificationRequestRepo *repository.VerificationRequestRepository,userService *service.UserService) *service.VerificationRequestService{
@@ -68,6 +69,8 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/update/{username}",handler.UpdateRegisteredUserProfile).Methods("PUT")
 	router.HandleFunc("/create",handler.CreateRegisteredUser).Methods("POST")
 	router.HandleFunc("/{username}",handler.FindUserByUsername).Methods("GET")
+	router.HandleFunc("/userid/{userId}",handler.FindUserByUserId).Methods("GET")
+	router.HandleFunc("/find-username-and-profile-picture/{userId}",handler.FindUsernameAndProfilePicture).Methods("GET")
 	router.HandleFunc("/search/{username}/{searchContent}",handler.SearchUser).Methods("GET")
 	router.HandleFunc("/convert-user-ids",handler.ConvertUserIdsToUsers).Methods("POST")
 	router.HandleFunc("/convert-usernames",handler.ConvertUsernamesToUsers).Methods("POST")
@@ -83,7 +86,7 @@ func handleUserFunc(handler *handler.UserHandler,router *mux.Router){
 	router.HandleFunc("/{username}/follow-notification/{setting}",handler.UpdateFollowNotificationSetting).Methods("PUT")
 	router.HandleFunc("/upload-profile-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/get-image/{id}", handler.GetImage).Methods("GET")
-
+	router.HandleFunc("/delete/{userId}",handler.DeleteUser).Methods("PUT")
 
 }
 
@@ -97,6 +100,12 @@ func handleVerificationRequestFunc(handler *handler.VerificationRequestHandler,r
 	router.HandleFunc("/verification-request/delete/{user}",handler.DeleteVerificationRequest).Methods("PUT")
 	router.HandleFunc("/verification-request/upload-verification-doc/{id}",handler.UploadImage).Methods("POST")
 	router.HandleFunc("/verification-request/get-image/{id}", handler.GetImage).Methods("GET")
+	router.HandleFunc("/agent-registration-request/create", handler.CreateAgentRegistrationRequest).Methods("POST")
+	router.HandleFunc("/agent-registration-request/get-all", handler.GetAllAgentRegistrationRequests).Methods("GET")
+	router.HandleFunc("/agent-registration-request/update-to-approved/{username}", handler.UpdateAgentRegistrationRequestToApproved).Methods("PUT")
+	router.HandleFunc("/agent-registration-request/delete/{username}", handler.DeleteAgentRegistrationRequestToApproved).Methods("PUT")
+
+
 
 }
 
@@ -120,6 +129,9 @@ func main() {
 	userRepo := initUserRepo(database)
 	userService := initUserService(userRepo)
 	userHandler := initUserHandler(userService)
+
+	go userService.Orchestrator.Start()
+	go userService.RedisConnection()
 
 	verificationRequestRepo := initVerificationRequestRepo(database)
 	verificationRequestService := initVerificationRequestService(verificationRequestRepo,userService)

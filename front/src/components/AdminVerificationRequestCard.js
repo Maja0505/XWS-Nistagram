@@ -6,12 +6,13 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { Grid } from "@material-ui/core";
+import { Grid, Paper } from "@material-ui/core";
 import axios from "axios";
 
 const useStyles = makeStyles({
   root: {
     width: "100%",
+    marginTop: "3%",
   },
 });
 
@@ -19,39 +20,42 @@ const AdminVerificationRequestCard = () => {
   const classes = useStyles();
   const [allRequests, setAllRequests] = useState([]);
 
-    const HandleOnClickApprove = (request) => {
-        axios.put("/api/user/verification-request/approve/" + request.User,{}).then((res) => {
-                console.log('uspesno') 
-                var array = [...allRequests]; // make a separate copy of the array
-                var index = array.indexOf(request)
-                if (index !== -1) {
-                  array.splice(index, 1);
-                  setAllRequests(array)
-                }         
-          });
-    }
-
-    const HandleOnClickDelete = (request) => {
-        axios.put("/api/user/verification-request/delete/" + request.User,{}).then((res) => {
-            console.log('uspesno') 
-            var array = [...allRequests]; // make a separate copy of the array
-            var index = array.indexOf(request)
-            if (index !== -1) {
-              array.splice(index, 1);
-              setAllRequests(array)
-            }         
+  const HandleOnClickApprove = (request) => {
+    axios
+      .put("/api/user/verification-request/approve/" + request.User, {})
+      .then((res) => {
+        console.log("uspesno");
+        var array = [...allRequests]; // make a separate copy of the array
+        var index = array.indexOf(request);
+        if (index !== -1) {
+          array.splice(index, 1);
+          setAllRequests(array);
+        }
       });
-    }
+  };
+
+  const HandleOnClickDelete = (request) => {
+    axios
+      .put("/api/user/verification-request/delete/" + request.User, {})
+      .then((res) => {
+        console.log("uspesno");
+        var array = [...allRequests]; // make a separate copy of the array
+        var index = array.indexOf(request);
+        if (index !== -1) {
+          array.splice(index, 1);
+          setAllRequests(array);
+        }
+      });
+  };
 
   useEffect(() => {
     axios.get("/api/user/verification-request/all").then((res) => {
-    if(res.data){
+      if (res.data) {
         console.log(res.data);
         setAllRequests(res.data);
-    }
-   
+      }
     });
-  },[]);
+  }, []);
 
   return (
     <div>
@@ -64,7 +68,7 @@ const AdminVerificationRequestCard = () => {
                 alt="Contemplative Reptile"
                 height="200"
                 image={
-                  "http://localhost:8080/api/user/verification-request/get-image/" +
+                  "http://localhost:8080/api/media/get-verification-doc/" +
                   request.User +
                   ".jpg"
                 }
@@ -119,10 +123,18 @@ const AdminVerificationRequestCard = () => {
               <Grid item xs={6}></Grid>
               <Grid item xs={6}>
                 <CardActions>
-                  <Button size="small" color="primary" onClick={() => HandleOnClickApprove(request)}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => HandleOnClickApprove(request)}
+                  >
                     Approve
                   </Button>
-                  <Button size="small" color="primary" onClick={() => HandleOnClickDelete(request)}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => HandleOnClickDelete(request)}
+                  >
                     Delete
                   </Button>
                 </CardActions>
@@ -131,6 +143,20 @@ const AdminVerificationRequestCard = () => {
           </Grid>
         </Card>
       ))}
+
+      {allRequests !== null && allRequests !== undefined && (
+        <>
+          {allRequests.length === 0 && (
+            <Paper style={{ marginTop: "3%" }}>
+              <Grid container style={{ marginBottom: "2%" }}></Grid>
+              <Grid container>
+                <p style={{ margin: "auto" }}>NO VERIFICATION REQUESTS</p>
+              </Grid>
+              <Grid container style={{ marginTop: "2%" }}></Grid>
+            </Paper>
+          )}
+        </>
+      )}
     </div>
   );
 };

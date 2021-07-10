@@ -13,15 +13,26 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type PostService struct {
 	Repo Repository.PostRepository
 }
 
-func (service *PostService) Create(postDTO *DTO.PostDTO) error {
+func (service *PostService) Create(postDTO *DTO.PostDTO) (gocql.UUID,error) {
 	post := Mapper.ConvertPostDTOToPost(postDTO)
-	err := service.Repo.Create(post)
+	id,err := service.Repo.Create(post)
+	if err != nil{
+		fmt.Println(err)
+		return  id,err
+	}
+	return id,nil
+}
+
+func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
+	comment := Mapper.ConvertCommentDTOToComment(commentDTO)
+	err := service.Repo.AddComment(comment)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -29,9 +40,8 @@ func (service *PostService) Create(postDTO *DTO.PostDTO) error {
 	return nil
 }
 
-func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
-	comment := Mapper.ConvertCommentDTOToComment(commentDTO)
-	err := service.Repo.AddComment(comment)
+func (service *PostService) AddLinks(dto *DTO.UpdateLinksDTO) error {
+	err := service.Repo.AddLinks(dto.Links, dto.ID, dto.UserID)
 	if err != nil{
 		fmt.Println(err)
 		return  err
@@ -215,6 +225,15 @@ func (service *PostService) FindPostsByTag(tag string) ( *[]Model.Post, error) {
 	return posts, err
 }
 
+func (service *PostService) FindPostsByLocation(location string) ( *[]Model.Post, error) {
+	posts,err := service.Repo.FindPostsByLocation(location)
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+	return posts, err
+}
+
 func (service *PostService) GetCommentsForPost(postid gocql.UUID) ( *[]Model.Comment, error) {
 	comments, err := service.Repo.GetCommentsForPost(postid)
 	if err != nil{
@@ -381,12 +400,124 @@ func (service *PostService) GetAllCollectionsForPostByUser(userid string, postuu
 
 	return collections, err
 }
+func (service *PostService) GetLocationForPost(postuuid gocql.UUID) (*Model.Location,error) {
+	location, err := service.Repo.GetLocationForPost(postuuid)
 
-/*func (service *PostService) GetAllLikesForPost(postid string) error {
-	err := service.Repo.GetAllLikesForPost(postid)
 	if err != nil{
 		fmt.Println(err)
-		return  err
+		return  nil, err
+	}
+
+	return location, err
+}
+func (service *PostService) GetTagSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetTagSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
+}
+func (service *PostService) GetLocationSuggestions(s string) (*[]string, error) {
+	ret, err := service.Repo.GetLocationSuggestions(s)
+
+	if err != nil{
+		fmt.Println(err)
+		return  nil, err
+	}
+
+	return ret, nil
+}
+
+func (service *PostService) GetAllReportedContents() ( *[]Model.ReportedContent, error){
+
+	ret,err := service.Repo.GetAllReportContents()
+	if err != nil {
+		return nil, err
+	}
+	return ret, err
+}
+
+func (service *PostService) DeleteReportContent(contentId gocql.UUID,userId string) error{
+	err := service.Repo.DeleteReportContent(contentId,userId)
+	if err != nil{
+		return err
 	}
 	return nil
-}*/
+}
+
+func (service *PostService) DeletePost(postId gocql.UUID,userId string) error{
+	err := service.Repo.DeletePost(postId,userId)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
+
+func (service *PostService) UpdatePostCreatedAt(dto *DTO.UpdateCreatedAtDTO) error {
+
+	err := service.Repo.UpdatePostCreatedAt(dto.CreatedAt, dto.UserID, dto.ID)
+	if err != nil{
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func (service *PostService) GetAllPostFeedsForUser(userid string) ( *[]Model.Post, error){
+
+	var postsByAllNotMutedFollowedUsers []Model.Post
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("USER_FOLLOWERS_SERVICE_DOMAIN") + ":" + os.Getenv("USER_FOLLOWERS_SERVICE_PORT") + "/allNotMutedFollows/" + userid)
+
+	resp, err := http.Get(reqUrl)
+	if err != nil || resp.StatusCode == 404 {
+		return nil,err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	var notMutedFollowedUsers []string
+	err = json.Unmarshal(body, &notMutedFollowedUsers)
+	if err != nil{
+		return nil, err
+	}
+
+	for _,userId := range notMutedFollowedUsers {
+
+		postsByOneUser,err := service.Repo.FindPostsByUserId(userId)
+
+		if err != nil {
+			return nil, err
+		}
+		if postsByOneUser != nil {
+			postsByAllNotMutedFollowedUsers = append(postsByAllNotMutedFollowedUsers, *postsByOneUser...)
+		}
+	}
+
+	var feedSlice FeedSlice
+	feedSlice = postsByAllNotMutedFollowedUsers
+	sort.Sort(feedSlice)
+	postsByAllNotMutedFollowedUsers = feedSlice
+
+	return &postsByAllNotMutedFollowedUsers,nil
+
+}
+
+
+//for sorting post feeds by created time
+type FeedSlice []Model.Post
+
+func (f FeedSlice) Len() int {
+	return len(f)
+}
+
+func (f FeedSlice) Less(i, j int) bool {
+	return f[i].CreatedAt.After(f[j].CreatedAt)
+}
+
+func (f FeedSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}

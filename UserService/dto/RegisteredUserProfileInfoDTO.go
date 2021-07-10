@@ -16,4 +16,5 @@ type RegisteredUserProfileInfoDTO struct {
 	Biography string
 	WebSite string
 	ProfilePicture string
+	IsAgent bool
 }

@@ -7,7 +7,15 @@ services:
     ports:
       - 7474:7474
       - 7687:7687
+      - 7473:7473
     volumes:
-      - ./neo4j/plugins:/plugins
+      - neo4j_db_test:/plugins
+      - neo4j_db_test:/conf
+      - neo4j_db_test:/data
+      - neo4j_db_test:/import
+      - neo4j_db_test:/logsneo4j
     environment:
       - NEO4J_AUTH=neo4j/nistagram
+
+volumes:
+    neo4j_db_test:

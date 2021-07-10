@@ -101,12 +101,15 @@ export default function UsersList({label,users,open, setOpen }) {
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center" }}
+          style={{ textAlign: "center",width:400 }}
         >
         <h3>{label}</h3>
         </DialogTitle>
-        <DialogContent dividers>
-        {users !== null && users.map((user) => (
+        <DialogContent
+        style={{width:400,height:400}}
+        dividers>
+        {users === undefined || users === null || (users !== null && users.length === 0) && <p>No {label}</p>}  
+        {users !== undefined && users !== null && users.map((user) => (
             <Grid container>
                <Grid item xs={8}>
                     {user.Username}

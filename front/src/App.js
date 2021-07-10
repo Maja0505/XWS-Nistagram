@@ -7,45 +7,24 @@ import UserHomePage from "./components/UserHomePage.js";
 import StartPage from "./components/StartPage.js";
 import NavBar from "./components/NavBar";
 import PostDialog from "./components/PostDialog";
-import StoryBar from "./components/StoryBar";
-import ContentDetails from "./components/ContentDetails";
 import AdminHomePage from "./components/AdminHomePage";
 import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
-import StoryFeeds from "./components/StoryFeeds";
+import { useEffect } from "react";
+import Button from '@material-ui/core/Button';
+import { SnackbarProvider, useSnackbar  } from 'notistack';
+import Snackbar from './components/Snackbar'
+import LocationTagPost from "./components/LocationTagPost.js";
+import FollowSuggestions from "./components/FollowSuggestions";
+import Message from "./components/Message"
 
 function App() {
   const logedUsername = localStorage.getItem("username");
 
-  const users = [
-    {
-      Username: "Perica",
-      FirstName: "Perica",
-      LastName: "Peric",
-      DateOfBirth: "krdlkjf",
-      Email: "Peric.peric@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Female",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-
-    {
-      Username: "marko",
-      FirstName: "Marko",
-      LastName: "Markovic",
-      DateOfBirth: "krdlkjf",
-      Email: "marko.markovic@gmail.com",
-      PhoneNumber: "0490843",
-      Gender: "Male",
-      Biography: "Jedna vrlo uspesan gospodin",
-      WebSite: "Pericaperic.com",
-    },
-  ];
-
   return (
     <div>
+
       <Router>
         <div className="App">
           <NavBar></NavBar>
@@ -73,7 +52,7 @@ function App() {
             <Route path="/admin" component={AdminHomePage}></Route>
 
             <Route
-              path="/dialog/:username/:post"
+              path="/dialog/:post"
               render={(props) => <PostDialog {...props} />}
             ></Route>
 
@@ -87,10 +66,26 @@ function App() {
               path="/explore/tags/:tag/"
               render={(props) => <HashTagPost {...props} />}
             ></Route>
-            <Route exact path="/story/feed/" component={StoryFeeds}></Route>
+            <Route
+              exact
+              path="/explore/locations/:location/"
+              render={(props) => <LocationTagPost {...props} />}
+            ></Route>
+
+            <Route
+              path="/follow-suggestions/"
+              component={FollowSuggestions}
+            ></Route>
+                   <Route
+              path="/messages/"
+              component={Message}
+            ></Route>
           </Switch>
         </div>
       </Router>
+     <SnackbarProvider maxSnack={3}>
+       <Snackbar/>
+     </SnackbarProvider>
     </div>
   );
 }

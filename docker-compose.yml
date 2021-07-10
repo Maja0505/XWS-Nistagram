@@ -25,12 +25,54 @@ services:
     restart: on-failure
     depends_on:
       - mongo
+      - redis
     links: 
       - mongo
-    tmpfs:
-      - /var/run
-      - /var/cache/verification-docs/*
-      - /var/cache/profile-docs/*
+      - redis
+    volumes:
+      - micro_services:/app
+
+  notification-service:
+    image: notification-service:compose_build
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      NOTIFICATION_SERVICE_PORT: 8080
+      NOTIFICATION_SERVICE_HOST: redis
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
+    depends_on:
+      - redis
+    links: 
+      - redis
+    restart: on-failure
+    volumes:
+      - micro_services:/app
+
+
+  message-service:
+    image: message-service:compose_build
+    build:
+      context: ./MessageService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      MESSAGE_SERVICE_PORT: 8080
+      MESSAGE_SERVICE_HOST: redis
+      USER_SERVICE_PORT: 8080
+      USER_SERVICE_DOMAIN: user-service
+    depends_on:
+      - redis
+    links: 
+      - redis
+    restart: on-failure
+    volumes:
+      - micro_services:/app
+
 
   post-service:
     image: post-service:compose_build
@@ -44,14 +86,38 @@ services:
       POST_SERVICE_HOST: cass
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      USER_FOLLOWERS_SERVICE_PORT: 8080
+      USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
     restart: on-failure
-    tmpfs:
-      - /var/run
-      - /var/cache/post-documents/*
+    volumes:
+      - micro_services:/app
     depends_on:
       - cass
     links: 
       - cass
+
+
+  agent-service:
+    image: agent-service:compose_build
+    build:
+      context: ./AgentService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      AGENT_SERVICE_PORT: 8080
+      AGENT_SERVICE_HOST: cass
+      POST_SERVICE_PORT: 8080
+      POST_SERVICE_DOMAIN: post-service
+    restart: on-failure
+    volumes:
+      - micro_services:/app
+    depends_on:
+      - cass
+    links: 
+      - cass
+
+
 
   user-followers-service:
     image: user-followers-service:compose_build
@@ -68,15 +134,32 @@ services:
     restart: on-failure
     depends_on:
       - neo4j
+      - redis
     links: 
       - neo4j
+      - redis
+    volumes:
+      - micro_services:/app
+
+  media-storage-service:
+    image: media-storage-service:compose_build
+    build:
+      context: ./MediaStorageService
+      dockerfile: Dockerfile
+    networks:
+      - network1
+    environment:
+      MEDIA_STORAGE_SERVICE_PORT: 8080
+    restart: on-failure
+    volumes:
+      - micro_services:/app
 
   mongo:
     image: mongo
     ports:
       - "27017:27017"
     volumes:
-      - ./data/db:/data/db
+      - mongo_db:/data/db
     networks:
       - network1
 
@@ -90,7 +173,11 @@ services:
     networks:
       - network1
     volumes:
-      - ./neo4j/plugins:/plugins
+      - neo4j_db:/plugins
+      - neo4j_db:/conf
+      - neo4j_db:/data
+      - neo4j_db:/import
+      - neo4j_db:/logsneo4j
     environment:
       - NEO4J_AUTH=neo4j/nistagram
       - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687
@@ -109,7 +196,23 @@ services:
     ports:
       - "9042:9042"
     volumes:
-      - ./cass.yaml:/etc/cassandra/cass.yaml
+      - cass_db:/etc/cassandra/cass.yaml
+
+  redis:
+    image: "redis:alpine"
+    networks:
+      - network1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_db:/usr/local/etc/redis/redis.config
+
+volumes:
+    cass_db:
+    neo4j_db:
+    mongo_db:
+    micro_services:
+    redis_db:
 
 networks:
    network1:
