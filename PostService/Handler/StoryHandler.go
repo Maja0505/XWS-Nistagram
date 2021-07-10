@@ -124,7 +124,7 @@ func (handler *StoryHandler) GetAllStoriesForCloseFriendsByUser(w http.ResponseW
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	fmt.Println(userId)
 	stories,err := handler.Service.GetAllStoriesForCloseFriendsByUser(userId)
 	if err != nil{
 		fmt.Println(err)

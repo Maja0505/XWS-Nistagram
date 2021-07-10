@@ -66,6 +66,7 @@ func (service *StoryService) GetAllNotExpiredStoriesByUser(userId string) (*[]DT
 }
 
 func (service *StoryService) GetAllStoriesForCloseFriendsByUser(userId string) (*[]DTO.StoryDTO,error){
+	fmt.Println("GetAllStoriesForCloseFriendsByUser")
 	stories,err := service.Repo.GetAllStoriesForCloseFriendsByUser(userId)
 	if err != nil {
 		return nil, err

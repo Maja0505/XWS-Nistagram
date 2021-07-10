@@ -13,8 +13,8 @@ type StoryRepository struct {
 
 func (repo *StoryRepository) Create(story *Model.Story) (gocql.UUID, error) {
 	ID := gocql.TimeUUID()
-	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id, userid, available, image, for_close_friends, highlights, createdat) VALUES(?, ?, ?, ?, ?, ?, ?)",
-		ID, story.UserID, true, story.Image,story.ForCloseFriends,story.Highlights, ID.Time()).Exec(); err != nil {
+	if err := repo.Session.Query("INSERT INTO postkeyspace.stories(id, userid, available, image, for_close_friends, highlights, createdat,link) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+		ID, story.UserID, true, story.Image,story.ForCloseFriends,story.Highlights, ID.Time(),story.Link).Exec(); err != nil {
 		return ID, err
 	}
 	if err := repo.SetStoryAvailability(ID, story.UserID); err != nil{
@@ -62,6 +62,7 @@ func (repo *StoryRepository) GetAllStoriesByUser(userId string) (*[]Model.Story,
 func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
+	fmt.Println("REPOOOOOOO")
 	query := "select * from postkeyspace.stories where userid=? and available = true and for_close_friends=False allow filtering;"
 	iter := repo.Session.Query(query,userId).Iter()
 
@@ -86,6 +87,7 @@ func (repo *StoryRepository) GetAllNotExpiredStoriesByUser(userId string) (*[]Mo
 func (repo *StoryRepository) GetAllStoriesForCloseFriendsByUser(userId string) (*[]Model.Story,error){
 	var stories []Model.Story
 	m := map[string]interface{}{}
+	fmt.Println("Repoo")
 	query := "select * from postkeyspace.stories where userid=? and available = true allow filtering;"
 	iter := repo.Session.Query(query,userId).Iter()
 

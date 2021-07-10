@@ -62,6 +62,11 @@ const Snackbar = () => {
               localStorage.setItem('invisibleNotification',false)
               handleClick(p2.user_who_follow + " " + p2.content + " " + p2.comment)
             }
+
+            if(p2.content === "sent you a message." && p2.channel === userid){
+              localStorage.setItem('invisibleNotification',false)
+              handleClick(p2.user_who_follow + " " + p2.content)
+            }
             };
       };
     

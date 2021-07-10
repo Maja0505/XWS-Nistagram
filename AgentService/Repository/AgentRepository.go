@@ -352,13 +352,17 @@ func (repo *AgentRepository) CreateAgentStory(campaign *Model.Campaign, i int) (
 
 	reqUrl := fmt.Sprintf("http://" + os.Getenv("POST_SERVICE_DOMAIN") + ":" + os.Getenv("POST_SERVICE_PORT") + "/story/create")
 
+	fmt.Println(campaign.Media[i])
 	storyDTO := DTO.StoryDTO{
 		Media:           campaign.Media[i],
 		UserID:          campaign.UserID,
 		ForCloseFriends: false,
 		Highlights:      false,
+		Link: campaign.Links[i],
 	}
 	jsonPost, _ := json.Marshal(storyDTO)
+	fmt.Println(storyDTO.Media)
+	fmt.Println(storyDTO.Link)
 
 	resp, err := http.Post(reqUrl, "appliation/json", bytes.NewBuffer(jsonPost))
 	if err != nil || resp.StatusCode == 404 {
