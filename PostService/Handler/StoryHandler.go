@@ -4,6 +4,7 @@ import (
 	"XWS-Nistagram/PostService/DTO"
 	"XWS-Nistagram/PostService/Service"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"io"
@@ -16,7 +17,36 @@ type StoryHandler struct {
 	Service *Service.StoryService
 }
 
+func (handler *StoryHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request){
+	client := &http.Client{}
+	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
+	req,err := http.NewRequest("POST",reqUrl,nil)
+	req.Header.Add("Authorization",r.Header.Get("Authorization"))
+	req.Header.Add("path","/api/post" + r.URL.Path)
+	req.Header.Add("method",r.Method)
+
+	fmt.Println(r.Method)
+	resp,err := client.Do(req)
+	if err != nil{
+		fmt.Println(err)
+	}
+	fmt.Println(resp.Body)
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Header)
+
+	if resp.StatusCode != 200 {
+		var errorText string
+		body, _ := ioutil.ReadAll(resp.Body)
+		respBodyInErrorCase := json.Unmarshal(body, &errorText)
+		respBodyInErrorCase = errors.New(errorText)
+		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
+		return
+	}
+
+}
+
 func (handler *StoryHandler) Create(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	var storyDTO DTO.CreateStoryDTO
 	err := json.NewDecoder(r.Body).Decode(&storyDTO)
@@ -37,6 +67,7 @@ func (handler *StoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 func (handler *StoryHandler) UpdateStoryAvailabilityAndDate(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	var upDTO DTO.UpdateStoryAgentDTO
 	err := json.NewDecoder(r.Body).Decode(&upDTO)
@@ -55,6 +86,7 @@ func (handler *StoryHandler) UpdateStoryAvailabilityAndDate(w http.ResponseWrite
 }
 
 func (handler *StoryHandler) SetStoryForHighlights(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -75,6 +107,7 @@ func (handler *StoryHandler) SetStoryForHighlights(w http.ResponseWriter, r *htt
 }
 
 func (handler *StoryHandler) GetAllStoriesByUser(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -96,6 +129,7 @@ func (handler *StoryHandler) GetAllStoriesByUser(w http.ResponseWriter, r *http.
 }
 
 func (handler *StoryHandler) GetAllNotExpiredStoriesByUser(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -117,6 +151,7 @@ func (handler *StoryHandler) GetAllNotExpiredStoriesByUser(w http.ResponseWriter
 }
 
 func (handler *StoryHandler) GetAllStoriesForCloseFriendsByUser(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -138,6 +173,7 @@ func (handler *StoryHandler) GetAllStoriesForCloseFriendsByUser(w http.ResponseW
 }
 
 func (handler *StoryHandler) GetAllHighlightsStoriesByUser(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]
@@ -159,6 +195,7 @@ func (handler *StoryHandler) GetAllHighlightsStoriesByUser(w http.ResponseWriter
 }
 
 func (handler *StoryHandler) GetAllFollowsWithStories(w http.ResponseWriter, r *http.Request) {
+	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userId := vars["userId"]

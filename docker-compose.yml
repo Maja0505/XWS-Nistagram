@@ -46,6 +46,8 @@ services:
       NOTIFICATION_SERVICE_HOST: redis
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      AUTHENTICATION_SERVICE_DOMAIN: authentication-service
+      AUTHENTICATION_SERVICE_PORT: 8080
     depends_on:
       - redis
     links: 
@@ -67,6 +69,8 @@ services:
       MESSAGE_SERVICE_HOST: redis
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      AUTHENTICATION_SERVICE_DOMAIN: authentication-service
+      AUTHENTICATION_SERVICE_PORT: 8080
     depends_on:
       - redis
     links: 
@@ -90,6 +94,8 @@ services:
       USER_SERVICE_DOMAIN: user-service
       USER_FOLLOWERS_SERVICE_PORT: 8080
       USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
+      AUTHENTICATION_SERVICE_DOMAIN: authentication-service
+      AUTHENTICATION_SERVICE_PORT: 8080
     restart: on-failure
     volumes:
       - micro_services:/app
@@ -177,7 +183,7 @@ services:
       - micro_services:/app
 
   mongo:
-    image: mongo:4.4.7
+    image: mongo
     ports:
       - "27017:27017"
     volumes:
