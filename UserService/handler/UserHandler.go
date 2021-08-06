@@ -61,7 +61,6 @@ func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
 }
 
 func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	var userForRegistrationDTO dto.UserForRegistrationDTO
 	err := json.NewDecoder(r.Body).Decode(&userForRegistrationDTO)

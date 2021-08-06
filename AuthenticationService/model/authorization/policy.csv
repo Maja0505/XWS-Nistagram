@@ -2,5 +2,27 @@ p,USER,/authorize,POST
 p,AGENT,/authorize,POST
 p,ADMIN,/authorize,POST
 
-p,USER,/api/user/,GET
+p,USER,/api/user/,*
+p,USER,/api/user/update/*,*
+p,USER,/api/user/change-password/*,*
+p,USER,/api/user/*/public-profile/*,*
+p,USER,/api/user/*/message-request/*,*
+p,USER,/api/user/*/allow-tags/*,*
+p,USER,/api/user/*/like-notification/*,*
+p,USER,/api/user/*/comment-notification/*,*
+p,USER,/api/user/*/message-request-notification/*,*
+p,USER,/api/user/*/message-notification/*,*
+p,USER,/api/user/*/follow-request-notification/*,*
+p,USER,/api/user/*/follow-notification/*,*
+p,USER,/api/user/delete/*,*
+p,ADMIN,/api/user/verification-request/create,*
+p,ADMIN,/api/user/verification-request/update/*,*
+p,ADMIN,/api/user/verification-request/all,*
+p,ADMIN,/api/user/verification-request/*,*
+p,ADMIN,/api/user/verification-request/approve/*,*
+p,ADMIN,/api/user/verification-request/delete/*,*
+p,ADMIN,/api/user/agent-registration-request/create,*
+p,ADMIN,/api/user/agent-registration-request/get-all,*
+p,ADMIN,/api/user/agent-registration-request/update-to-approved/*,*
+p,ADMIN,/api/user/agent-registration-request/delete/*,*
 
