@@ -1,5 +1,6 @@
-p, User, /authorize, POST
-p,Agent,/authorizeDemonstration,POST
-p,Agent,/authorize,POST
+p,USER,/authorize,POST
+p,AGENT,/authorize,POST
+p,ADMIN,/authorize,POST
+
 p,USER,/api/user/,GET
 

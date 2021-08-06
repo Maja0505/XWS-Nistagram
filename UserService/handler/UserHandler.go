@@ -18,7 +18,7 @@ type UserHandler struct {
 	Service *service.UserService
 }
 
-func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request){
+func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) *http.Response{
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -35,11 +35,21 @@ func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request
 	fmt.Println(resp.Status)
 	fmt.Println(resp.Header)
 
+	return resp
+
 }
 
 
 func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	resp := handler.CheckAuthorize(w,r)
+	if resp.StatusCode != 200 {
+		var errorText string
+		body, _ := ioutil.ReadAll(resp.Body)
+		respBodyInErrorCase := json.Unmarshal(body, &errorText)
+		respBodyInErrorCase = errors.New(errorText)
+		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	users,err := handler.Service.FindAll()
 	if err != nil{
