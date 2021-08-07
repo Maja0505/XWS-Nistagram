@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"time"
 )
 
 type UserFollowersRepository struct{
@@ -15,14 +16,19 @@ type UserFollowersRepository struct{
 
 func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationship) error{
 
+	fmt.Println("Pocetak kreiranja prvog korisnika : ",time.Now())
 	err := repository.CreateUserNodeIfNotExist(fr.User)
+	fmt.Println("Zavrseno kreiranje prvog korisnika")
+	fmt.Println("Pocetak kreiranja drugog korisnika : ",time.Now())
 	err = repository.CreateUserNodeIfNotExist(fr.FollowedUser)
+	fmt.Println("Zavrseno kreiranje prvog korisnika : ",time.Now())
 
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
+	fmt.Println("Pocetak kreiranja veze : ",time.Now())
 	_,err = repository.Session.Run("MATCH (u1:User),(u2:User) WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
 		"MERGE (u1)-[r:follow]->(u2) set r.close_friend=$close set r.mute=$mute",map[string]interface{}{
 		"userId1" : fr.User ,
@@ -30,7 +36,7 @@ func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationsh
 		"mute" : fr.Muted,
 		"close" : fr.CloseFriend,
 	})
-
+	fmt.Println("Zavrseno kreiranje veze izmedju korisnika : ",time.Now())
 	if err != nil{
 		fmt.Println(err)
 		return err

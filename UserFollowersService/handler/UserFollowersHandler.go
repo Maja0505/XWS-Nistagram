@@ -16,7 +16,7 @@ type UserFollowersHandler struct{
 	Service *service.UserFollowersService
 }
 
-func (handler *UserFollowersHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) {
+func (handler *UserFollowersHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool {
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -39,14 +39,16 @@ func (handler *UserFollowersHandler) CheckAuthorize(w http.ResponseWriter,r *htt
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
+		return false
 	}
-
+	return true
 
 }
 
 func (handler *UserFollowersHandler) FollowUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -69,7 +71,9 @@ func (handler *UserFollowersHandler) FollowUser(w http.ResponseWriter, r *http.R
 }
 
 func (handler *UserFollowersHandler) UnfollowUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -92,7 +96,9 @@ func (handler *UserFollowersHandler) UnfollowUser(w http.ResponseWriter, r *http
 }
 
 func (handler *UserFollowersHandler) AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -113,7 +119,9 @@ func (handler *UserFollowersHandler) AcceptFollowRequest(w http.ResponseWriter, 
 }
 
 func (handler *UserFollowersHandler) CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -134,7 +142,9 @@ func (handler *UserFollowersHandler) CancelFollowRequest(w http.ResponseWriter, 
 }
 
 func (handler *UserFollowersHandler) SetCloseFriend(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -155,7 +165,9 @@ func (handler *UserFollowersHandler) SetCloseFriend(w http.ResponseWriter, r *ht
 }
 
 func (handler *UserFollowersHandler) SetMuteFriend(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -287,7 +299,9 @@ func (handler *UserFollowersHandler) GetAllFollowersByUser(w http.ResponseWriter
 }
 
 func (handler *UserFollowersHandler) GetAllFollowRequests(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -311,7 +325,9 @@ func (handler *UserFollowersHandler) GetAllFollowRequests(w http.ResponseWriter,
 }
 
 func (handler *UserFollowersHandler) GetAllCloseFriends(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -335,7 +351,9 @@ func (handler *UserFollowersHandler) GetAllCloseFriends(w http.ResponseWriter, r
 }
 
 func (handler *UserFollowersHandler) GetAllMuteFriends(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -447,7 +465,9 @@ func (handler *UserFollowersHandler) CheckClosed(w http.ResponseWriter, r *http.
 }
 
 func (handler *UserFollowersHandler) GetFollowSuggestions(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
