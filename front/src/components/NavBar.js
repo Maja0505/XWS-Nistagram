@@ -34,7 +34,11 @@ import Badge from "@material-ui/core/Badge";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const NavBar = () => {
-  const token = localStorage.getItem("token");
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
@@ -56,22 +60,12 @@ const NavBar = () => {
 
   const logout = () => {
     axios
-      .post(
-        "/api/auth/logout",
-        { asd: "sdsad" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        console.log(res.data);
-        clearLocalStorage();
-      })
+      .post("/api/auth/logout", {}, authorization)
+      .then((res) => {})
       .catch((error) => {
         console.log(error);
       });
+    clearLocalStorage();
   };
 
   const clearLocalStorage = () => {
@@ -640,7 +634,6 @@ const NavBar = () => {
     <>
       {redirection === true && <Redirect to={redirectionString} />}
       <AppBar position="static">
-        <p>{token}</p>
         {(username === null || username === undefined) &&
           NavBarForUnregisteredUser}
         {username !== null && username !== undefined && NavBarForRegistredUser}

@@ -42,6 +42,12 @@ import AddCampaignToInfluencerDialog from "./AddCampaignToInfluencerDialog";
 import ViewCampaignRequestsForInfluencerDialog from "./ViewCampaignRequestsForInfluencerDialog";
 
 const UserHomePage = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [user, setUser] = useState();
   const [tabValue, setTabValue] = useState(0);
   const { username } = useParams();
@@ -263,7 +269,8 @@ const UserHomePage = () => {
             if (res.data) {
               setHighlightStories(res.data);
             }
-          }).catch((error) => {
+          })
+          .catch((error) => {
             //console.log(error);
           });
       })
@@ -278,13 +285,16 @@ const UserHomePage = () => {
       Friend: user.ID,
       Mute: false,
     };
-    axios.put("/api/user-follow/setMuteFriend", muteDto).then((res) => {
-      console.log("uspelo");
-      setOpen((prevOpen) => !prevOpen);
-      setMuted(false);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/user-follow/setMuteFriend", muteDto)
+      .then((res) => {
+        console.log("uspelo");
+        setOpen((prevOpen) => !prevOpen);
+        setMuted(false);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const handleOpenDialogForBlock = () => {
@@ -311,12 +321,15 @@ const UserHomePage = () => {
       Friend: user.IdString,
       Close: true,
     };
-    axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
-      console.log("uspesno");
-      setClose(true);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/user-follow/setCloseFriend", closeDto)
+      .then((res) => {
+        console.log("uspesno");
+        setClose(true);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const handleSetToRemoveFromClose = () => {
@@ -325,12 +338,15 @@ const UserHomePage = () => {
       Friend: user.IdString,
       Close: false,
     };
-    axios.put("/api/user-follow/setCloseFriend", closeDto).then((res) => {
-      console.log("uspesno");
-      setClose(false);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/user-follow/setCloseFriend", closeDto)
+      .then((res) => {
+        console.log("uspesno");
+        setClose(false);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const followClicked = () => {
@@ -340,57 +356,63 @@ const UserHomePage = () => {
         FollowedUser: user.ID,
         Private: true,
       };
-      axios.post("/api/user-follow/followUser", follow).then((res) => {
-        console.log("uspesno");
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              user.IdString +
-              '"' +
-              ', "content": "requested to following you."}'
+      axios
+        .post("/api/user-follow/followUser", follow, authorization)
+        .then((res) => {
+          console.log("uspesno");
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
           );
-        };
-        setRequested(true);
-      }).catch((error) => {
-        //console.log(error);
-      });
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                user.IdString +
+                '"' +
+                ', "content": "requested to following you."}'
+            );
+          };
+          setRequested(true);
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
     } else {
       var follow = {
         User: loggedInId,
         FollowedUser: user.ID,
         Private: false,
       };
-      axios.post("/api/user-follow/followUser", follow).then((res) => {
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              user.IdString +
-              '"' +
-              ', "content": "started following you."}'
+      axios
+        .post("/api/user-follow/followUser", follow, authorization)
+        .then((res) => {
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
           );
-        };
-        setFollowing(true);
-      }).catch((error) => {
-        //console.log(error);
-      });
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                user.IdString +
+                '"' +
+                ', "content": "started following you."}'
+            );
+          };
+          setFollowing(true);
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
     }
   };
   const unfollowClicked = () => {
@@ -398,12 +420,15 @@ const UserHomePage = () => {
       User: loggedInId,
       UnfollowedUser: user.ID,
     };
-    axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
-      console.log("uspesno");
-      //setUser({...user,allFollowers: user.allFollowers - 1})
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/user-follow/unfollowUser", follow)
+      .then((res) => {
+        console.log("uspesno");
+        //setUser({...user,allFollowers: user.allFollowers - 1})
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
     setFollowing(false);
   };
 
