@@ -25,6 +25,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const AddCampaign = ({ setTabValue }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
 
   const [selectedFile, setSelectedFile] = useState([]);
@@ -171,7 +176,7 @@ const AddCampaign = ({ setTabValue }) => {
       };
       console.log("Uspesno upload-ovao sliku");
       axios
-        .post("/api/agent/create-campaign", postDTO)
+        .post("/api/agent/create-campaign", postDTO,authorization)
         .then((res1) => {
           console.log("Uspesno kreirao post");
           //var postDTONew = { ...postDTO, ID: res1.data };

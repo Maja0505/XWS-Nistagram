@@ -76,6 +76,11 @@ export default function DialogForSaveToFavorites({
   saved,
   setSaved,
 }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [saveToFavorites, setSaveToFavorites] = useState(true);
   const [saveToCollection, setSaveToCollection] = useState(false);
@@ -100,7 +105,7 @@ export default function DialogForSaveToFavorites({
         "/api/post/get-all-collections-for-post-by-user/" +
           loggedUserId +
           "/" +
-          post
+          post,authorization
       )
       .then((res) => {
         if (res.data) {
@@ -118,9 +123,9 @@ export default function DialogForSaveToFavorites({
       UserID: loggedUserId,
       Collection: collectionName,
     };
-    axios.post("/api/post/add-to-favourites", favoritesDto).then((res) => {
+    axios.post("/api/post/add-to-favourites", favoritesDto,authorization).then((res) => {
       if (createNewCollection || saveToAnExistingCollection) {
-        axios.post("/api/post/add-to-collection", favoritesDto).then((res) => {
+        axios.post("/api/post/add-to-collection", favoritesDto,authorization).then((res) => {
           console.log("uspelo");
           setOpen(false);
           setSaved(true);
@@ -137,7 +142,7 @@ export default function DialogForSaveToFavorites({
 
   const handleClickSaveToCollection = () => {
     axios
-      .get("/api/post/get-collections-for-user/" + loggedUserId)
+      .get("/api/post/get-collections-for-user/" + loggedUserId,authorization)
       .then((res) => {
         if (res.data) {
           setAllUserCollections(res.data);
@@ -171,7 +176,7 @@ export default function DialogForSaveToFavorites({
       Collection: "",
     };
     axios
-      .post("/api/post/remove-post-from-favourites", favoritesDto)
+      .post("/api/post/remove-post-from-favourites", favoritesDto,authorization)
       .then((res) => {
         console.log("uspenso");
         setSaved(false);
@@ -188,7 +193,7 @@ export default function DialogForSaveToFavorites({
       Collection: collectionName,
     };
     axios
-      .post("/api/post/remove-post-from-collection", favoritesDto)
+      .post("/api/post/remove-post-from-collection", favoritesDto,authorization)
       .then((res) => {
         console.log("uspenso");
 

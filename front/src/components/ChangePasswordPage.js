@@ -22,6 +22,11 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 const ChangePasswordPage = ({setOpen,setMessage}) => {
+    const authorization = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    };
     const classes = useStyles();
     const username = localStorage.getItem("username");
     const [oldPassword,setOldPassword] = useState('')
@@ -33,7 +38,7 @@ const ChangePasswordPage = ({setOpen,setMessage}) => {
             newPassword: newPassword,
             confirmNewPassword: confirmedNewPassword
         }
-        axios.put('/api/user/change-password/' + username, passwordDto)
+        axios.put('/api/user/change-password/' + username, passwordDto,authorization)
             .then((res)=>{
                     setOpen(true)
                     setMessage('Successful changed password')

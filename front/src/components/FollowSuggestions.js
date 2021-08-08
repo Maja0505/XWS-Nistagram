@@ -5,12 +5,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const FollowSuggestions = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const loggedUserID = localStorage.getItem("id");
   const [followSuggestions, setFollowSuggestions] = useState([]);
 
   useEffect(() => {
     axios
-      .get("/api/user-follow/followSuggestions/" + loggedUserID)
+      .get("/api/user-follow/followSuggestions/" + loggedUserID,authorization)
       .then((res) => {
         setFollowSuggestions(res.data);
       }).catch((error) => {

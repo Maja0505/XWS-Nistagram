@@ -23,6 +23,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const AddPost = ({ setTabValue }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
 
   const [selectedFile, setSelectedFile] = useState([]);
@@ -61,7 +66,7 @@ const AddPost = ({ setTabValue }) => {
           .post("/api/post/add-tag", {
             Tag: "#" + tag,
             PostID: postDTO.ID,
-          })
+          },authorization)
           .then((res) => {
             console.log("Upisan tag  " + tag);
           })
@@ -77,7 +82,7 @@ const AddPost = ({ setTabValue }) => {
         .post("/api/post/add-tag", {
           Tag: userTag,
           PostID: postDTO.ID,
-        })
+        },authorization)
         .then((res) => {
           let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
           socket.onopen = () => {
@@ -156,7 +161,7 @@ const AddPost = ({ setTabValue }) => {
       };
       console.log("Uspesno upload-ovao sliku");
       axios
-        .post("/api/post/create", postDTO)
+        .post("/api/post/create", postDTO,authorization)
         .then((res1) => {
           console.log("Uspesno kreirao post");
           var postDTONew = { ...postDTO, ID: res1.data };

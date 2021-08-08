@@ -44,6 +44,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const AddStoryCampaign = ({ open, setOpen,setHaveStory }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
   const [selectedFile, setSelectedFile] = useState([]);
@@ -210,7 +215,7 @@ const AddStoryCampaign = ({ open, setOpen,setHaveStory }) => {
       };
       console.log("Uspesno upload-ovao sliku");
       axios
-        .post("/api/agent/create-campaign", postDTO)
+        .post("/api/agent/create-campaign", postDTO,authorization)
         .then((res1) => {
           console.log("Uspesno kreirao post");
           //var postDTONew = { ...postDTO, ID: res1.data };

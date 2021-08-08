@@ -22,6 +22,11 @@ import axios from "axios";
 
 
 export default function ContentDetails() {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [username,setUsername] =  useState("")
   const [users,setUsers] = useState([])
   const loggedUserId = localStorage.getItem("id");
@@ -32,7 +37,7 @@ export default function ContentDetails() {
 
 
   useEffect(() => {
-    axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId)
+    axios.get("/api/post/story/all-follows-with-stories/" + loggedUserId,authorization)
     .then((res) => {
       if(res.data){
         setUsers(res.data)
@@ -40,7 +45,7 @@ export default function ContentDetails() {
     }).catch((error) =>{
 
     })
-   axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
+   axios.get("/api/post/story/all-for-close-friends/" + loggedUserId,authorization)
     .then((res) => {
       if(res.data){
         console.log(res.data)
@@ -80,10 +85,10 @@ export default function ContentDetails() {
       setOpen((prevOpen) => !prevOpen);
  
     }else{
-      axios.get("/api/user-follow/checkClosed/"+loggedUserId+"/" + username)
+      axios.get("/api/user-follow/checkClosed/"+loggedUserId+"/" + username,authorization)
         .then((res) => {
           if(res.data){
-            axios.get("/story/all-for-close-friends/" + username)
+            axios.get("/story/all-for-close-friends/" + username,authorization)
               .then((res) => {
                 setStories(res.data)
                 setStoriesOpen(true)
@@ -91,7 +96,7 @@ export default function ContentDetails() {
       
               })
           }else{
-            axios.get("/api/post/story/all-not-expired/" + username)
+            axios.get("/api/post/story/all-not-expired/" + username,authorization)
             .then((res) => {
               setStories(res.data)
               setStoriesOpen(true)
@@ -132,7 +137,7 @@ export default function ContentDetails() {
   };
 
   const handleClickOpenMyStories = () => {
-    axios.get("/api/post/story/all-for-close-friends/" + loggedUserId)
+    axios.get("/api/post/story/all-for-close-friends/" + loggedUserId,authorization)
     .then((res) => {
       console.log(res.data)
       setStories(res.data)

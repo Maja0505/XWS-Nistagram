@@ -71,6 +71,12 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOpen }) {
+
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const handleClose = () => {
     setOpen(false);
@@ -85,7 +91,7 @@ export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOp
         Friend: muteUserId,
         Mute : true
     }
-    axios.put('/api/user-follow/setMuteFriend',muteDto)
+    axios.put('/api/user-follow/setMuteFriend',muteDto,authorization)
     .then((res)=> {
       console.log('uspelo')
       setOpen(false)

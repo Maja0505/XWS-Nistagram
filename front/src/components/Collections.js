@@ -106,6 +106,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Collections = ({userForProfile}) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [collections, setCollections] = useState([]);
@@ -120,7 +125,7 @@ const Collections = ({userForProfile}) => {
   };
 
   useEffect(() => {
-    axios.get('/api/post/get-collections-for-user/' + loggedUserId)
+    axios.get('/api/post/get-collections-for-user/' + loggedUserId,authorization)
       .then((res)=>
       {
         setCollections(res.data)

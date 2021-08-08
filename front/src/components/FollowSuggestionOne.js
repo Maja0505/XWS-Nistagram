@@ -7,6 +7,11 @@ import avatar from "../images/nistagramAvatar.jpg";
 
 import axios from "axios";
 const FollowSuggestionOne = ({ suggestion }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [user, setUser] = useState();
   const [allFollowers, setAllFollowers] = useState([]);
   const [buttonState, setButtonState] = useState("not_following");
@@ -14,13 +19,13 @@ const FollowSuggestionOne = ({ suggestion }) => {
   const [requested, setRequested] = useState(false);
 
   useEffect(() => {
-    axios.get("/api/user/" + suggestion.Username).then((res) => {
+    axios.get("/api/user/" + suggestion.Username,authorization).then((res) => {
       console.log(res.data);
       setUser(res.data);
     });
 
     axios
-      .get("/api/user-follow/allFollowers/" + suggestion.IdString)
+      .get("/api/user-follow/allFollowers/" + suggestion.IdString,authorization)
       .then((res) => {
         if (res.data) {
           console.log(res.data);
@@ -38,7 +43,7 @@ const FollowSuggestionOne = ({ suggestion }) => {
         "/api/user-follow/checkRequested/" +
           loggedUserId +
           "/" +
-          suggestion.IdString
+          suggestion.IdString,authorization
       )
       .then((res) => {
         setRequested(res.data);
@@ -59,7 +64,7 @@ const FollowSuggestionOne = ({ suggestion }) => {
         FollowedUser: user.ID,
         Private: false,
       };
-      axios.post("/api/user-follow/followUser", follow).then((res) => {
+      axios.post("/api/user-follow/followUser", follow,authorization).then((res) => {
         console.log("uspesno");
       });
     } else {
@@ -68,7 +73,7 @@ const FollowSuggestionOne = ({ suggestion }) => {
         FollowedUser: user.ID,
         Private: true,
       };
-      axios.post("/api/user-follow/followUser", follow).then((res) => {
+      axios.post("/api/user-follow/followUser", follow,authorization).then((res) => {
         console.log("uspesno");
       }).catch((error) => {
         //console.log(error);
@@ -86,7 +91,7 @@ const FollowSuggestionOne = ({ suggestion }) => {
       User: loggedUserId,
       UnfollowedUser: user.ID,
     };
-    axios.put("/api/user-follow/unfollowUser", follow).then((res) => {
+    axios.put("/api/user-follow/unfollowUser", follow,authorization).then((res) => {
       console.log("uspesno");
     }).catch((error) => {
       //console.log(error);
@@ -101,7 +106,7 @@ const FollowSuggestionOne = ({ suggestion }) => {
       UserWitchSendRequest: loggedUserId,
     };
     axios
-      .put("/api/user-follow/cancelFollowRequest", requestDto)
+      .put("/api/user-follow/cancelFollowRequest", requestDto,authorization)
       .then((res) => {
         console.log("uspelo");
       }).catch((error) => {

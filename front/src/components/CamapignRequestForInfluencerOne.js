@@ -3,11 +3,16 @@ import { useEffect, useState } from "react";
 
 import axios from "axios";
 const CamapignRequestForInfluencerOne = ({ campaignId }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [campaign, setCampaign] = useState();
   const loggedUserId = localStorage.getItem("id");
 
   useEffect(() => {
-    axios.get("/api/agent/get-campaign/" + campaignId).then((res) => {
+    axios.get("/api/agent/get-campaign/" + campaignId,authorization).then((res) => {
       setCampaign(res.data);
     });
   }, []);
@@ -18,7 +23,7 @@ const CamapignRequestForInfluencerOne = ({ campaignId }) => {
         ID: campaignId,
         UserID: campaign.UserID,
         InfluencerID: loggedUserId,
-      })
+      },authorization)
       .then((res) => {
         alert("Success accept camapign request !");
       }).catch((error) => {

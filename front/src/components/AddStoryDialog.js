@@ -42,6 +42,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
   const [selectedFile, setSelectedFile] = useState([]);
@@ -103,7 +108,7 @@ const AddStoryDialog = ({ open, setOpen,setHaveStory }) => {
             ForCloseFriends: close,
             Link:''
           };
-          axios.post("/api/post/story/create", story).then((res) => {
+          axios.post("/api/post/story/create", story,authorization).then((res) => {
             console.log("uspesno");
             //setOpen(false);
             setHaveStory(true)

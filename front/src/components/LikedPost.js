@@ -87,6 +87,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const LikedPost = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [postID, setPostID] = useState({});
@@ -95,7 +100,7 @@ const LikedPost = () => {
 
   useEffect(() => {
     axios
-      .get("/api/post/get-liked-posts-for-user/" + loggedUserId)
+      .get("/api/post/get-liked-posts-for-user/" + loggedUserId,authorization)
       .then((res) => {
         if (res.data) {
           setPosts(res.data);

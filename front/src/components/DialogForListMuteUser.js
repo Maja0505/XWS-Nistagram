@@ -72,12 +72,17 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function DialogForListMuteUser({loggedUserId,open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const classes = useStyles();
   const [allMuted,setAllMuted] = useState([])
 
   useEffect(() => {
-   axios.get("/api/user-follow/allMuteFriends/" + loggedUserId)
+   axios.get("/api/user-follow/allMuteFriends/" + loggedUserId,authorization)
     .then((res) => {
         if(res.data){
             setAllMuted(res.data)
@@ -100,7 +105,7 @@ export default function DialogForListMuteUser({loggedUserId,open, setOpen }) {
         Friend: muted.IdString,
         Mute : false
     }
-    axios.put('/api/user-follow/setMuteFriend',muteDto)
+    axios.put('/api/user-follow/setMuteFriend',muteDto,authorization)
     .then((res)=> {
       console.log('uspelo')
       var array = [...allMuted]; // make a separate copy of the array

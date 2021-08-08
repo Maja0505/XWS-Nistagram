@@ -7,11 +7,16 @@ import PostsForHashTag from "./PostsForHashTag";
 import axios from "axios";
 
 const HashTagPost = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const { tag } = useParams();
   const [posts, setPosts] = useState();
 
   useEffect(() => {
-    axios.get("/api/post/get-all-by-tag/" + tag).then((res) => {
+    axios.get("/api/post/get-all-by-tag/" + tag,authorization).then((res) => {
       setPosts(res.data);
     }).catch((error) => {
       //console.log(error);

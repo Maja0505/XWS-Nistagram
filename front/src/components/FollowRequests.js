@@ -72,12 +72,17 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function FollowRequest({loggedUserId,open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const classes = useStyles();
   const [allRequests,setAllRequests] = useState([])
 
   useEffect(() => {
-   axios.get("/api/user-follow/allFollowRequests/" + loggedUserId)
+   axios.get("/api/user-follow/allFollowRequests/" + loggedUserId,authorization)
     .then((res) => {
         if(res.data){
             setAllRequests(res.data)
@@ -92,12 +97,13 @@ export default function FollowRequest({loggedUserId,open, setOpen }) {
   };
 
   const handleClickAccept = (request) => {
+
    
     var requestDto = {
         User: loggedUserId,
         UserWitchSendRequest: request.IdString
     }
-      axios.put("/api/user-follow/acceptFollowRequest",requestDto)
+      axios.put("/api/user-follow/acceptFollowRequest",requestDto,authorization)
         .then((res) => {
             console.log("uspelo")
             var array = [...allRequests]; // make a separate copy of the array
@@ -117,7 +123,7 @@ export default function FollowRequest({loggedUserId,open, setOpen }) {
         User: loggedUserId,
         UserWitchSendRequest: request.IdString
     }
-      axios.put("/api/user-follow/cancelFollowRequest",requestDto)
+      axios.put("/api/user-follow/cancelFollowRequest",requestDto,authorization)
         .then((res) => {
             console.log("uspelo")
             var array = [...allRequests]; // make a separate copy of the array

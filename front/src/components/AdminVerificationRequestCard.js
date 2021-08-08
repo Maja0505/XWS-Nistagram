@@ -17,12 +17,17 @@ const useStyles = makeStyles({
 });
 
 const AdminVerificationRequestCard = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [allRequests, setAllRequests] = useState([]);
 
   const HandleOnClickApprove = (request) => {
     axios
-      .put("/api/user/verification-request/approve/" + request.User, {})
+      .put("/api/user/verification-request/approve/" + request.User, {},authorization)
       .then((res) => {
         console.log("uspesno");
         var array = [...allRequests]; // make a separate copy of the array
@@ -38,7 +43,7 @@ const AdminVerificationRequestCard = () => {
 
   const HandleOnClickDelete = (request) => {
     axios
-      .put("/api/user/verification-request/delete/" + request.User, {})
+      .put("/api/user/verification-request/delete/" + request.User, {},authorization)
       .then((res) => {
         console.log("uspesno");
         var array = [...allRequests]; // make a separate copy of the array
@@ -53,7 +58,7 @@ const AdminVerificationRequestCard = () => {
   };
 
   useEffect(() => {
-    axios.get("/api/user/verification-request/all").then((res) => {
+    axios.get("/api/user/verification-request/all",authorization).then((res) => {
       if (res.data) {
         console.log(res.data);
         setAllRequests(res.data);

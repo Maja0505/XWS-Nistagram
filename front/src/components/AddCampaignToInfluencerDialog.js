@@ -16,6 +16,12 @@ const AddCampaignToInfluencerDialog = ({
   open,
   setOpen,
 }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [agentCamapigns, setAgentCamapigns] = useState([]);
 
   const now = new Date();
@@ -25,7 +31,7 @@ const AddCampaignToInfluencerDialog = ({
   };
 
   useEffect(() => {
-    axios.get("/api/agent/get-campaigns-for-user/" + agent).then((res) => {
+    axios.get("/api/agent/get-campaigns-for-user/" + agent,authorization).then((res) => {
       console.log(res.data);
       setAgentCamapigns(res.data);
     }).catch((error) => {
@@ -38,7 +44,7 @@ const AddCampaignToInfluencerDialog = ({
       .post("/api/agent/create-campaign-request", {
         CampaignID: campaignId,
         UserID: influencer,
-      })
+      },authorization)
       .then((res) => {
         alert("Success create camapign request !");
       }).catch((error) => {

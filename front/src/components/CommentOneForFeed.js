@@ -6,12 +6,17 @@ import avatar from "../images/nistagramAvatar.jpg";
 import { Avatar, Grid } from "@material-ui/core";
 
 const CommentOneForFeed = ({ comment }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [profilePicture, setProfilePicture] = useState("");
   const [username, setUsername] = useState();
 
   useEffect(() => {
     axios
-      .get("/api/user/find-username-and-profile-picture/" + comment.UserID)
+      .get("/api/user/find-username-and-profile-picture/" + comment.UserID,authorization)
       .then((res) => {
         setUsername(res.data.Username);
         setProfilePicture(res.data.ProfilePicture);

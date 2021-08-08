@@ -71,6 +71,11 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function DialogForBlockUser({loggedUserId, blockedUserId ,open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [inappropriate,setInappropriate] = useState(false)
   const handleClose = () => {
@@ -85,7 +90,7 @@ export default function DialogForBlockUser({loggedUserId, blockedUserId ,open, s
         User: loggedUserId,
         BlockedUser: blockedUserId
     }
-    axios.post('/api/user-follow/blockUser',blockDto)
+    axios.post('/api/user-follow/blockUser',blockDto,authorization)
     .then((res)=> {
       console.log('uspelo')
       setOpen(false)

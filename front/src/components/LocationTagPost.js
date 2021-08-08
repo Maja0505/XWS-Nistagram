@@ -8,12 +8,17 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const LocationTagPost = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const { location } = useParams();
 
   const [posts, setPosts] = useState();
 
   useEffect(() => {
-    axios.get("/api/post/get-all-by-location/" + location).then((res) => {
+    axios.get("/api/post/get-all-by-location/" + location,authorization).then((res) => {
       setPosts(res.data);
     }).catch((error) => {
       //console.log(error);

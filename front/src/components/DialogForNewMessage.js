@@ -70,6 +70,11 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 export default function DialogForNewMessage({ open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
   const username = localStorage.getItem("username");
@@ -101,7 +106,7 @@ export default function DialogForNewMessage({ open, setOpen }) {
 
   const sendMessage = () => {
     var user = {}
-    axios.get("/api/user/" + userForNewMessage)
+    axios.get("/api/user/" + userForNewMessage,authorization)
         .then((res) => {
             user = res.data
             let socket = new WebSocket("ws://localhost:8080/api/message/chat/" + user.ID)

@@ -9,6 +9,11 @@ const AgentRegistrationRequestOne = ({
   setAgentRequests,
   agentRequests,
 }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [webSiteOK, setWebSiteOK] = useState(false);
   const [clickedOnCheck, setClickedOnCheck] = useState(false);
 
@@ -29,7 +34,8 @@ const AgentRegistrationRequestOne = ({
       .put(
         "/api/user/agent-registration-request/update-to-approved/" +
           request.Username,
-        {}
+        {},
+        authorization
       )
       .then((res) => {
         deleteFromArray();
@@ -42,7 +48,7 @@ const AgentRegistrationRequestOne = ({
     axios
       .put(
         "/api/user/agent-registration-request/delete/" + request.Username,
-        {}
+        {},authorization
       )
       .then((res) => {
         deleteFromArray();

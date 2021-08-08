@@ -60,6 +60,12 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 export default function DialogForReport({ loggedUserId, post, open, setOpen }) {
+
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
   const handleClose = () => {
@@ -76,7 +82,7 @@ export default function DialogForReport({ loggedUserId, post, open, setOpen }) {
       UserId: loggedUserId,
       AdminId: "60cb4d91f5c97c3aa5894ab3", //ispraviti
     };
-    axios.post("/api/post/report-content", reportedContentDto).then((res) => {
+    axios.post("/api/post/report-content", reportedContentDto,authorization).then((res) => {
       console.log("uspelo");
       console.log(reportedContentDto);
       setInappropriate(false);

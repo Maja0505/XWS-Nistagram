@@ -7,10 +7,15 @@ import axios from "axios";
 import AgentRegistrationRequestOne from "./AgentRegistrationRequestOne";
 
 const AgentRegistrationRequests = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [agentRequests, setAgentRequests] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/user/agent-registration-request/get-all").then((res) => {
+    axios.get("/api/user/agent-registration-request/get-all",authorization).then((res) => {
       if (res.data !== null) {
         console.log(res.data);
         setAgentRequests(res.data);

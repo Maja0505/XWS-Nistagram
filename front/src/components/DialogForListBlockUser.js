@@ -72,12 +72,17 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function DialogForListBlockUser({loggedUserId,open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const classes = useStyles();
   const [allBlocked,setAllBlocked] = useState([])
 
   useEffect(() => {
-   axios.get("/api/user-follow/getAllBlockUsers/" + loggedUserId)
+   axios.get("/api/user-follow/getAllBlockUsers/" + loggedUserId,authorization)
     .then((res) => {
         if(res.data){
             setAllBlocked(res.data)
@@ -99,7 +104,7 @@ export default function DialogForListBlockUser({loggedUserId,open, setOpen }) {
         User: loggedUserId,
         BlockedUser: blocked.IdString
     }
-      axios.put("/api/user-follow/unblockUser",blockDto)
+      axios.put("/api/user-follow/unblockUser",blockDto,authorization)
         .then((res) => {
             console.log("uspelo")
             var array = [...allBlocked]; // make a separate copy of the array
