@@ -17,7 +17,7 @@ type AgentHandler struct {
 	Service *Service.AgentService
 }
 
-func (handler *AgentHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) {
+func (handler *AgentHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool {
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -40,14 +40,16 @@ func (handler *AgentHandler) CheckAuthorize(w http.ResponseWriter,r *http.Reques
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
+		return false
 	}
 
-
+	return true
 }
 
 func (handler *AgentHandler) CreateCampaign(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	var campaignDTO DTO.CampaignDTO
@@ -67,7 +69,9 @@ func (handler *AgentHandler) CreateCampaign(w http.ResponseWriter, r *http.Reque
 }
 
 func (handler *AgentHandler) CreateCampaignRequest(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	var requestDTO DTO.RequestDTO
@@ -87,7 +91,9 @@ func (handler *AgentHandler) CreateCampaignRequest(w http.ResponseWriter, r *htt
 }
 
 func (handler *AgentHandler) DeleteCampaign(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	var campaignDTO DTO.CampaignDTO
@@ -143,7 +149,9 @@ func (handler *AgentHandler) GetCampaignRequests(w http.ResponseWriter, r *http.
 }
 
 func (handler *AgentHandler) AddCampaignInfluencer(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	var influencerDTO DTO.AddInfluencerDTO
@@ -161,7 +169,6 @@ func (handler *AgentHandler) AddCampaignInfluencer(w http.ResponseWriter, r *htt
 	}
 	w.WriteHeader(http.StatusCreated)
 }
-
 
 func (handler *AgentHandler) GetCampaignById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
