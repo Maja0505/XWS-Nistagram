@@ -7,11 +7,7 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"errors"
-
 )
 
 var upgrader = websocket.Upgrader{}
@@ -20,36 +16,7 @@ var upgrader = websocket.Upgrader{}
 var connectedUsers = make(map[string]*Model.User)
 
 
-func CheckAuthorize(w http.ResponseWriter,r *http.Request){
-	client := &http.Client{}
-	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
-	req,err := http.NewRequest("POST",reqUrl,nil)
-	req.Header.Add("Authorization",r.Header.Get("Authorization"))
-	req.Header.Add("path","/api/message" + r.URL.Path)
-	req.Header.Add("method",r.Method)
-
-	fmt.Println(r.Method)
-	resp,err := client.Do(req)
-	if err != nil{
-		fmt.Println(err)
-	}
-	fmt.Println(resp.Body)
-	fmt.Println(resp.Status)
-	fmt.Println(resp.Header)
-
-	if resp.StatusCode != 200 {
-		var errorText string
-		body, _ := ioutil.ReadAll(resp.Body)
-		respBodyInErrorCase := json.Unmarshal(body, &errorText)
-		respBodyInErrorCase = errors.New(errorText)
-		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
-	}
-
-}
-
 func GetAllMessageChatForUser(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
 
 	vars := mux.Vars(r)
 	userid := vars["user"]
@@ -69,7 +36,7 @@ func GetAllMessageChatForUser(w http.ResponseWriter, r *http.Request, rdb *redis
 }
 
 func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
+
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -97,7 +64,7 @@ func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rd
 }
 
 func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
+
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -127,7 +94,7 @@ func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Re
 }
 
 func UserChannelsNotificationsUpdateHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
+
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -156,7 +123,7 @@ func UserChannelsNotificationsUpdateHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func UsersHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
+
 
 	list, err := Model.List(rdb)
 	if err != nil {
@@ -184,7 +151,7 @@ func H(rdb *redis.Client, fn func(http.ResponseWriter, *http.Request, *redis.Cli
 
 
 func MessageWebSocketHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
-	CheckAuthorize(w,r)
+
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	fmt.Println(upgrader)

@@ -165,7 +165,7 @@ func handleFunc(handler *Handler.PostHandler,router *mux.Router){
 	router.HandleFunc("/delete-reported-content/{id}/{userid}", handler.DeleteReportedContent).Methods("PUT")
 	router.HandleFunc("/delete-post/{postid}/{userid}", handler.DeletePost).Methods("PUT")
 	router.HandleFunc("/update-createdat", handler.UpdatePostCreatedAt).Methods("POST")
-	router.HandleFunc("/C", handler.AddLinks).Methods("POST")
+	router.HandleFunc("/add-links", handler.AddLinks).Methods("POST")
 }
 
 func handleStoryFunc(handler *Handler.StoryHandler,router *mux.Router){
