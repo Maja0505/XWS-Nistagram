@@ -7,9 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type UserFollowersHandler struct{
@@ -487,4 +490,73 @@ func (handler *UserFollowersHandler) GetFollowSuggestions(w http.ResponseWriter,
 
 	json.NewEncoder(w).Encode(users)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (handler *UserFollowersHandler) TestHttp(w http.ResponseWriter, r *http.Request) {
+
+	session := handler.Service.Repository.Driver.NewSession(neo4j.SessionConfig{
+		AccessMode:   neo4j.AccessModeRead,
+	})
+	defer session.Close()
+
+	query := `match (u1:User)-[r:follow]->(u2:User)
+ 			  where u1.UserId='nemanja' and u2.UserId='pera' return r`
+
+	fmt.Println("Zapoceto izvrsavanje sypher-shell-a : ",time.Now())
+	_, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		records, err := tx.Run(query, map[string]interface{}{})
+		if err != nil {
+			return nil, err
+		}
+		if records.Next() {
+			return true,nil
+		}
+		return nil, nil
+	})
+	fmt.Println("Zavrseno izvrsavanje sypher-shell-a : ",time.Now())
+
+	if err != nil {
+		log.Println("error querying graph:", err)
+		return
+	}
+	/*err = json.NewEncoder(w).Encode(d3Resp)
+	if err != nil {
+		log.Println("error writing graph response:", err)
+	}
+	w.WriteHeader(http.StatusOK)*/
+}
+
+
+func (handler *UserFollowersHandler) Test() {
+
+	session := handler.Service.Repository.Driver.NewSession(neo4j.SessionConfig{
+		AccessMode:   neo4j.AccessModeRead,
+	})
+	defer session.Close()
+
+	query := `match (u1:User)-[r:follow]->(u2:User)
+ 			  where u1.UserId='nemanja' and u2.UserId='pera' return r`
+
+	fmt.Println("Zapoceto izvrsavanje sypher-shell-a : ",time.Now())
+	_, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		records, err := tx.Run(query, map[string]interface{}{})
+		if err != nil {
+			return nil, err
+		}
+		if records.Next() {
+			return true,nil
+		}
+		return nil, nil
+	})
+	fmt.Println("Zavrseno izvrsavanje sypher-shell-a : ",time.Now())
+
+	if err != nil {
+		log.Println("error querying graph:", err)
+		return
+	}
+	/*err = json.NewEncoder(w).Encode(d3Resp)
+	if err != nil {
+		log.Println("error writing graph response:", err)
+	}
+	w.WriteHeader(http.StatusOK)*/
 }
