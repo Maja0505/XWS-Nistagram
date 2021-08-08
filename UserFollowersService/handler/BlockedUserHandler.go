@@ -16,7 +16,7 @@ type BlockedUserHandler struct{
 	Service *service.BlockedUserService
 }
 
-func (handler *BlockedUserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) {
+func (handler *BlockedUserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool {
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -39,14 +39,16 @@ func (handler *BlockedUserHandler) CheckAuthorize(w http.ResponseWriter,r *http.
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
+		return false
 	}
-
+	return true
 
 }
 
 func (handler *BlockedUserHandler) BlockUser(w http.ResponseWriter, r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -68,7 +70,9 @@ func (handler *BlockedUserHandler) BlockUser(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *BlockedUserHandler) GetAllBlockedUsers(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -115,7 +119,9 @@ func (handler *BlockedUserHandler) CheckBlock(w http.ResponseWriter, r *http.Req
 }
 
 func (handler *BlockedUserHandler) UnblockUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 

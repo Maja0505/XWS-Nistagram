@@ -18,7 +18,7 @@ type UserHandler struct {
 	Service *service.UserService
 }
 
-func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) {
+func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool {
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -41,14 +41,16 @@ func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
+		return true
 	}
-
+	return false
 
 }
 
 func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	users,err := handler.Service.FindAll()
 	if err != nil{
@@ -61,7 +63,6 @@ func (handler *UserHandler) FindAll(w http.ResponseWriter,r *http.Request){
 }
 
 func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	var userForRegistrationDTO dto.UserForRegistrationDTO
 	err := json.NewDecoder(r.Body).Decode(&userForRegistrationDTO)
@@ -97,7 +98,9 @@ func (handler *UserHandler) CreateRegisteredUser(w http.ResponseWriter, r *http.
 }
 
 func (handler *UserHandler) UpdateRegisteredUserProfile(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	vars := mux.Vars(r)
 	username := vars["username"]
 	if username == "" {
@@ -239,7 +242,9 @@ func (handler *UserHandler) ConvertUsernamesToUsers(w http.ResponseWriter, r *ht
 }
 
 func (handler *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type","application/json")
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -266,7 +271,9 @@ func (handler *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Reques
 }
 
 func (handler *UserHandler) UpdatePublicProfileSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -280,7 +287,9 @@ func (handler *UserHandler) UpdatePublicProfileSetting(w http.ResponseWriter, r 
 }
 
 func (handler *UserHandler) UpdateMessageRequestSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -294,7 +303,9 @@ func (handler *UserHandler) UpdateMessageRequestSetting(w http.ResponseWriter, r
 }
 
 func (handler *UserHandler) UpdateAllowTagsSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -308,7 +319,9 @@ func (handler *UserHandler) UpdateAllowTagsSetting(w http.ResponseWriter, r *htt
 }
 
 func (handler *UserHandler) UpdateLikeNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -322,7 +335,9 @@ func (handler *UserHandler) UpdateLikeNotificationSetting(w http.ResponseWriter,
 }
 
 func (handler *UserHandler) UpdateCommentNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -336,7 +351,9 @@ func (handler *UserHandler) UpdateCommentNotificationSetting(w http.ResponseWrit
 }
 
 func (handler *UserHandler) UpdateMessageRequestNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -350,7 +367,9 @@ func (handler *UserHandler) UpdateMessageRequestNotificationSetting(w http.Respo
 }
 
 func (handler *UserHandler) UpdateMessageNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -365,7 +384,9 @@ func (handler *UserHandler) UpdateMessageNotificationSetting(w http.ResponseWrit
 }
 
 func (handler *UserHandler) UpdateFollowRequestNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -379,7 +400,9 @@ func (handler *UserHandler) UpdateFollowRequestNotificationSetting(w http.Respon
 }
 
 func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	setting := vars["setting"]
@@ -393,7 +416,9 @@ func (handler *UserHandler) UpdateFollowNotificationSetting(w http.ResponseWrite
 }
 
 func (handler *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	vars := mux.Vars(r)
 	userId := vars["userId"]

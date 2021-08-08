@@ -18,7 +18,7 @@ type VerificationRequestHandler struct {
 	Service *service.VerificationRequestService
 }
 
-func (handler *VerificationRequestHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) {
+func (handler *VerificationRequestHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool{
 	client := &http.Client{}
 	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
 	req,err := http.NewRequest("POST",reqUrl,nil)
@@ -41,15 +41,13 @@ func (handler *VerificationRequestHandler) CheckAuthorize(w http.ResponseWriter,
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return
+		return false
 	}
-
+	return true
 
 }
 
-
 func (handler *VerificationRequestHandler) Create(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
 	w.Header().Set("Content-Type", "application/json")
 	var vrDTO dto.VerificationRequestDTO
 	err := json.NewDecoder(r.Body).Decode(&vrDTO)
@@ -68,7 +66,9 @@ func (handler *VerificationRequestHandler) Create(w http.ResponseWriter,r *http.
 }
 
 func (handler *VerificationRequestHandler) Update(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	var vrDTO dto.VerificationRequestDTO
@@ -96,7 +96,9 @@ func (handler *VerificationRequestHandler) Update(w http.ResponseWriter,r *http.
 }
 
 func (handler *VerificationRequestHandler) GetAllVerificationRequest(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -111,7 +113,9 @@ func (handler *VerificationRequestHandler) GetAllVerificationRequest(w http.Resp
 }
 
 func (handler *VerificationRequestHandler) GetVerificationRequestByUser(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -134,7 +138,9 @@ func (handler *VerificationRequestHandler) GetVerificationRequestByUser(w http.R
 }
 
 func (handler *VerificationRequestHandler) ApproveVerificationRequest(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -155,7 +161,9 @@ func (handler *VerificationRequestHandler) ApproveVerificationRequest(w http.Res
 }
 
 func (handler *VerificationRequestHandler) DeleteVerificationRequest(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -176,7 +184,9 @@ func (handler *VerificationRequestHandler) DeleteVerificationRequest(w http.Resp
 }
 
 func (handler *VerificationRequestHandler) CreateAgentRegistrationRequest(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -198,7 +208,9 @@ func (handler *VerificationRequestHandler) CreateAgentRegistrationRequest(w http
 }
 
 func (handler *VerificationRequestHandler) GetAllAgentRegistrationRequests(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -214,7 +226,9 @@ func (handler *VerificationRequestHandler) GetAllAgentRegistrationRequests(w htt
 }
 
 func (handler *VerificationRequestHandler) UpdateAgentRegistrationRequestToApproved(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -236,7 +250,9 @@ func (handler *VerificationRequestHandler) UpdateAgentRegistrationRequestToAppro
 }
 
 func (handler *VerificationRequestHandler) DeleteAgentRegistrationRequestToApproved(w http.ResponseWriter,r *http.Request){
-	handler.CheckAuthorize(w,r)
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
