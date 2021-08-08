@@ -11,6 +11,12 @@ import CamapignRequestForInfluencerOne from "./CamapignRequestForInfluencerOne";
 import axios from "axios";
 
 const ViewCampaignRequestsForInfluencerDialog = ({ label, open, setOpen }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [campaignRequests, setCampaignRequests] = useState([]);
   const loggedUserId = localStorage.getItem("id");
 
@@ -20,10 +26,11 @@ const ViewCampaignRequestsForInfluencerDialog = ({ label, open, setOpen }) => {
 
   useEffect(() => {
     axios
-      .get("/api/agent/get-campaign-requests/" + loggedUserId)
+      .get("/api/agent/get-campaign-requests/" + loggedUserId, authorization)
       .then((res) => {
         setCampaignRequests(res.data);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   }, []);

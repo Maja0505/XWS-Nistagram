@@ -85,6 +85,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PostsForHashTag = ({ posts }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [postID, setPostID] = useState({});

@@ -7,20 +7,27 @@ import PostFeed from "./PostFeed.js";
 import StoryFeeds from "./StoryFeeds.js";
 
 const StartPage = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const loggedUserId = localStorage.getItem("id");
 
   const [feeds, setFeeds] = useState([]);
 
   useEffect(() => {
     axios
-      .get("/api/post/get-all-post-feeds-for-user/" + loggedUserId)
+      .get(
+        "/api/post/get-all-post-feeds-for-user/" + loggedUserId,
+        authorization
+      )
       .then((res) => {
         console.log(res.data);
         setFeeds(res.data);
-      }).catch((error) => {
-        
-      }
-    );
+      })
+      .catch((error) => {});
   }, []);
 
   return (

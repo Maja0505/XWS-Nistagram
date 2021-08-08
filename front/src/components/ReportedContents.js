@@ -7,16 +7,25 @@ import axios from "axios";
 import ReportedContentOne from "./ReportedContentOne";
 
 const ReportedContents = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [reportedContents, setReportedContents] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/post/get-all-reported-contents").then((res) => {
-      if (res.data !== null) {
-        setReportedContents(res.data);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-all-reported-contents", authorization)
+      .then((res) => {
+        if (res.data !== null) {
+          setReportedContents(res.data);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   }, []);
 
   return (

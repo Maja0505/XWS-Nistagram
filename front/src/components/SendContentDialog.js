@@ -9,21 +9,11 @@ import Typography from "@material-ui/core/Typography";
 import { Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import {
-
-    Grid,
-    TextField,
-    Avatar,
-    Button
-
-  } from "@material-ui/core";
-  import { Autocomplete } from "@material-ui/lab";
-  import axios from "axios";
-  import avatar from "../images/nistagramAvatar.jpg";
-  import {
- 
-    RoomRounded, ThreeDRotation,
-  } from "@material-ui/icons";
+import { Grid, TextField, Avatar, Button } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import axios from "axios";
+import avatar from "../images/nistagramAvatar.jpg";
+import { RoomRounded, ThreeDRotation } from "@material-ui/icons";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -69,15 +59,26 @@ const DialogContent = withStyles((theme) => ({
   },
 }))(MuiDialogContent);
 
-export default function SendContentDialog({ open, setOpen,userForPost, postId }) {
+export default function SendContentDialog({
+  open,
+  setOpen,
+  userForPost,
+  postId,
+}) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const classes = useStyles();
   const [inappropriate, setInappropriate] = useState(false);
   const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
-  const [userForNewMessage,setUserForNewMessage] = useState()
+  const [userForNewMessage, setUserForNewMessage] = useState();
 
   const [searchedContent, setSearchedContent] = useState([]);
-  const [text,setText] = useState("")
+  const [text, setText] = useState("");
 
   const handleClose = () => {
     setOpen(false);
@@ -85,86 +86,135 @@ export default function SendContentDialog({ open, setOpen,userForPost, postId })
 
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
-        axios
-          .get("/api/user/search/" + username + "/" + text)
-          .then((res) => {
-            
-            setSearchedContent(res.data);
-          })
-          .catch((error) => {
-            setSearchedContent([]);
-          });
+      axios
+        .get("/api/user/search/" + username + "/" + text, authorization)
+        .then((res) => {
+          setSearchedContent(res.data);
+        })
+        .catch((error) => {
+          setSearchedContent([]);
+        });
     } else {
       setSearchedContent([]);
     }
   };
 
   const sendMessage = () => {
-    var user = {}
-    axios.get("/api/user/" + userForNewMessage)
-        .then((res) => {
-            user = res.data
+    var user = {};
+    axios.get("/api/user/" + userForNewMessage, authorization).then((res) => {
+      user = res.data;
 
-            axios.get("/api/message/channels/" + loggedUserId + "/" + user.ID + "/messages")
-                .then((res1) => {
-                    
-                    if(res1.data.channel !== undefined){
-                        let socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
-                        socket.onopen = () => {
-                        console.log("Successfully Connected");                
-                        socket.send('{"id":true' + ',"command": 2, "channel":"' + res1.data.channel + '", "content": "","opened":false,"type":1,"text":"' +  text + '","user_from":"' + username + '","user_to":"' + user.Username + '"' + ',"user_for_content_id":' + '"' + userForPost + '"' + ',"content_id":' + '"' + postId  + '"}')
+      axios
+        .get(
+          "/api/message/channels/" + loggedUserId + "/" + user.ID + "/messages",
+          authorization
+        )
+        .then((res1) => {
+          if (res1.data.channel !== undefined) {
+            let socket = new WebSocket(
+              "ws://localhost:8080/api/message/chat/" + loggedUserId
+            );
+            socket.onopen = () => {
+              console.log("Successfully Connected");
+              socket.send(
+                '{"id":true' +
+                  ',"command": 2, "channel":"' +
+                  res1.data.channel +
+                  '", "content": "","opened":false,"type":1,"text":"' +
+                  text +
+                  '","user_from":"' +
+                  username +
+                  '","user_to":"' +
+                  user.Username +
+                  '"' +
+                  ',"user_for_content_id":' +
+                  '"' +
+                  userForPost +
+                  '"' +
+                  ',"content_id":' +
+                  '"' +
+                  postId +
+                  '"}'
+              );
+            };
+          } else {
+            let socket = new WebSocket(
+              "ws://localhost:8080/api/message/chat/" + user.ID
+            );
 
-                
-                      };
+            socket.onopen = () => {
+              console.log("Successfully Connected");
+              socket.send(
+                '{"command": 0, "channel": ' +
+                  '"' +
+                  loggedUserId +
+                  "-" +
+                  user.ID +
+                  '"' +
+                  "}"
+              );
 
-                    }else{
-                        let socket = new WebSocket("ws://localhost:8080/api/message/chat/" + user.ID)
+              setTimeout(500);
 
-                        socket.onopen = () => {
-                    
-                            console.log("Successfully Connected");
-                            socket.send('{"command": 0, "channel": ' + '"' +  loggedUserId +   '-' +  user.ID + '"' + '}')
-            
-                            setTimeout(500)
-            
-                            socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
-            
-                            socket.onopen = () => {
-                                console.log("Successfully Connected");
-                                socket.send('{"command": 0, "channel": ' + '"' +  loggedUserId +   '-' +  user.ID + '"' + '}')
-                                setTimeout(500)
-                                socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
-                                    socket.onopen = () => {
-                                    console.log("Successfully Connected");                
-                                    socket.send('{"id":true' + ',"command": 2, "channel":"' + loggedUserId +   '-' +  user.ID  + '", "content": "","opened":false,"type":1,"text":"' +  text + '","user_from":"' + username + '","user_to":"' + user.Username + '"' + ',"user_for_content_id":' + '"' + userForPost + '"' + ',"content_id":' + '"' + postId  + '"}')
-            
-                            
-                                  };
-                        
-                        
-                              };
-                    
-                    
-                        };
+              socket = new WebSocket(
+                "ws://localhost:8080/api/message/chat/" + loggedUserId
+              );
 
-                    }
-                    
-                }).catch((error) => {
-                    console.log("greska")
-
-                })
- 
+              socket.onopen = () => {
+                console.log("Successfully Connected");
+                socket.send(
+                  '{"command": 0, "channel": ' +
+                    '"' +
+                    loggedUserId +
+                    "-" +
+                    user.ID +
+                    '"' +
+                    "}"
+                );
+                setTimeout(500);
+                socket = new WebSocket(
+                  "ws://localhost:8080/api/message/chat/" + loggedUserId
+                );
+                socket.onopen = () => {
+                  console.log("Successfully Connected");
+                  socket.send(
+                    '{"id":true' +
+                      ',"command": 2, "channel":"' +
+                      loggedUserId +
+                      "-" +
+                      user.ID +
+                      '", "content": "","opened":false,"type":1,"text":"' +
+                      text +
+                      '","user_from":"' +
+                      username +
+                      '","user_to":"' +
+                      user.Username +
+                      '"' +
+                      ',"user_for_content_id":' +
+                      '"' +
+                      userForPost +
+                      '"' +
+                      ',"content_id":' +
+                      '"' +
+                      postId +
+                      '"}'
+                  );
+                };
+              };
+            };
+          }
         })
-  }
-
+        .catch((error) => {
+          console.log("greska");
+        });
+    });
+  };
 
   const goToSearchContent = (content) => {
     if (content !== null) {
-        setUserForNewMessage(content.Username)
+      setUserForNewMessage(content.Username);
     }
   };
-
-
 
   const searchBar = (
     <Grid item xs={6} style={{ textAlign: "center" }}>
@@ -173,7 +223,7 @@ export default function SendContentDialog({ open, setOpen,userForPost, postId })
         renderOption={(option) => (
           <Grid container>
             <Grid item xs={2}>
-              { option.Username !== undefined && (
+              {option.Username !== undefined && (
                 <Avatar
                   alt="N"
                   src={avatar}
@@ -207,7 +257,6 @@ export default function SendContentDialog({ open, setOpen,userForPost, postId })
           option.Username !== undefined ? option.Username : option
         }
         onChange={(event, value) => goToSearchContent(value)}
-
         renderInput={(params) => (
           <>
             <TextField
@@ -223,7 +272,6 @@ export default function SendContentDialog({ open, setOpen,userForPost, postId })
     </Grid>
   );
 
-
   return (
     <div>
       <Dialog
@@ -234,18 +282,21 @@ export default function SendContentDialog({ open, setOpen,userForPost, postId })
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center",width:400 }}
+          style={{ textAlign: "center", width: 400 }}
         >
           Report
         </DialogTitle>
         <DialogContent dividers>
           <h3>New Message</h3>
           <Divider />
-            Search user:{searchBar}
-            <TextField multiline style={{height:100}} value={text} onChange={(e) => setText(e.target.value)}>
-
-            </TextField>
-            <Button onClick={sendMessage}>Send</Button>
+          Search user:{searchBar}
+          <TextField
+            multiline
+            style={{ height: 100 }}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          ></TextField>
+          <Button onClick={sendMessage}>Send</Button>
         </DialogContent>
       </Dialog>
     </div>

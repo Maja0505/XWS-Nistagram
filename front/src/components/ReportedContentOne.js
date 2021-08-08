@@ -10,46 +10,68 @@ const ReportedContentOne = ({
   setReportedContents,
   reportedContents,
 }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [post, setPost] = useState();
   const [userWichReportedPost, setUserWichReportePost] = useState("");
   const [userWichPosted, setUserWichPosted] = useState("");
 
   useEffect(() => {
-    axios.get("/api/post/get-one-post/" + content.Image).then((res) => {
-      if (res.data !== null) {
-        console.log(res.data);
-        setPost(res.data);
-        axios.get("/api/user/userid/" + res.data.UserID).then((res1) => {
-          setUserWichPosted(res1.data.Username);
-        }).catch((error) => {
-          //console.log(error);
-        });
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-one-post/" + content.Image, authorization)
+      .then((res) => {
+        if (res.data !== null) {
+          console.log(res.data);
+          setPost(res.data);
+          axios
+            .get("/api/user/userid/" + res.data.UserID, authorization)
+            .then((res1) => {
+              setUserWichPosted(res1.data.Username);
+            })
+            .catch((error) => {
+              //console.log(error);
+            });
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
 
-    axios.get("/api/user/userid/" + content.UserID).then((res) => {
-      setUserWichReportePost(res.data.Username);
-    });
+    axios
+      .get("/api/user/userid/" + content.UserID, authorization)
+      .then((res) => {
+        setUserWichReportePost(res.data.Username);
+      });
   }, [reportedContents]);
 
   const deletePost = () => {
     axios
-      .put("/api/post/delete-post/" + post.ID + "/" + post.UserID, {})
+      .put(
+        "/api/post/delete-post/" + post.ID + "/" + post.UserID,
+        {},
+        authorization
+      )
       .then((res) => {
         deleteReportedContent();
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };
 
   const deleteUser = () => {
-    axios.put("/api/user/delete/" + post.UserID, {}).then((res) => {
-      deletePost();
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/user/delete/" + post.UserID, {}, authorization)
+      .then((res) => {
+        deletePost();
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const deleteReportedContent = () => {
@@ -59,11 +81,13 @@ const ReportedContentOne = ({
           content.ID +
           "/" +
           content.UserID,
-        {}
+        {},
+        authorization
       )
       .then((res) => {
         deleteFromArray();
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };

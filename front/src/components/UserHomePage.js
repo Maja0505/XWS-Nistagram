@@ -117,7 +117,7 @@ const UserHomePage = () => {
     console.log(loggedUsername);
 
     axios
-      .get("/api/user/" + username)
+      .get("/api/user/" + username, authorization)
       .then((res) => {
         console.log(res.data);
         setUser(res.data);
@@ -128,7 +128,8 @@ const UserHomePage = () => {
               "/api/user-follow/checkBlock/" +
                 loggedInId +
                 "/" +
-                res.data.IdString
+                res.data.IdString,
+              authorization
             )
             .then((res) => {
               console.log(res.data);
@@ -145,7 +146,8 @@ const UserHomePage = () => {
               "/api/user-follow/checkRequested/" +
                 loggedInId +
                 "/" +
-                res.data.IdString
+                res.data.IdString,
+              authorization
             )
             .then((res) => {
               console.log(res.data);
@@ -161,7 +163,8 @@ const UserHomePage = () => {
               "/api/user-follow/checkFollowing/" +
                 loggedInId +
                 "/" +
-                res.data.IdString
+                res.data.IdString,
+              authorization
             )
             .then((res) => {
               console.log(res.data);
@@ -177,7 +180,8 @@ const UserHomePage = () => {
               "/api/user-follow/checkMuted/" +
                 loggedInId +
                 "/" +
-                res.data.IdString
+                res.data.IdString,
+              authorization
             )
             .then((res) => {
               console.log(res.data);
@@ -193,7 +197,8 @@ const UserHomePage = () => {
               "/api/user-follow/checkClosed/" +
                 loggedInId +
                 "/" +
-                res.data.IdString
+                res.data.IdString,
+              authorization
             )
             .then((res) => {
               console.log(res.data);
@@ -205,7 +210,10 @@ const UserHomePage = () => {
             });
 
           axios
-            .get("/api/user-follow/allFollows/" + res.data.IdString)
+            .get(
+              "/api/user-follow/allFollows/" + res.data.IdString,
+              authorization
+            )
             .then((res) => {
               if (res.data) {
                 setAllFollows(res.data);
@@ -219,7 +227,10 @@ const UserHomePage = () => {
             });
 
           axios
-            .get("/api/user-follow/allFollowers/" + res.data.IdString)
+            .get(
+              "/api/user-follow/allFollowers/" + res.data.IdString,
+              authorization
+            )
             .then((res) => {
               if (res.data) {
                 setAllFollowers(res.data);
@@ -233,7 +244,10 @@ const UserHomePage = () => {
             });
         } else {
           axios
-            .get("/api/user-follow/allFollows/" + res.data.IdString)
+            .get(
+              "/api/user-follow/allFollows/" + res.data.IdString,
+              authorization
+            )
             .then((res) => {
               if (res.data) {
                 setAllFollows(res.data);
@@ -247,7 +261,10 @@ const UserHomePage = () => {
             });
 
           axios
-            .get("/api/user-follow/allFollowers/" + res.data.IdString)
+            .get(
+              "/api/user-follow/allFollowers/" + res.data.IdString,
+              authorization
+            )
             .then((res) => {
               if (res.data) {
                 setAllFollowers(res.data);
@@ -264,7 +281,10 @@ const UserHomePage = () => {
           setLoad3(true);
         }
         axios
-          .get("/api/post/story/all-highlights/" + res.data.IdString)
+          .get(
+            "/api/post/story/all-highlights/" + res.data.IdString,
+            authorization
+          )
           .then((res) => {
             if (res.data) {
               setHighlightStories(res.data);
@@ -286,7 +306,7 @@ const UserHomePage = () => {
       Mute: false,
     };
     axios
-      .put("/api/user-follow/setMuteFriend", muteDto)
+      .put("/api/user-follow/setMuteFriend", muteDto, authorization)
       .then((res) => {
         console.log("uspelo");
         setOpen((prevOpen) => !prevOpen);
@@ -322,7 +342,7 @@ const UserHomePage = () => {
       Close: true,
     };
     axios
-      .put("/api/user-follow/setCloseFriend", closeDto)
+      .put("/api/user-follow/setCloseFriend", closeDto, authorization)
       .then((res) => {
         console.log("uspesno");
         setClose(true);
@@ -339,7 +359,7 @@ const UserHomePage = () => {
       Close: false,
     };
     axios
-      .put("/api/user-follow/setCloseFriend", closeDto)
+      .put("/api/user-follow/setCloseFriend", closeDto, authorization)
       .then((res) => {
         console.log("uspesno");
         setClose(false);
@@ -421,7 +441,7 @@ const UserHomePage = () => {
       UnfollowedUser: user.ID,
     };
     axios
-      .put("/api/user-follow/unfollowUser", follow)
+      .put("/api/user-follow/unfollowUser", follow, authorization)
       .then((res) => {
         console.log("uspesno");
         //setUser({...user,allFollowers: user.allFollowers - 1})

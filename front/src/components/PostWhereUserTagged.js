@@ -5,16 +5,25 @@ import PostsForHashTag from "./PostsForHashTag.js";
 import axios from "axios";
 
 const PostWhereUserTagged = ({ user }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/post/get-all-by-tag/@" + user.Username).then((res) => {
-      if (res.data !== null) {
-        setPosts(res.data);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-all-by-tag/@" + user.Username, authorization)
+      .then((res) => {
+        if (res.data !== null) {
+          setPosts(res.data);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   }, []);
 
   return (

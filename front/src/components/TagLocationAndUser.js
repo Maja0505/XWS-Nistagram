@@ -7,7 +7,19 @@ import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
 import TaggedUsersList from "./TaggedUsersList.js";
 
-const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOfTaggedUserid,listOfTaggedUserid }) => {
+const TagLocationAndUser = ({
+  setLocation,
+  setTaggedUsers,
+  taggedUsers,
+  setListOfTaggedUserid,
+  listOfTaggedUserid,
+}) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const username = localStorage.getItem("username");
   const [searchedContent, setSearchedContent] = useState([]);
   const [userForTag, setUserForTag] = useState();
@@ -16,7 +28,7 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOf
   const handleChangeInput = (text) => {
     if (text.length !== 0) {
       axios
-        .get("/api/user/search/" + username + "/" + text)
+        .get("/api/user/search/" + username + "/" + text, authorization)
         .then((res) => {
           setSearchedContent(res.data);
         })
@@ -31,19 +43,22 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOf
   const addUserInTaggedUsers = () => {
     var array = [...taggedUsers];
     var index = array.indexOf("@" + userForTag);
-    axios.get("/api/user/" + userForTag)
+    axios
+      .get("/api/user/" + userForTag, authorization)
       .then((res) => {
-        if (res.data.ProfileSettings.AllowTags){
+        if (res.data.ProfileSettings.AllowTags) {
           if (index === -1) {
             setTaggedUsers((prevState) => [...prevState, "@" + userForTag]);
-            setListOfTaggedUserid((prevState) => [...prevState,res.data.IdString])
+            setListOfTaggedUserid((prevState) => [
+              ...prevState,
+              res.data.IdString,
+            ]);
           }
         }
-     
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
-   
   };
 
   const viewAllTaggedUsers = () => {
@@ -134,8 +149,8 @@ const TagLocationAndUser = ({ setLocation, setTaggedUsers, taggedUsers,setListOf
           open={open}
           setOpen={setOpen}
           setTaggedUsers={setTaggedUsers}
-          setListOfTaggedUserid = {setListOfTaggedUserid}
-          listOfTaggedUserid = {listOfTaggedUserid}
+          setListOfTaggedUserid={setListOfTaggedUserid}
+          listOfTaggedUserid={listOfTaggedUserid}
         ></TaggedUsersList>
       )}
     </div>

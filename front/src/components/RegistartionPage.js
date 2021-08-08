@@ -8,6 +8,12 @@ import RegistrationAgent from "./RegistrationAgent";
 import RegistrationUser from "./RegistrationUser";
 
 const RegistartionPage = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [tabValue, setTabValue] = useState(0);
 
   const handleChangeTab = (event, newValue) => {

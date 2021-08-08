@@ -12,6 +12,12 @@ import validator from "validator";
 import axios from "axios";
 
 const RegistrationAgent = ({ setRedirection }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [user, setUser] = useState({ gender: 1 });
 
   const handleSubmitClick = () => {
@@ -28,7 +34,11 @@ const RegistrationAgent = ({ setRedirection }) => {
       Approved: false,
     };
     axios
-      .post("/api/user/agent-registration-request/create", userForRegistration)
+      .post(
+        "/api/user/agent-registration-request/create",
+        userForRegistration,
+        authorization
+      )
       .then((res) => {
         setRedirection(true);
       })

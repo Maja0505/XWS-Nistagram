@@ -12,6 +12,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const VerificationRequest = ({ user, setOpen, setMessage }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
 
@@ -28,7 +34,7 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
 
   useEffect(() => {
     axios
-      .get("/api/user/verification-request/" + loggedUserId)
+      .get("/api/user/verification-request/" + loggedUserId, authorization)
       .then((res) => {
         console.log(res.data);
         if (res.data !== null) {
@@ -82,7 +88,8 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
       axios
         .put(
           "/api/user/verification-request/update/" + loggedUserId,
-          verification_request
+          verification_request,
+          authorization
         )
         .then((res) => {
           axios
@@ -93,32 +100,36 @@ const VerificationRequest = ({ user, setOpen, setMessage }) => {
               setOpen(true);
               setMessage("Successfully update verification request");
               setUpdateMode(true);
-            }).catch((error) => {
+            })
+            .catch((error) => {
               //console.log(error);
             });
-        }).catch((error) => {
+        })
+        .catch((error) => {
           //console.log(error);
         });
     } else {
       axios
-        .post("/api/user/verification-request/create", verification_request)
+        .post(
+          "/api/user/verification-request/create",
+          verification_request,
+          authorization
+        )
         .then((res) => {
           axios
-            .post(
-              "/api/media/upload-verification-doc/" + loggedUserId,
-              image,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
-            )
+            .post("/api/media/upload-verification-doc/" + loggedUserId, image, {
+              headers: { "Content-Type": "multipart/form-data" },
+            })
             .then((res) => {
               setOpen(true);
               setMessage("Successfully sent verification request");
               setUpdateMode(true);
-            }).catch((error) => {
+            })
+            .catch((error) => {
               //console.log(error);
             });
-        }).catch((error) => {
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }

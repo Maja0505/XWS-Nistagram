@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -9,11 +9,11 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import { Grid, Divider } from "@material-ui/core";
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
-import {useEffect } from "react";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import { makeStyles } from "@material-ui/core/styles";
+import { useEffect } from "react";
 import axios from "axios";
 
 const styles = (theme) => ({
@@ -27,20 +27,17 @@ const styles = (theme) => ({
     top: theme.spacing(1),
     color: theme.palette.grey[500],
   },
-
 });
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
+    width: "100%",
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
   },
 }));
 
 const DialogTitle = withStyles(styles)((props) => {
-  
   const { children, classes, onClose, ...other } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
@@ -71,25 +68,27 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-export default function UsersList({label,users,open, setOpen }) {
+export default function UsersList({ label, users, open, setOpen }) {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const classes = useStyles();
 
-  useEffect(() => {
-   
-  }, []);
+  useEffect(() => {}, []);
 
   const handleClose = () => {
     setOpen(false);
   };
   const handleClickCancel = () => {
     setOpen(false);
-  }
+  };
 
   const handleClickSetToCloseFriend = (user) => {
-    console.log("aaaaaaa")
-  }
-
+    console.log("aaaaaaa");
+  };
 
   return (
     <div>
@@ -101,26 +100,23 @@ export default function UsersList({label,users,open, setOpen }) {
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center",width:400 }}
+          style={{ textAlign: "center", width: 400 }}
         >
-        <h3>{label}</h3>
+          <h3>{label}</h3>
         </DialogTitle>
-        <DialogContent
-        style={{width:400,height:400}}
-        dividers>
-        {users === undefined || users === null || (users !== null && users.length === 0) && <p>No {label}</p>}  
-        {users !== undefined && users !== null && users.map((user) => (
-            <Grid container>
-               <Grid item xs={8}>
-                    {user.Username}
+        <DialogContent style={{ width: 400, height: 400 }} dividers>
+          {users === undefined ||
+            users === null ||
+            (users !== null && users.length === 0 && <p>No {label}</p>)}
+          {users !== undefined &&
+            users !== null &&
+            users.map((user) => (
+              <Grid container>
+                <Grid item xs={8}>
+                  {user.Username}
                 </Grid>
-            </Grid>
-
-          
-          
-       ))}
-
-          
+              </Grid>
+            ))}
         </DialogContent>
       </Dialog>
     </div>

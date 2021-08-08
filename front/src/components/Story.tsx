@@ -23,6 +23,12 @@ interface Props {
 }
  
 export default function Story({ onClose, stories, user }: Props ){
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [storyPaused, setStoryPaused] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const storyIndexRef = useRef(0);
@@ -52,7 +58,7 @@ export default function Story({ onClose, stories, user }: Props ){
   }, [storyIndex]);
 
   useEffect(() => {
-    axios.get("/api/user/userid/" + user )
+    axios.get("/api/user/userid/" + user ,authorization)
     .then((res)=> {
       setImageProfile(res.data.ProfilePicture)
       setUsername(res.data.Username)

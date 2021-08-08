@@ -12,6 +12,12 @@ import {
 import axios from "axios";
 
 const RegistrationUser = ({ setRedirection }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const [user, setUser] = useState({ gender: 1 });
 
   const handleSubmitClick = () => {
@@ -21,7 +27,7 @@ const RegistrationUser = ({ setRedirection }) => {
       DateOfBirth: user.DateOfBirth + "T00:00:00+01:00",
     };
     axios
-      .post("/api/user/create", userForRegistration)
+      .post("/api/user/create", userForRegistration, authorization)
       .then((res) => {
         setRedirection(true);
       })

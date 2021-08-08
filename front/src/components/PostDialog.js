@@ -40,6 +40,11 @@ import SendContentDialog from "./SendContentDialog.js";
 import avatar from "../images/nistagramAvatar.jpg";
 
 const PostDialog = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const loggedUserId = localStorage.getItem("id");
   const loggedUsername = localStorage.getItem("username");
 
@@ -65,8 +70,9 @@ const PostDialog = () => {
   const [openPicker, setOpenPicker] = useState(false);
   const [location, setLocation] = useState();
   const [taggedUsers, setTaggedUsers] = useState([]);
-  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] = useState(false);
-  const [openSendContentDialog,setOpenSendContentDialog] = useState(false)
+  const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] =
+    useState(false);
+  const [openSendContentDialog, setOpenSendContentDialog] = useState(false);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -97,43 +103,49 @@ const PostDialog = () => {
       CreatedAt: "2018-12-10T13:49:51.141Z",
       Content: newComment,
     };
-    axios.post("/api/post/add-comment", comment).then((res) => {
-      console.log("upisan komentar");
-      let socket = new WebSocket(
-        "ws://localhost:8080/api/notification/chat/" + loggedUserId
-      );
-      socket.onopen = () => {
-        console.log("Successfully Connected");
-        socket.send(
-          '{"user_who_follow":' +
-            '"' +
-            loggedUsername +
-            '"' +
-            ',"command": 2, "channel": ' +
-            '"' +
-            imagePost.UserID +
-            '"' +
-            ', "content": "commented your post:"' +
-            ', "media": "' +
-            imagePost.Media[0] +
-            '"' +
-            ', "comment": "' +
-            newComment +
-            '"}' +
-            ', "post_id": "' +
-            imagePost.ID +
-            '"}'
+    axios
+      .post("/api/post/add-comment", comment, authorization)
+      .then((res) => {
+        console.log("upisan komentar");
+        let socket = new WebSocket(
+          "ws://localhost:8080/api/notification/chat/" + loggedUserId
         );
-      };
-      setNewComment("");
-      axios.get("/api/post/get-comments-for-post/" + post).then((res) => {
-        setCommentsForPost(res.data);
-      }).catch((error) => {
+        socket.onopen = () => {
+          console.log("Successfully Connected");
+          socket.send(
+            '{"user_who_follow":' +
+              '"' +
+              loggedUsername +
+              '"' +
+              ',"command": 2, "channel": ' +
+              '"' +
+              imagePost.UserID +
+              '"' +
+              ', "content": "commented your post:"' +
+              ', "media": "' +
+              imagePost.Media[0] +
+              '"' +
+              ', "comment": "' +
+              newComment +
+              '"}' +
+              ', "post_id": "' +
+              imagePost.ID +
+              '"}'
+          );
+        };
+        setNewComment("");
+        axios
+          .get("/api/post/get-comments-for-post/" + post, authorization)
+          .then((res) => {
+            setCommentsForPost(res.data);
+          })
+          .catch((error) => {
+            //console.log(error);
+          });
+      })
+      .catch((error) => {
         //console.log(error);
       });
-    }).catch((error) => {
-      //console.log(error);
-    });
   };
 
   useEffect(() => {
@@ -146,12 +158,15 @@ const PostDialog = () => {
     axios.get("/api/post/get-one-post/" + post).then((res) => {
       setImagePost(res.data);
       makeDescriptionFromPost(res.data.Description);
-      axios.get("/api/user/userid/" + res.data.UserID).then((res1) => {
-        console.log(res1.data);
-        setUser(res1.data);
-      }).catch((error) => {
-        //console.log(error);
-      });
+      axios
+        .get("/api/user/userid/" + res.data.UserID, authorization)
+        .then((res1) => {
+          console.log(res1.data);
+          setUser(res1.data);
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
 
       console.log(res.data);
     });
@@ -160,54 +175,64 @@ const PostDialog = () => {
       UserID: loggedUserId,
     };
     console.log(like);
-    axios.put("/api/post/like-exists", like).then((res) => {
-      if (res.data == true && res.status === 201) {
-        setPostIsLiked(true);
-      } else if (res.data == false && res.status === 201) {
-        setPostIsLiked(false);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
-
-    axios.put("/api/post/dislike-exists", like).then((res) => {
-      if (res.data == true && res.status === 201) {
-        setPostIsDisliked(true);
-      } else if (res.data == false && res.status === 201) {
-        setPostIsDisliked(false);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .put("/api/post/like-exists", like, authorization)
+      .then((res) => {
+        if (res.data == true && res.status === 201) {
+          setPostIsLiked(true);
+        } else if (res.data == false && res.status === 201) {
+          setPostIsLiked(false);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
 
     axios
-      .get("/api/post/post-exists-in-favourites/" + loggedUserId + "/" + post)
+      .put("/api/post/dislike-exists", like, authorization)
+      .then((res) => {
+        if (res.data == true && res.status === 201) {
+          setPostIsDisliked(true);
+        } else if (res.data == false && res.status === 201) {
+          setPostIsDisliked(false);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+
+    axios
+      .get(
+        "/api/post/post-exists-in-favourites/" + loggedUserId + "/" + post,
+        authorization
+      )
       .then((res) => {
         if (res.data == true) {
           setPostSavedToFavourites(true);
         } else if (res.data == false) {
           setPostSavedToFavourites(false);
         }
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
 
     axios
-      .get("/api/post/get-comments-for-post/" + post)
+      .get("/api/post/get-comments-for-post/" + post, authorization)
       .then((res) => {
         setCommentsForPost(res.data);
       })
       .catch((error) => {});
 
     axios
-      .get("/api/post/get-location-for-post/" + post)
+      .get("/api/post/get-location-for-post/" + post, authorization)
       .then((res) => {
         setLocation(res.data.Location);
       })
       .catch((error) => {});
 
     axios
-      .get("/api/post/get-users-tagged-on-post/" + post)
+      .get("/api/post/get-users-tagged-on-post/" + post, authorization)
       .then((res) => {
         if (res.data !== null) {
           setTaggedUsers(res.data);
@@ -221,64 +246,67 @@ const PostDialog = () => {
       PostID: post,
       UserID: loggedUserId,
     };
-    axios.post("/api/post/like-post", like).then((res) => {
-      if (postIsLiked) {
-        if (postIsDisliked) {
-          setImagePost({
-            ...imagePost,
-            LikesCount: Number(imagePost.LikesCount) + Number(1),
-            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
-          });
-          setPostIsDisliked(false);
+    axios
+      .post("/api/post/like-post", like, authorization)
+      .then((res) => {
+        if (postIsLiked) {
+          if (postIsDisliked) {
+            setImagePost({
+              ...imagePost,
+              LikesCount: Number(imagePost.LikesCount) + Number(1),
+              DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+            });
+            setPostIsDisliked(false);
+          } else {
+            setImagePost({
+              ...imagePost,
+              LikesCount: Number(imagePost.LikesCount) - Number(1),
+            });
+          }
+          setPostIsLiked(false);
         } else {
-          setImagePost({
-            ...imagePost,
-            LikesCount: Number(imagePost.LikesCount) - Number(1),
-          });
-        }
-        setPostIsLiked(false);
-      } else {
-        if (postIsDisliked) {
-          setImagePost({
-            ...imagePost,
-            LikesCount: Number(imagePost.LikesCount) + Number(1),
-            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
-          });
-          setPostIsDisliked(false);
-        } else {
-          setImagePost({
-            ...imagePost,
-            LikesCount: Number(imagePost.LikesCount) + Number(1),
-          });
-        }
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              imagePost.UserID +
-              '"' +
-              ', "content": "liked your photo."' +
-              ', "media": "' +
-              imagePost.Media[0] +
-              '"' +
-              ', "post_id": "' +
-              imagePost.ID +
-              '"}'
+          if (postIsDisliked) {
+            setImagePost({
+              ...imagePost,
+              LikesCount: Number(imagePost.LikesCount) + Number(1),
+              DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+            });
+            setPostIsDisliked(false);
+          } else {
+            setImagePost({
+              ...imagePost,
+              LikesCount: Number(imagePost.LikesCount) + Number(1),
+            });
+          }
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
           );
-        };
-        setPostIsLiked(true);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                imagePost.UserID +
+                '"' +
+                ', "content": "liked your photo."' +
+                ', "media": "' +
+                imagePost.Media[0] +
+                '"' +
+                ', "post_id": "' +
+                imagePost.ID +
+                '"}'
+            );
+          };
+          setPostIsLiked(true);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const HandleClickDislike = () => {
@@ -286,82 +314,91 @@ const PostDialog = () => {
       PostID: post,
       UserID: loggedUserId,
     };
-    axios.post("/api/post/dislike-post", dislike).then((res) => {
-      if (postIsDisliked) {
-        if (postIsLiked) {
-          setImagePost({
-            ...imagePost,
-            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
-            LikesCount: Number(imagePost.LikesCount) - Number(1),
-          });
-          setPostIsLiked(false);
+    axios
+      .post("/api/post/dislike-post", dislike, authorization)
+      .then((res) => {
+        if (postIsDisliked) {
+          if (postIsLiked) {
+            setImagePost({
+              ...imagePost,
+              DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+              LikesCount: Number(imagePost.LikesCount) - Number(1),
+            });
+            setPostIsLiked(false);
+          } else {
+            setImagePost({
+              ...imagePost,
+              DislikesCount: Number(imagePost.DislikesCount) - Number(1),
+            });
+          }
+          setPostIsDisliked(false);
         } else {
-          setImagePost({
-            ...imagePost,
-            DislikesCount: Number(imagePost.DislikesCount) - Number(1),
-          });
-        }
-        setPostIsDisliked(false);
-      } else {
-        if (postIsLiked) {
-          setImagePost({
-            ...imagePost,
-            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
-            LikesCount: Number(imagePost.LikesCount) - Number(1),
-          });
-          setPostIsLiked(false);
-        } else {
-          setImagePost({
-            ...imagePost,
-            DislikesCount: Number(imagePost.DislikesCount) + Number(1),
-          });
-        }
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              imagePost.UserID +
-              '"' +
-              ', "content": "disliked your photo."' +
-              ', "media": "' +
-              imagePost.Media[0] +
-              '"' +
-              ', "post_id": "' +
-              imagePost.ID +
-              '"}'
+          if (postIsLiked) {
+            setImagePost({
+              ...imagePost,
+              DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+              LikesCount: Number(imagePost.LikesCount) - Number(1),
+            });
+            setPostIsLiked(false);
+          } else {
+            setImagePost({
+              ...imagePost,
+              DislikesCount: Number(imagePost.DislikesCount) + Number(1),
+            });
+          }
+          let socket = new WebSocket(
+            "ws://localhost:8080/api/notification/chat/" + loggedUserId
           );
-        };
-        setPostIsDisliked(true);
-      }
-    }).catch((error) => {
-      //console.log(error);
-    });
+          socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send(
+              '{"user_who_follow":' +
+                '"' +
+                loggedUsername +
+                '"' +
+                ',"command": 2, "channel": ' +
+                '"' +
+                imagePost.UserID +
+                '"' +
+                ', "content": "disliked your photo."' +
+                ', "media": "' +
+                imagePost.Media[0] +
+                '"' +
+                ', "post_id": "' +
+                imagePost.ID +
+                '"}'
+            );
+          };
+          setPostIsDisliked(true);
+        }
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const handleClickAllLikes = () => {
-    axios.get("/api/post/get-users-who-liked-post/" + post).then((res) => {
-      setLikers(res.data);
-      setOpenDialogForLikes(true);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-users-who-liked-post/" + post, authorization)
+      .then((res) => {
+        setLikers(res.data);
+        setOpenDialogForLikes(true);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const handleClickAllDislikes = () => {
-    axios.get("/api/post/get-users-who-disliked-post/" + post).then((res) => {
-      setDislikers(res.data);
-      setOpenDialogForDislikes(true);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-users-who-disliked-post/" + post, authorization)
+      .then((res) => {
+        setDislikers(res.data);
+        setOpenDialogForDislikes(true);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const handleOpenDialogForReport = () => {
@@ -459,8 +496,8 @@ const PostDialog = () => {
   };
 
   const HandleClickOpenSendContentDialog = () => {
-    setOpenSendContentDialog(true)
-  }
+    setOpenSendContentDialog(true);
+  };
 
   function SampleNextArrow(props) {
     const { className, style, onClick } = props;
@@ -714,7 +751,7 @@ const PostDialog = () => {
                         <SendRounded
                           fontSize="large"
                           style={{ cursor: "pointer" }}
-                          onClick = {HandleClickOpenSendContentDialog}
+                          onClick={HandleClickOpenSendContentDialog}
                         ></SendRounded>
                       </Grid>
                       <Grid item xs={2}>
@@ -837,9 +874,12 @@ const PostDialog = () => {
       )}
 
       {openSendContentDialog && (
-        <SendContentDialog open={openSendContentDialog} setOpen={setOpenSendContentDialog} userForPost={imagePost.UserID} postId = {imagePost.ID}>
-
-        </SendContentDialog>
+        <SendContentDialog
+          open={openSendContentDialog}
+          setOpen={setOpenSendContentDialog}
+          userForPost={imagePost.UserID}
+          postId={imagePost.ID}
+        ></SendContentDialog>
       )}
 
       {openDialogForLikes && (

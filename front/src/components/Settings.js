@@ -5,14 +5,12 @@ import ChangePasswordPage from "./ChangePasswordPage.js";
 import { useHistory } from "react-router-dom";
 import ProfilePage from "./ProfilePage";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Snackbar from '@material-ui/core/Snackbar';
+import Snackbar from "@material-ui/core/Snackbar";
 import { Alert } from "@material-ui/lab";
 import ProfilePrivacy from "./ProfilePrivacy.js";
 import PushNotificationPage from "./PushNotificationPage.js";
 import VerificationRequest from "./VerificationRequest";
 import axios from "axios";
-
-
 
 const tabList = [
   {
@@ -34,15 +32,20 @@ const tabList = [
     key: 3,
     id: 3,
     label: "Push Notification",
-  },{
+  },
+  {
     key: 4,
     id: 4,
     label: "Request verification",
   },
-
 ];
 
 const Settings = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 
   const [user, setUser] = useState({});
   const username = localStorage.getItem("username");
@@ -50,27 +53,25 @@ const Settings = () => {
   const [tabs] = useState(tabList);
   const [value, setValue] = useState(0);
 
-
-  const [open, setOpen] = useState(false)
-  const [message,setMessage] = useState('')
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
 
   const [selectedValue, setSelectedValue] = useState("male");
   const [load, setLoad] = useState(false);
   const [userCopy, setUserCopy] = useState({});
 
-  const [accountPrivacy,setAccountPrivacy] = useState(false)
-  const [messageRequest,setMessageRequest] = useState(false)
-  const [allowTags,setAllowTags] = useState(false)
-  const [profileSettings,setProfileSettings] = useState({})
-  const [pushNotification, setPushNotification] = useState({})
-
+  const [accountPrivacy, setAccountPrivacy] = useState(false);
+  const [messageRequest, setMessageRequest] = useState(false);
+  const [allowTags, setAllowTags] = useState(false);
+  const [profileSettings, setProfileSettings] = useState({});
+  const [pushNotification, setPushNotification] = useState({});
 
   const handleClick = () => {
     setOpen(true);
   };
 
   const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
 
@@ -78,73 +79,106 @@ const Settings = () => {
   };
   const handleTabChange = (event, value) => {
     setValue(value);
-    handleUrlForTab(value)
+    handleUrlForTab(value);
   };
   let history = useHistory();
 
-const TabChanged = () => {
-  if (value === 0) {
-    return <ProfilePage user={user} setUser={setUser} selectedValue={selectedValue} setSelectedValue={setSelectedValue} userCopy={userCopy} setUserCopy={setUserCopy} load={load}></ProfilePage>
-  }else if(value === 1){
-    return <ChangePasswordPage setOpen={setOpen} setMessage={setMessage}></ChangePasswordPage>
-  }else if(value === 2){
-    return <ProfilePrivacy profileSettings={profileSettings} setProfileSettings={setProfileSettings} load={load}></ProfilePrivacy>
-  }else if(value === 3){
-    return <PushNotificationPage pushNotification={pushNotification} setPushNotification={setPushNotification} load={load}></PushNotificationPage>
-  }else if(value === 4){
-    return <VerificationRequest user={user} setOpen={setOpen} setMessage={setMessage}></VerificationRequest>
-  }
-}
+  const TabChanged = () => {
+    if (value === 0) {
+      return (
+        <ProfilePage
+          user={user}
+          setUser={setUser}
+          selectedValue={selectedValue}
+          setSelectedValue={setSelectedValue}
+          userCopy={userCopy}
+          setUserCopy={setUserCopy}
+          load={load}
+        ></ProfilePage>
+      );
+    } else if (value === 1) {
+      return (
+        <ChangePasswordPage
+          setOpen={setOpen}
+          setMessage={setMessage}
+        ></ChangePasswordPage>
+      );
+    } else if (value === 2) {
+      return (
+        <ProfilePrivacy
+          profileSettings={profileSettings}
+          setProfileSettings={setProfileSettings}
+          load={load}
+        ></ProfilePrivacy>
+      );
+    } else if (value === 3) {
+      return (
+        <PushNotificationPage
+          pushNotification={pushNotification}
+          setPushNotification={setPushNotification}
+          load={load}
+        ></PushNotificationPage>
+      );
+    } else if (value === 4) {
+      return (
+        <VerificationRequest
+          user={user}
+          setOpen={setOpen}
+          setMessage={setMessage}
+        ></VerificationRequest>
+      );
+    }
+  };
 
-const handleUrlForTab = (value) => {
-  var route =''
-  if (value === 0) {
-    route = '/accounts/edit/'
-  }else if(value === 1){
-    route = '/accounts/password/change/'
-  }else if(value === 2){
-    route = '/accounts/privacy/'
-  }else if(value === 3){
-    route = '/accounts/notification/'
-  }else if(value === 4){
-    route = '/accounts/verification/'
-  }
-  history.push(route)
-  
-}
+  const handleUrlForTab = (value) => {
+    var route = "";
+    if (value === 0) {
+      route = "/accounts/edit/";
+    } else if (value === 1) {
+      route = "/accounts/password/change/";
+    } else if (value === 2) {
+      route = "/accounts/privacy/";
+    } else if (value === 3) {
+      route = "/accounts/notification/";
+    } else if (value === 4) {
+      route = "/accounts/verification/";
+    }
+    history.push(route);
+  };
 
-useEffect(() => {
- 
-  var urls = window.location.href.split('accounts')
-  if(urls[1] === '/edit/'){
-    setValue(0)
-  }else if(urls[1] === '/password/change/'){
-    setValue(1)
-  }else if(urls[1] === '/privacy/'){
-    setValue(2)
-  }else if(urls[1] === '/notification/'){
-    setValue(3)
-  }else if(urls[1] === '/verification/'){
-    setValue(4)
-  }
-  axios.get("/api/user/" + username).then((res) => {
-    setUser(res.data);
-    res.data.Gender === 0 ? setSelectedValue("male") : setSelectedValue("female");
-    setLoad(true);
-    setUserCopy(res.data);
+  useEffect(() => {
+    var urls = window.location.href.split("accounts");
+    if (urls[1] === "/edit/") {
+      setValue(0);
+    } else if (urls[1] === "/password/change/") {
+      setValue(1);
+    } else if (urls[1] === "/privacy/") {
+      setValue(2);
+    } else if (urls[1] === "/notification/") {
+      setValue(3);
+    } else if (urls[1] === "/verification/") {
+      setValue(4);
+    }
+    axios
+      .get("/api/user/" + username, authorization)
+      .then((res) => {
+        setUser(res.data);
+        res.data.Gender === 0
+          ? setSelectedValue("male")
+          : setSelectedValue("female");
+        setLoad(true);
+        setUserCopy(res.data);
 
-    setProfileSettings(res.data.ProfileSettings)
-    setPushNotification(res.data.NotificationSettings)
-
-  }).catch((error) => {
-    //console.log(error);
-  });
-
-}, []);
+        setProfileSettings(res.data.ProfileSettings);
+        setPushNotification(res.data.NotificationSettings);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+  }, []);
 
   return (
     <div>
-
       <Grid container>
         <Grid container style={{ marginTop: "2%" }}>
           <Grid item xs={2} />
@@ -171,26 +205,28 @@ useEffect(() => {
                 </Tabs>
               </Box>
             </Grid>
-            <Box border={1} style={{ width: 600,height: 700 }}>
-               {TabChanged}
+            <Box border={1} style={{ width: 600, height: 700 }}>
+              {TabChanged}
             </Box>
           </Grid>
 
           <Grid item xs={2} />
         </Grid>
       </Grid>
-    <Snackbar
+      <Snackbar
         open={open}
-        autoHideDuration={2000} 
+        autoHideDuration={2000}
         onClose={handleClose}
-        TransitionComponent='TransitionRight'
+        TransitionComponent="TransitionRight"
         message={message}
-        
       >
-        {message === 'Successful changed password' || message === 'Successfully sent verification request' && <Alert onClose={handleClose} severity="success">
-          {message}
-        </Alert>}
-     </Snackbar>
+        {message === "Successful changed password" ||
+          (message === "Successfully sent verification request" && (
+            <Alert onClose={handleClose} severity="success">
+              {message}
+            </Alert>
+          ))}
+      </Snackbar>
     </div>
   );
 };

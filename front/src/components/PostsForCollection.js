@@ -105,6 +105,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PostsForCollection = () => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -121,7 +127,7 @@ const PostsForCollection = () => {
   useEffect(() => {
     if (collection === "allPosts") {
       axios
-        .get("/api/post/get-favourite-posts/" + loggedUserId)
+        .get("/api/post/get-favourite-posts/" + loggedUserId, authorization)
         .then((res) => {
           setPosts(res.data);
         })
@@ -132,7 +138,8 @@ const PostsForCollection = () => {
           "/api/post/get-posts-from-collection/" +
             loggedUserId +
             "/" +
-            collection
+            collection,
+          authorization
         )
         .then((res) => {
           setPosts(res.data);
@@ -142,11 +149,14 @@ const PostsForCollection = () => {
   }, []);
 
   const getImage = (image) => {
-    axios.get("/api/media/get-media-image/" + image).then((res) => {
-      return res.data;
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/media/get-media-image/" + image, authorization)
+      .then((res) => {
+        return res.data;
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   return (

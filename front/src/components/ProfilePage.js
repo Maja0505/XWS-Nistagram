@@ -32,6 +32,12 @@ const ProfilePage = ({
   setUserCopy,
   load,
 }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const classes = useStyles();
   const username = localStorage.getItem("username");
   const [selectedFile, setSelectedFile] = useState();
@@ -71,7 +77,8 @@ const ProfilePage = ({
         })
         .then((res) => {
           console.log("Uspesno upload-ovao sliku");
-        }).catch((error) => {
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
@@ -88,23 +95,26 @@ const ProfilePage = ({
       WebSite: user.WebSite,
       ProfilePicture: user.ProfilePicture + ".jpg",
     };
-    axios.put("/api/user/update/" + user.Username, userDto).then((res) => {
-      setUserCopy({
-        ...userCopy,
-        FirstName: user.FirstName,
-        Username: user.Username,
-        WebSite: user.WebSite,
-        Biography: user.Biography,
-        Email: user.Email,
-        PhoneNumber: user.PhoneNumber,
-        Gender: user.Gender,
-        ProfilePicture: user.ProfilePicture + ".jpg",
+    axios
+      .put("/api/user/update/" + user.Username, userDto, authorization)
+      .then((res) => {
+        setUserCopy({
+          ...userCopy,
+          FirstName: user.FirstName,
+          Username: user.Username,
+          WebSite: user.WebSite,
+          Biography: user.Biography,
+          Email: user.Email,
+          PhoneNumber: user.PhoneNumber,
+          Gender: user.Gender,
+          ProfilePicture: user.ProfilePicture + ".jpg",
+        });
+        setUser({ ...user, ProfilePicture: loggedUserId + ".jpg" });
+        localStorage.setItem("username", user.Username);
+      })
+      .catch((error) => {
+        //console.log(error);
       });
-      setUser({ ...user, ProfilePicture: loggedUserId + ".jpg" });
-      localStorage.setItem("username", user.Username);
-    }).catch((error) => {
-      //console.log(error);
-    });
   };
 
   return (

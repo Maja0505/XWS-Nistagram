@@ -7,218 +7,344 @@ import axios from "axios";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 
-const PushNotificationPage = ({pushNotification, setPushNotification,load}) => {
+const PushNotificationPage = ({
+  pushNotification,
+  setPushNotification,
+  load,
+}) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const username = localStorage.getItem("username");
 
-
   const HandleOnChangeLikesNotification = (value) => {
- 
-      if(pushNotification.LikesNotification !== value){
-        axios.put("/api/user/" + username + "/like-notification/" + value).then((res) => {
-            setPushNotification({...pushNotification, LikeNotification: value === 'true'})
+    if (pushNotification.LikesNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/like-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            LikeNotification: value === "true",
           });
-      }
-    
+        });
+    }
   };
 
   const HandleOnChangeCommentNotification = (value) => {
- 
-    if(pushNotification.CommentNotification !== value){
-      axios.put("/api/user/" + username + "/comment-notification/" + value).then((res) => {
-        setPushNotification({...pushNotification, CommentNotification: value === 'true'})
-
-        }).catch((error) => {
+    if (pushNotification.CommentNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/comment-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            CommentNotification: value === "true",
+          });
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
-  
-};
+  };
 
-const HandleOnChangeMessageRequestNotification = (value) => {
- 
-    if(pushNotification.MessageRequestNotification !== value){
-      axios.put("/api/user/" + username + "/message-request-notification/" + value).then((res) => {
-        setPushNotification({...pushNotification, MessageRequestNotification: value === 'true'})
-
-        }).catch((error) => {
+  const HandleOnChangeMessageRequestNotification = (value) => {
+    if (pushNotification.MessageRequestNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/message-request-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            MessageRequestNotification: value === "true",
+          });
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
-  
-};
+  };
 
-const HandleOnChangeMessageNotification = (value) => {
- 
-    if(pushNotification.MessageNotification !== value){
-      axios.put("/api/user/" + username + "/message-notification/" + value).then((res) => {
-        setPushNotification({...pushNotification, MessageNotification: value === 'true'})
-        }).catch((error) => {
+  const HandleOnChangeMessageNotification = (value) => {
+    if (pushNotification.MessageNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/message-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            MessageNotification: value === "true",
+          });
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
-  
-};
+  };
 
-const HandleOnChangeFollowRequestNotification = (value) => {
- 
-    if(pushNotification.FollowRequestNotification !== value){
-      axios.put("/api/user/" + username + "/follow-request-notification/" + value).then((res) => {
-        setPushNotification({...pushNotification, FollowRequestNotification: value === 'true'})
-        }).catch((error) => {
+  const HandleOnChangeFollowRequestNotification = (value) => {
+    if (pushNotification.FollowRequestNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/follow-request-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            FollowRequestNotification: value === "true",
+          });
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
-  
-};
+  };
 
-const HandleOnChangeFollowNotification = (value) => {
- 
-    if(pushNotification.FollowNotification !== value){
-      axios.put("/api/user/" + username + "/follow-notification/" + value).then((res) => {
-        setPushNotification({...pushNotification, FollowNotification: value === 'true'})
-        }).catch((error) => {
+  const HandleOnChangeFollowNotification = (value) => {
+    if (pushNotification.FollowNotification !== value) {
+      axios
+        .put(
+          "/api/user/" + username + "/follow-notification/" + value,
+          {},
+          authorization
+        )
+        .then((res) => {
+          setPushNotification({
+            ...pushNotification,
+            FollowNotification: value === "true",
+          });
+        })
+        .catch((error) => {
           //console.log(error);
         });
     }
-  
-};
+  };
   return (
     <Grid container item xs={9} style={{ height: 600 }}>
-     <Grid item xs={1}></Grid>
-     {load && <Grid container item xs={10}>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>
-              Likes notification
-            </p>
+      <Grid item xs={1}></Grid>
+      {load && (
+        <Grid container item xs={10}>
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Likes notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="likes"
+                value={pushNotification.LikeNotification === true}
+                name="likes"
+                onClick={(e) => HandleOnChangeLikesNotification(e.target.value)}
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
+                johnappleseed liked your photo.
+              </p>
+            </Grid>
+            <Divider />
           </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="likes" value={pushNotification.LikeNotification === true} name="likes" onClick={(e) => HandleOnChangeLikesNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Comments notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="comment"
+                name="comment"
+                value={pushNotification.CommentNotification === true}
+                onClick={(e) =>
+                  HandleOnChangeCommentNotification(e.target.value)
+                }
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
+                johnappleseed commented: "Nice shot!"
+              </p>
+            </Grid>
+            <Divider />
           </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
-            johnappleseed liked your photo.
-            </p>
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Messages request notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="message-request"
+                name="message-request"
+                value={pushNotification.MessageRequestNotification === true}
+                onClick={(e) =>
+                  HandleOnChangeMessageRequestNotification(e.target.value)
+                }
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
+                johnappleseed wants to send you a message.
+              </p>
+            </Grid>
+            <Divider />
           </Grid>
-          <Divider />
-        </Grid>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>Comments notification</p>
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Messages notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="message"
+                name="message"
+                value={pushNotification.MessageNotification === true}
+                onClick={(e) =>
+                  HandleOnChangeMessageNotification(e.target.value)
+                }
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
+                johnappleseed sent you a message.
+              </p>
+            </Grid>
+            <Divider />
           </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="comment" name="comment" value={pushNotification.CommentNotification === true} onClick={(e)=> HandleOnChangeCommentNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
-            johnappleseed commented: "Nice shot!"
-            </p>
-          </Grid>
-          <Divider />
-        </Grid>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>Messages request notification</p>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="message-request" name="message-request" value={pushNotification.MessageRequestNotification === true} onClick={(e)=> HandleOnChangeMessageRequestNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
-            johnappleseed wants to send you a message.
-            </p>
-          </Grid>
-          <Divider />
-        </Grid>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>Messages notification</p>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="message" name="message" value={pushNotification.MessageNotification === true} onClick={(e)=> HandleOnChangeMessageNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
-            johnappleseed sent you a message.
-            </p>
-          </Grid>
-          <Divider />
-        </Grid>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>
-              Follow request notification
-            </p>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="follow-request" name="follow-request" value={pushNotification.FollowRequestNotification === true} onClick={(e)=> HandleOnChangeFollowRequestNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Follow request notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="follow-request"
+                name="follow-request"
+                value={pushNotification.FollowRequestNotification === true}
+                onClick={(e) =>
+                  HandleOnChangeFollowRequestNotification(e.target.value)
+                }
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
                 johnappleseed requested to follow you.
-            </p>
+              </p>
+            </Grid>
+            <Divider />
           </Grid>
-          <Divider />
+          <Grid style={{ height: "20%", width: "100%" }}>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 25, textAlign: "left" }}>
+                Follow notification
+              </p>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <RadioGroup
+                aria-label="follow"
+                name="follow"
+                value={pushNotification.FollowNotification === true}
+                onClick={(e) =>
+                  HandleOnChangeFollowNotification(e.target.value)
+                }
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Off"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="From Everyone"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid style={{ height: "30%", width: "100%" }}>
+              <p style={{ fontSize: 13, textAlign: "left" }}>
+                johnappleseed started following you.
+              </p>
+            </Grid>
+            <Divider />
+          </Grid>
         </Grid>
-        <Grid style={{ height: "20%", width: "100%" }}>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 25, textAlign: "left" }}>
-             Follow notification
-            </p>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <RadioGroup aria-label="follow" name="follow" value={pushNotification.FollowNotification === true} onClick={(e)=> HandleOnChangeFollowNotification(e.target.value)}>
-              <FormControlLabel value={false} control={<Radio />} label="Off" />
-              <FormControlLabel
-                value={true}
-                control={<Radio />}
-                label="From Everyone"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid style={{ height: "30%", width: "100%" }}>
-            <p style={{ fontSize: 13, textAlign: "left" }}>
-            johnappleseed started following you.
-            </p>
-          </Grid>
-          <Divider />
-        </Grid>
-      </Grid>}
+      )}
       <Grid item xs={1}></Grid>
     </Grid>
   );

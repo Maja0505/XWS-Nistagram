@@ -35,13 +35,17 @@ import Slider from "react-slick";
 import Picker from "emoji-picker-react";
 import SendContentDialog from "./SendContentDialog.js";
 
-
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import axios from "axios";
 
 const PostFeed = ({ feed }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
   const [username, setUsername] = useState();
   const [profileImage, setProfileImage] = useState();
   const [descriptionArray, setDescriptionArray] = useState([]);
@@ -68,8 +72,7 @@ const PostFeed = ({ feed }) => {
   const [saveToFavoritesDialog, setSaveToFavoritesDialog] = useState(false);
   const [openDialogForTaggedUsers, setOpenDialogForTaggedUsers] =
     useState(false);
-  const [openSendContentDialog,setOpenSendContentDialog] = useState(false)
-
+  const [openSendContentDialog, setOpenSendContentDialog] = useState(false);
 
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -84,8 +87,8 @@ const PostFeed = ({ feed }) => {
   };
 
   const HandleClickOpenSendContentDialog = () => {
-    setOpenSendContentDialog(true)
-  }
+    setOpenSendContentDialog(true);
+  };
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
@@ -161,62 +164,76 @@ const PostFeed = ({ feed }) => {
     prevOpen.current = open;
 
     axios
-      .put("/api/post/like-exists", { PostID: feed.ID, UserID: loggedUserId })
+      .put(
+        "/api/post/like-exists",
+        { PostID: feed.ID, UserID: loggedUserId },
+        authorization
+      )
       .then((res) => {
         setIsLiked(res.data);
-      }).catch((error) => {
-
-      });
+      })
+      .catch((error) => {});
 
     axios
-      .put("/api/post/dislike-exists", {
-        PostID: feed.ID,
-        UserID: loggedUserId,
-      })
+      .put(
+        "/api/post/dislike-exists",
+        {
+          PostID: feed.ID,
+          UserID: loggedUserId,
+        },
+        authorization
+      )
       .then((res) => {
         setIsDisliked(res.data);
-      }).catch((error) => {
-        
-      });
+      })
+      .catch((error) => {});
 
     axios
       .get(
-        "/api/post/post-exists-in-favourites/" + loggedUserId + "/" + feed.ID
+        "/api/post/post-exists-in-favourites/" + loggedUserId + "/" + feed.ID,
+        authorization
       )
       .then((res) => {
         setIsSaved(res.data);
-      }).catch((error) => {
-        
-      });
+      })
+      .catch((error) => {});
 
     makeDescriptionFromPost(feed.Description);
     axios
-      .get("/api/user/find-username-and-profile-picture/" + feed.UserID)
+      .get(
+        "/api/user/find-username-and-profile-picture/" + feed.UserID,
+        authorization
+      )
       .then((res) => {
         setUsername(res.data.Username);
         setProfileImage(res.data.ProfilePicture);
-      }).catch((error) => {
-        
-      });
+      })
+      .catch((error) => {});
 
-    axios.get("/api/post/get-location-for-post/" + feed.ID).then((res) => {
-      setLocationForFeed(res.data.Location);
-    }).catch((error) => {
-        
-    });
+    axios
+      .get("/api/post/get-location-for-post/" + feed.ID, authorization)
+      .then((res) => {
+        setLocationForFeed(res.data.Location);
+      })
+      .catch((error) => {});
 
-    axios.get("/api/post/get-users-tagged-on-post/" + feed.ID).then((res) => {
-      if (res.data !== null) {
-        setTaggedUsers(res.data);
-      }
-    }).catch((error) => {
-        
-    });
+    axios
+      .get("/api/post/get-users-tagged-on-post/" + feed.ID, authorization)
+      .then((res) => {
+        if (res.data !== null) {
+          setTaggedUsers(res.data);
+        }
+      })
+      .catch((error) => {});
   }, [feed]);
 
   const likePost = () => {
     axios
-      .post("/api/post/like-post", { PostID: feed.ID, UserID: loggedUserId })
+      .post(
+        "/api/post/like-post",
+        { PostID: feed.ID, UserID: loggedUserId },
+        authorization
+      )
       .then((res) => {
         if (!isLiked) {
           if (isDisliked) {
@@ -271,14 +288,19 @@ const PostFeed = ({ feed }) => {
           }
         }
         setIsLiked(!isLiked);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };
 
   const dislikePost = () => {
     axios
-      .post("/api/post/dislike-post", { PostID: feed.ID, UserID: loggedUserId })
+      .post(
+        "/api/post/dislike-post",
+        { PostID: feed.ID, UserID: loggedUserId },
+        authorization
+      )
       .then((res) => {
         if (!isDisliked) {
           if (isLiked) {
@@ -333,18 +355,23 @@ const PostFeed = ({ feed }) => {
           }
         }
         setIsDisliked(!isDisliked);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };
 
   const addComment = () => {
     axios
-      .post("/api/post/add-comment", {
-        PostID: feed.ID,
-        UserID: loggedUserId,
-        Content: newComment,
-      })
+      .post(
+        "/api/post/add-comment",
+        {
+          PostID: feed.ID,
+          UserID: loggedUserId,
+          Content: newComment,
+        },
+        authorization
+      )
       .then((res) => {
         let socket = new WebSocket(
           "ws://localhost:8080/api/notification/chat/" + loggedUserId
@@ -372,28 +399,35 @@ const PostFeed = ({ feed }) => {
               '"}'
           );
         };
-        axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
-          setComments(res.data);
-        }).catch((error) => {
-          //console.log(error);
-        });
+        axios
+          .get("/api/post/get-comments-for-post/" + feed.ID, authorization)
+          .then((res) => {
+            setComments(res.data);
+          })
+          .catch((error) => {
+            //console.log(error);
+          });
         setCopyOfFeed({
           ...copyOfFeed,
           CommentsCount: Number(copyOfFeed.CommentsCount) + Number(1),
         });
         setNewComment("");
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };
 
   const viewComments = () => {
-    axios.get("/api/post/get-comments-for-post/" + feed.ID).then((res) => {
-      setComments(res.data);
-      setShowComments(true);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-comments-for-post/" + feed.ID, authorization)
+      .then((res) => {
+        setComments(res.data);
+        setShowComments(true);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const addToComment = (event, emojiObject) => {
@@ -401,21 +435,25 @@ const PostFeed = ({ feed }) => {
   };
 
   const getUsersWhoLikedPost = () => {
-    axios.get("/api/post/get-users-who-liked-post/" + feed.ID).then((res) => {
-      setLikers(res.data);
-      setOpenDialogForLikes(true);
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/post/get-users-who-liked-post/" + feed.ID, authorization)
+      .then((res) => {
+        setLikers(res.data);
+        setOpenDialogForLikes(true);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   const getUsersWhoDislikedPost = () => {
     axios
-      .get("/api/post/get-users-who-disliked-post/" + feed.ID)
+      .get("/api/post/get-users-who-disliked-post/" + feed.ID, authorization)
       .then((res) => {
         setDislikers(res.data);
         setOpenDialogForDislikes(true);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         //console.log(error);
       });
   };
@@ -641,11 +679,10 @@ const PostFeed = ({ feed }) => {
                   )}
                 </Grid>
                 <Grid item xs={3}>
-
                   <SendRounded
                     fontSize="large"
                     style={{ margin: "auto", cursor: "pointer" }}
-                    onClick = {HandleClickOpenSendContentDialog}
+                    onClick={HandleClickOpenSendContentDialog}
                   />
                 </Grid>
               </Grid>
@@ -842,9 +879,12 @@ const PostFeed = ({ feed }) => {
         ></UsersList>
       )}
       {openSendContentDialog && (
-        <SendContentDialog open={openSendContentDialog} setOpen={setOpenSendContentDialog} userForPost={feed.UserID} postId = {feed.ID}>
-
-        </SendContentDialog>
+        <SendContentDialog
+          open={openSendContentDialog}
+          setOpen={setOpenSendContentDialog}
+          userForPost={feed.UserID}
+          postId={feed.ID}
+        ></SendContentDialog>
       )}
     </div>
   );

@@ -79,14 +79,17 @@ const NavBar = () => {
         setIsUser(false);
         if (text.length > 1) {
           axios
-            .get("/api/post/get-tag-suggestions/" + text.substring(1))
+            .get(
+              "/api/post/get-tag-suggestions/" + text.substring(1),
+              authorization
+            )
             .then((res) => {
               console.log(res.data);
               setSearchedContent(res.data);
             });
         } else {
           axios
-            .get("/api/post/get-all-tags")
+            .get("/api/post/get-all-tags", authorization)
             .then((res) => {
               console.log(res.data);
               setSearchedContent(res.data);
@@ -99,12 +102,12 @@ const NavBar = () => {
         setIsHastag(false);
         setIsUser(true);
         axios
-          .get("/api/user/search/" + username + "/" + text)
+          .get("/api/user/search/" + username + "/" + text, authorization)
           .then((res) => {
             console.log(res.data);
             setSearchedContent(res.data);
             axios
-              .get("/api/post/get-location-suggestions/" + text)
+              .get("/api/post/get-location-suggestions/" + text, authorization)
               .then((res) => {
                 console.log(res.data);
                 if (res.data !== null) {
@@ -120,7 +123,7 @@ const NavBar = () => {
           })
           .catch((error) => {
             axios
-              .get("/api/post/get-location-suggestions/" + text)
+              .get("/api/post/get-location-suggestions/" + text, authorization)
               .then((res) => {
                 console.log(res.data);
                 if (res.data !== null) {
@@ -192,7 +195,7 @@ const NavBar = () => {
   const handleNotificationButton = () => {
     if (!openNotifications) {
       axios
-        .get("/api/notification/channels/" + loggedUserId)
+        .get("/api/notification/channels/" + loggedUserId, authorization)
         .then((res) => {
           console.log(res.data);
           if (res.data) {

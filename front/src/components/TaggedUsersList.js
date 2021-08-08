@@ -7,7 +7,21 @@ import {
 } from "@material-ui/core";
 import { useEffect } from "react";
 
-const TaggedUsersList = ({ label, setOpen, users, open, setTaggedUsers,setListOfTaggedUserid,listOfTaggedUserid }) => {
+const TaggedUsersList = ({
+  label,
+  setOpen,
+  users,
+  open,
+  setTaggedUsers,
+  setListOfTaggedUserid,
+  listOfTaggedUserid,
+}) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   useEffect(() => {}, []);
 
   const handleClose = () => {
@@ -21,11 +35,10 @@ const TaggedUsersList = ({ label, setOpen, users, open, setTaggedUsers,setListOf
 
     if (index !== -1) {
       array.splice(index, 1);
-      array2.splice(index,1)
-      setListOfTaggedUserid(array2)
+      array2.splice(index, 1);
+      setListOfTaggedUserid(array2);
       setTaggedUsers(array);
     }
-    
   };
 
   return (

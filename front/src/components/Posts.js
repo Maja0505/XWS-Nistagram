@@ -117,6 +117,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Posts = ({ userForProfile, username }) => {
+  const authorization = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
+
   const classes = useStyles();
   const [redirection, setRedirectiton] = useState(false);
   const [postID, setPostID] = useState({});
@@ -131,7 +137,7 @@ const Posts = ({ userForProfile, username }) => {
 
   useEffect(() => {
     axios
-      .get("/api/post/get-all-by-userid/" + userForProfile.ID)
+      .get("/api/post/get-all-by-userid/" + userForProfile.ID, authorization)
       .then((res) => {
         if (res.data) {
           console.log(res.data);
@@ -146,11 +152,14 @@ const Posts = ({ userForProfile, username }) => {
   }, [userForProfile]);
 
   const getImage = (image) => {
-    axios.get("/api/media/get-media-image/" + image).then((res) => {
-      return res.data;
-    }).catch((error) => {
-      //console.log(error);
-    });
+    axios
+      .get("/api/media/get-media-image/" + image, authorization)
+      .then((res) => {
+        return res.data;
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
   };
 
   return (
