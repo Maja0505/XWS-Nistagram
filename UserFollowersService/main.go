@@ -13,15 +13,15 @@ import (
 	"os"
 )
 
-func initDB()  neo4j.Session{
-	session, _, err := ConnectToDB()
+func initDB()  (neo4j.Session, neo4j.Driver){
+	session, driver, err := ConnectToDB()
 	if err != nil {
 		log.Println(err)
 		log.Fatalln("Error connecting to Database")
 	}
 
 	log.Println("Starting to listen..")
-	return session
+	return session,driver
 }
 
 func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
@@ -30,6 +30,9 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 		session neo4j.Session
 		err     error
 	)
+
+	defer session.Close()
+
 	if driver, err = neo4j.NewDriver("neo4j://" + os.Getenv("USER_FOLLOWERS_SERVICE_HOST") + ":7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
 	}
@@ -56,8 +59,8 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 	return session, driver, nil
 }
 
-func initUserFollowRepo(session neo4j.Session) *repository.UserFollowersRepository {
-	return &repository.UserFollowersRepository{Session: session}
+func initUserFollowRepo(driver neo4j.Driver) *repository.UserFollowersRepository {
+	return &repository.UserFollowersRepository{Driver: driver}
 }
 
 func initUserFollowService(repo *repository.UserFollowersRepository) *service.UserFollowersService {
@@ -68,8 +71,8 @@ func initUserFollowHandler(service *service.UserFollowersService) *handler.UserF
 	return &handler.UserFollowersHandler{Service: service}
 }
 
-func initUserBlockRepo(session neo4j.Session) *repository.BlockedUserRepository {
-	return &repository.BlockedUserRepository{Session: session}
+func initUserBlockRepo(driver neo4j.Driver) *repository.BlockedUserRepository {
+	return &repository.BlockedUserRepository{Driver: driver}
 }
 
 func initUserBlockService(repo *repository.BlockedUserRepository) *service.BlockedUserService {
@@ -107,6 +110,8 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 	router.HandleFunc("/followSuggestions/{userId}",handler.GetFollowSuggestions).Methods("GET")
 
 
+	router.HandleFunc("/test",handler.TestHttp).Methods("GET")
+
 
 }
 
@@ -130,15 +135,15 @@ func init() {
 
 
 func main() {
-	db:= initDB()
+	_,driver:= initDB()
 
-	userFollowRepo :=initUserFollowRepo(db)
+	userFollowRepo :=initUserFollowRepo(driver)
 	userFollowService :=initUserFollowService(userFollowRepo)
 	userFollowHandler :=initUserFollowHandler(userFollowService)
 
 	go userFollowService.RedisConnection()
 
-	userBlockRepo :=initUserBlockRepo(db)
+	userBlockRepo :=initUserBlockRepo(driver)
 	userBlockService :=initUserBlockService(userBlockRepo)
 	userBlockHandler :=initUserBlockHandler(userBlockService)
 
@@ -150,6 +155,7 @@ func main() {
 
 
 	fmt.Println("Server running on port " + os.Getenv("USER_FOLLOWERS_SERVICE_PORT"))
+	userFollowHandler.Test()
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),router))
 
 }
