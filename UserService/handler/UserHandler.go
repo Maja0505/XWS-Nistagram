@@ -41,9 +41,9 @@ func (handler *UserHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request
 		respBodyInErrorCase := json.Unmarshal(body, &errorText)
 		respBodyInErrorCase = errors.New(errorText)
 		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
-		return true
+		return false
 	}
-	return false
+	return true
 
 }
 
