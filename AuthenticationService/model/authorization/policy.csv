@@ -73,8 +73,8 @@ p,USER,/api/post/story/all-follows-with-stories/*,GET
 
 
 p,ADMIN,/api/post/get-all-reported-contents,GET
-p,ADMIN,/api/post/delete-reported-content/{id}/{userid},PUT
-p,ADMIN,/api/post/delete-post/{postid}/{userid},PUT
+p,ADMIN,/api/post/delete-reported-content/*/*,PUT
+p,ADMIN,/api/post/delete-post/*/*,PUT
 
 
 
