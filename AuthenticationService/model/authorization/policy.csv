@@ -39,5 +39,42 @@ p,USER,/api/user-follow/blockUser,POST
 p,USER,/api/user-follow/getAllBlockUsers/*,GET
 p,USER,/api/user-follow/unblockUser,PUT
 
+p,USER,/api/post/create,POST
+p,USER,/api/post/add-comment,POST
+p,USER,/api/post/delete-comment,POST
+p,USER,/api/post/like-post,POST
+p,USER,/api/post/dislike-post,POST
+p,USER,/api/post/add-to-favourites,POST
+p,USER,/api/post/add-to-collection,POST
+p,USER,/api/post/remove-post-from-favourites,POST
+p,USER,/api/post/remove-post-from-collection,POST
+p,USER,/api/post/get-users-who-liked-post/*,GET
+p,USER,/api/post/get-users-who-disliked-post/*,GET
+p,USER,/api/post/add-tag,POST
+p,USER,/api/post/get-favourite-posts/*,GET
+p,USER,/api/post/get-posts-from-collection/*/*,GET
+p,USER,/api/post/like-exists,PUT
+p,USER,/api/post/dislike-exists,PUT
+p,USER,/api/post/get-liked-posts-for-user/*,GET
+p,USER,/api/post/get-disliked-posts-for-user/*,GET
+p,USER,/api/post/report-content,POST
+p,USER,/api/post/get-collections-for-user/*,GET
+p,USER,/api/post/post-exists-in-favourites/*/*,GET
+p,USER,/api/post/get-all-collections-for-post-by-user/*/*,GET
+p,USER,/api/post/add-links,POST
+p,USER,/api/post/story/create,POST
+p,USER,/api/post/story/set-for-highlights/*,POST
+p,USER,/api/post/story/all/*,GET
+p,USER,/api/post/story/all-not-expired/*,GET
+p,USER,/api/post/story/all-for-close-friends/*,GET
+p,USER,/api/post/story/all-highlights/*,GET
+p,USER,/api/post/story/all-follows-with-stories/*,GET
+p,USER,/api/post/story/all-follows-with-stories/*,GET
+
+
+p,ADMIN,/api/post/get-all-reported-contents,GET
+p,ADMIN,/api/post/delete-reported-content/{id}/{userid},PUT
+p,ADMIN,/api/post/delete-post/{postid}/{userid},PUT
+
 
 
