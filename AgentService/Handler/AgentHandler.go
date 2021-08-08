@@ -131,6 +131,9 @@ func (handler *AgentHandler) GetCampaignsForUser(w http.ResponseWriter, r *http.
 }
 
 func (handler *AgentHandler) GetCampaignRequests(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userid := vars["id"]

@@ -139,9 +139,6 @@ func (handler *PostHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) AddLinks(w http.ResponseWriter, r *http.Request) {
-	if !handler.CheckAuthorize(w,r){
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	var dto DTO.UpdateLinksDTO
 	err := json.NewDecoder(r.Body).Decode(&dto)
@@ -901,6 +898,10 @@ func (handler *PostHandler) GetAllCollectionsForPostByUser(w http.ResponseWriter
 }
 
 func (handler *PostHandler) GetAllPostFeedsForUser(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	userId := mux.Vars(r)["userId"]
 	if userId == "" {

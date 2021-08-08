@@ -19,16 +19,29 @@ const LoginPage = () => {
         localStorage.setItem("id", res.data.ID);
         localStorage.setItem("isAgent", res.data.IsAgent);
 
-        if (user.username === "admin") {
-          window.location.href = "http://localhost:3000/admin";
-        } else {
-          window.location.href =
-            "http://localhost:3000/homePage/" + res.data.Username;
-        }
+        axios
+          .post("/api/auth/login", {
+            Username: user.username,
+            Password: user.password,
+          })
+          .then((res1) => {
+            console.log(res1.data);
+            localStorage.setItem("token", res1.data.access_token);
+            if (user.username === "admin") {
+              window.location.href = "http://localhost:3000/admin";
+            } else {
+              window.location.href =
+                "http://localhost:3000/homePage/" + res.data.Username;
+            }
+          })
+          .catch((error) => {
+            alert("Wrong username or password");
+          });
       })
       .catch((error) => {
         alert("Wrong username or password");
       });
+
     //localStorage.setItem("username", user.username);
     /*window.location.href =
           "http://localhost:3000/homePage/" + user.username;*/

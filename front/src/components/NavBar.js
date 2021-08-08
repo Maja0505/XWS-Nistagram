@@ -34,6 +34,8 @@ import Badge from "@material-ui/core/Badge";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const NavBar = () => {
+  const token = localStorage.getItem("token");
+
   const username = localStorage.getItem("username");
   const loggedUserId = localStorage.getItem("id");
 
@@ -53,7 +55,23 @@ const NavBar = () => {
   const [redirection, setRedirection] = useState(false);
 
   const logout = () => {
-    clearLocalStorage();
+    axios
+      .post(
+        "/api/auth/logout",
+        { asd: "sdsad" },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+        clearLocalStorage();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const clearLocalStorage = () => {
@@ -73,12 +91,15 @@ const NavBar = () => {
               setSearchedContent(res.data);
             });
         } else {
-          axios.get("/api/post/get-all-tags").then((res) => {
-            console.log(res.data);
-            setSearchedContent(res.data);
-          }).catch((error) => {
-            //console.log(error);
-          });
+          axios
+            .get("/api/post/get-all-tags")
+            .then((res) => {
+              console.log(res.data);
+              setSearchedContent(res.data);
+            })
+            .catch((error) => {
+              //console.log(error);
+            });
         }
       } else {
         setIsHastag(false);
@@ -176,18 +197,23 @@ const NavBar = () => {
 
   const handleNotificationButton = () => {
     if (!openNotifications) {
-      axios.get("/api/notification/channels/" + loggedUserId).then((res) => {
-        console.log(res.data);
-        if (res.data) {
-          setAllNotifications(res.data);
-        }
-        setOpenNotifications((prevOpenNotifications) => !prevOpenNotifications);
-        setOpen(false);
-        localStorage.setItem("invisibleNotification", true);
-        setInvisible(localStorage.getItem("invisibleNotification"));
-      }).catch((error) => {
-        //console.log(error);
-      });
+      axios
+        .get("/api/notification/channels/" + loggedUserId)
+        .then((res) => {
+          console.log(res.data);
+          if (res.data) {
+            setAllNotifications(res.data);
+          }
+          setOpenNotifications(
+            (prevOpenNotifications) => !prevOpenNotifications
+          );
+          setOpen(false);
+          localStorage.setItem("invisibleNotification", true);
+          setInvisible(localStorage.getItem("invisibleNotification"));
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
     }
   };
 
@@ -519,13 +545,13 @@ const NavBar = () => {
                 />
               </Link>
               <Link to="/messages/">
-              <EmailOutlined
-                style={{
-                  color: "gray",
-                  width: "29px",
-                  height: "29px",
-                }}
-              />
+                <EmailOutlined
+                  style={{
+                    color: "gray",
+                    width: "29px",
+                    height: "29px",
+                  }}
+                />
               </Link>
             </Grid>
             <Grid
@@ -614,6 +640,7 @@ const NavBar = () => {
     <>
       {redirection === true && <Redirect to={redirectionString} />}
       <AppBar position="static">
+        <p>{token}</p>
         {(username === null || username === undefined) &&
           NavBarForUnregisteredUser}
         {username !== null && username !== undefined && NavBarForRegistredUser}

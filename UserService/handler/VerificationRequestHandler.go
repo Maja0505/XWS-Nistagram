@@ -48,6 +48,9 @@ func (handler *VerificationRequestHandler) CheckAuthorize(w http.ResponseWriter,
 }
 
 func (handler *VerificationRequestHandler) Create(w http.ResponseWriter,r *http.Request){
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var vrDTO dto.VerificationRequestDTO
 	err := json.NewDecoder(r.Body).Decode(&vrDTO)

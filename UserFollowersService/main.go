@@ -31,7 +31,7 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 		err     error
 	)
 
-	defer session.Close()
+	
 
 	if driver, err = neo4j.NewDriver("neo4j://" + os.Getenv("USER_FOLLOWERS_SERVICE_HOST") + ":7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
