@@ -1,0 +1,21 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j:4.0.3
+    restart: unless-stopped
+    hostname: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+      - 7473:7473
+    volumes:
+      - neo4j_db_test:/plugins
+      - neo4j_db_test:/conf
+      - neo4j_db_test:/data
+      - neo4j_db_test:/import
+      - neo4j_db_test:/logsneo4j
+    environment:
+      - NEO4J_AUTH=neo4j/nistagram
+
+volumes:
+    neo4j_db_test:
