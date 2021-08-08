@@ -15,7 +15,9 @@ var upgrader = websocket.Upgrader{}
 
 var connectedUsers = make(map[string]*Model.User)
 
+
 func UserChannelsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
 	vars := mux.Vars(r)
 	username := vars["user"]
 
@@ -33,6 +35,7 @@ func UserChannelsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Clie
 }
 
 func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	channel := vars["channel"]
@@ -57,6 +60,7 @@ func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rd
 }
 
 func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	channel := vars["channel"]
@@ -83,6 +87,7 @@ func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Re
 }
 
 func UserChannelsNotificationsUpdateHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	channel := vars["channel"]

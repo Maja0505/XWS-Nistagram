@@ -6,6 +6,7 @@ import (
 	"XWS-Nistagram/PostService/Service"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
@@ -21,7 +22,41 @@ type PostHandler struct {
 	Service *Service.PostService
 }
 
+func (handler *PostHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool{
+	client := &http.Client{}
+	reqUrl := fmt.Sprintf("http://" +os.Getenv("AUTHENTICATION_SERVICE_DOMAIN") + ":" + os.Getenv("AUTHENTICATION_SERVICE_PORT")+ "/authorize")
+	req,err := http.NewRequest("POST",reqUrl,nil)
+	req.Header.Add("Authorization",r.Header.Get("Authorization"))
+	req.Header.Add("path","/api/post" + r.URL.Path)
+	req.Header.Add("method",r.Method)
+
+	fmt.Println(r.Method)
+	resp,err := client.Do(req)
+	if err != nil{
+		fmt.Println(err)
+	}
+	fmt.Println(resp.Body)
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Header)
+
+	if resp.StatusCode != 200 {
+		var errorText string
+		body, _ := ioutil.ReadAll(resp.Body)
+		respBodyInErrorCase := json.Unmarshal(body, &errorText)
+		respBodyInErrorCase = errors.New(errorText)
+		http.Error(w,respBodyInErrorCase.Error(),resp.StatusCode)
+		return false
+	}
+
+	return true
+
+
+}
+
 func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var postDTO DTO.PostDTO
 	err := json.NewDecoder(r.Body).Decode(&postDTO)
@@ -41,6 +76,9 @@ func (handler *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) AddPostToFavourites(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var favouriteDTO DTO.FavouriteDTO
 	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
@@ -59,6 +97,9 @@ func (handler *PostHandler) AddPostToFavourites(w http.ResponseWriter, r *http.R
 }
 
 func (handler *PostHandler) AddPostToCollection(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var favouriteDTO DTO.FavouriteDTO
 	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
@@ -77,6 +118,9 @@ func (handler *PostHandler) AddPostToCollection(w http.ResponseWriter, r *http.R
 }
 
 func (handler *PostHandler) AddComment(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var commentDTO DTO.CommentDTO
 	err := json.NewDecoder(r.Body).Decode(&commentDTO)
@@ -95,6 +139,9 @@ func (handler *PostHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) AddLinks(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var dto DTO.UpdateLinksDTO
 	err := json.NewDecoder(r.Body).Decode(&dto)
@@ -113,6 +160,9 @@ func (handler *PostHandler) AddLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) AddTag(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var tag Model.Tag
 	err := json.NewDecoder(r.Body).Decode(&tag)
@@ -131,6 +181,9 @@ func (handler *PostHandler) AddTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var comment DTO.CommentDTO
 	err := json.NewDecoder(r.Body).Decode(&comment)
@@ -149,6 +202,9 @@ func (handler *PostHandler) DeleteComment(w http.ResponseWriter, r *http.Request
 }
 
 func (handler *PostHandler) RemovePostFromFavourites(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var favouriteDTO DTO.FavouriteDTO
 	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
@@ -167,6 +223,9 @@ func (handler *PostHandler) RemovePostFromFavourites(w http.ResponseWriter, r *h
 }
 
 func (handler *PostHandler) RemovePostFromCollection(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var favouriteDTO DTO.FavouriteDTO
 	err := json.NewDecoder(r.Body).Decode(&favouriteDTO)
@@ -185,6 +244,9 @@ func (handler *PostHandler) RemovePostFromCollection(w http.ResponseWriter, r *h
 }
 
 func (handler *PostHandler) LikePost(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var like Model.Like
 	err := json.NewDecoder(r.Body).Decode(&like)
@@ -203,6 +265,9 @@ func (handler *PostHandler) LikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var dislike Model.Dislike
 	err := json.NewDecoder(r.Body).Decode(&dislike)
@@ -221,6 +286,9 @@ func (handler *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) 
 }
 
 func (handler *PostHandler) CheckIfLikeExists(w http.ResponseWriter, r *http.Request)  {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var like Model.Like
 	err := json.NewDecoder(r.Body).Decode(&like)
@@ -235,7 +303,9 @@ func (handler *PostHandler) CheckIfLikeExists(w http.ResponseWriter, r *http.Req
 }
 
 func (handler *PostHandler) CheckIfDislikeExists(w http.ResponseWriter, r *http.Request) {
-
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var dislike Model.Dislike
 	err := json.NewDecoder(r.Body).Decode(&dislike)
@@ -275,6 +345,9 @@ func (handler *PostHandler) FindPostById(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *PostHandler) GetFavouritePosts(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -295,6 +368,9 @@ func (handler *PostHandler) GetFavouritePosts(w http.ResponseWriter, r *http.Req
 }
 
 func (handler *PostHandler) GetPostsFromCollection(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -496,6 +572,9 @@ func (handler *PostHandler) GetUsersTaggedOnPost(w http.ResponseWriter, r *http.
 }
 
 func (handler *PostHandler) GetUsersWhoLikedPost(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -520,6 +599,9 @@ func (handler *PostHandler) GetUsersWhoLikedPost(w http.ResponseWriter, r *http.
 }
 
 func (handler *PostHandler) GetUsersWhoDislikedPost(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -679,6 +761,9 @@ func (handler *PostHandler) GetVideo(w http.ResponseWriter, r *http.Request) {
 
 
 func (handler *PostHandler) GetLikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -699,6 +784,9 @@ func (handler *PostHandler) GetLikedPostsForUser(w http.ResponseWriter, r *http.
 }
 
 func (handler *PostHandler) GetDislikedPostsForUser(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -719,6 +807,9 @@ func (handler *PostHandler) GetDislikedPostsForUser(w http.ResponseWriter, r *ht
 }
 
 func (handler *PostHandler) ReportContent(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	var reportedConted DTO.ReportedContentDTO
 	err := json.NewDecoder(r.Body).Decode(&reportedConted)
@@ -741,6 +832,9 @@ func (handler *PostHandler) ReportContent(w http.ResponseWriter, r *http.Request
 }
 
 func (handler *PostHandler) GetCollectionsForUser(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -761,6 +855,9 @@ func (handler *PostHandler) GetCollectionsForUser(w http.ResponseWriter, r *http
 }
 
 func (handler *PostHandler) CheckIfPostExistsInFavourites(w http.ResponseWriter, r *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -781,6 +878,9 @@ func (handler *PostHandler) CheckIfPostExistsInFavourites(w http.ResponseWriter,
 }
 
 func (handler *PostHandler) GetAllCollectionsForPostByUser(w http.ResponseWriter,r  *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -895,6 +995,9 @@ func (handler *PostHandler) GetLocationSuggestions(w http.ResponseWriter, r *htt
 }
 
 func (handler *PostHandler) GetAllReportedContents(w http.ResponseWriter,r  *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	fmt.Println("usau u GetAllReportedContents")
 	w.Header().Set("Content-Type", "application/json")
 
@@ -912,6 +1015,9 @@ func (handler *PostHandler) GetAllReportedContents(w http.ResponseWriter,r  *htt
 }
 
 func (handler *PostHandler) DeleteReportedContent(w http.ResponseWriter,r  *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -935,6 +1041,9 @@ func (handler *PostHandler) DeleteReportedContent(w http.ResponseWriter,r  *http
 }
 
 func (handler *PostHandler) DeletePost(w http.ResponseWriter,r  *http.Request) {
+	if !handler.CheckAuthorize(w,r){
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	stringPostId := vars["postid"]

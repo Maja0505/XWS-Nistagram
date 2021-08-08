@@ -15,7 +15,9 @@ var upgrader = websocket.Upgrader{}
 
 var connectedUsers = make(map[string]*Model.User)
 
+
 func GetAllMessageChatForUser(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
 	vars := mux.Vars(r)
 	userid := vars["user"]
 
@@ -34,6 +36,8 @@ func GetAllMessageChatForUser(w http.ResponseWriter, r *http.Request, rdb *redis
 }
 
 func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userid1 := vars["userid1"]
@@ -60,6 +64,8 @@ func UserChannelsNotificationsHandler(w http.ResponseWriter, r *http.Request, rd
 }
 
 func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	userid1 := vars["userid1"]
@@ -88,6 +94,8 @@ func UserChannelsNotOpenedNotificationsHandler(w http.ResponseWriter, r *http.Re
 }
 
 func UserChannelsNotificationsUpdateHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
+
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	channel := vars["channel"]
@@ -116,6 +124,7 @@ func UserChannelsNotificationsUpdateHandler(w http.ResponseWriter, r *http.Reque
 
 func UsersHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
 
+
 	list, err := Model.List(rdb)
 	if err != nil {
 		handleError(err, w)
@@ -142,6 +151,8 @@ func H(rdb *redis.Client, fn func(http.ResponseWriter, *http.Request, *redis.Cli
 
 
 func MessageWebSocketHandler(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
+
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	fmt.Println(upgrader)
 	conn, err := upgrader.Upgrade(w, r, nil)
