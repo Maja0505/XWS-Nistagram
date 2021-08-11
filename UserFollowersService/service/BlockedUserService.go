@@ -34,7 +34,7 @@ func (service *BlockedUserService) GetAllBlockedUser(userId string) (*[]dto.User
 
 }
 
-func (service *BlockedUserService) CheckBlock(userId string, blockedUserId string) (interface{},error){
+func (service *BlockedUserService) CheckBlock(userId string, blockedUserId string) (*interface{},error){
 	block,err := service.Repository.CheckBlock(userId,blockedUserId)
 	if err !=nil{
 		return nil,err

@@ -17,6 +17,7 @@ import (
 
 type UserFollowersHandler struct{
 	Service *service.UserFollowersService
+	BlockedUserService *service.BlockedUserService
 }
 
 func (handler *UserFollowersHandler) CheckAuthorize(w http.ResponseWriter,r *http.Request) bool {
@@ -492,44 +493,50 @@ func (handler *UserFollowersHandler) GetFollowSuggestions(w http.ResponseWriter,
 	w.WriteHeader(http.StatusOK)
 }
 
-func (handler *UserFollowersHandler) TestHttp(w http.ResponseWriter, r *http.Request) {
+func (handler *UserFollowersHandler) GetRelationshipBetweenUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	userId1 := vars["userId1"]
+	userId2 := vars["userId2"]
 
-	session := handler.Service.Repository.Driver.NewSession(neo4j.SessionConfig{
-		AccessMode:   neo4j.AccessModeRead,
-	})
-	defer session.Close()
-
-	query := `match (u1:User)-[r:follow]->(u2:User)
- 			  where u1.UserId='nemanja' and u2.UserId='pera' return r`
-
-	fmt.Println("Zapoceto izvrsavanje sypher-shell-a : ",time.Now())
-	_, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		records, err := tx.Run(query, map[string]interface{}{})
-		if err != nil {
-			return nil, err
-		}
-		if records.Next() {
-			return true,nil
-		}
-		return nil, nil
-	})
-	fmt.Println("Zavrseno izvrsavanje sypher-shell-a : ",time.Now())
-
-	if err != nil {
-		log.Println("error querying graph:", err)
+	if userId1 == "" || userId2 == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	/*err = json.NewEncoder(w).Encode(d3Resp)
-	if err != nil {
-		log.Println("error writing graph response:", err)
+
+	var relationshipDTO RelationshipDTO
+	var err error
+
+	relationshipDTO.IsBlocked,err = handler.BlockedUserService.CheckBlock(userId1,userId2)
+	relationshipDTO.IsClosed,err = handler.Service.CheckClosed(userId1,userId2)
+	relationshipDTO.IsMuted,err = handler.Service.CheckMuted(userId1,userId2)
+	relationshipDTO.IsRequested,err = handler.Service.CheckRequested(userId1,userId2)
+	relationshipDTO.IsFollowing,err = handler.Service.CheckFollowing(userId1,userId2)
+
+
+	if err != nil{
+		w.WriteHeader(http.StatusExpectationFailed)
+		return
 	}
-	w.WriteHeader(http.StatusOK)*/
+
+	json.NewEncoder(w).Encode(relationshipDTO)
+	w.WriteHeader(http.StatusOK)
+
+
+
 }
 
+type RelationshipDTO struct {
+	IsBlocked *interface{}
+	IsClosed *interface{}
+	IsMuted *interface{}
+	IsRequested *interface{}
+	IsFollowing *interface{}
+}
 
 func (handler *UserFollowersHandler) Test() {
-
-	session := handler.Service.Repository.Driver.NewSession(neo4j.SessionConfig{
+	driver := *handler.Service.Repository.Driver
+	session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -549,6 +556,10 @@ func (handler *UserFollowersHandler) Test() {
 		return nil, nil
 	})
 	fmt.Println("Zavrseno izvrsavanje sypher-shell-a : ",time.Now())
+
+	//handler.Service.Repository.CheckFollowing("test","test")
+	//handler.Service.Repository.CheckFollowing("test","test")
+
 
 	if err != nil {
 		log.Println("error querying graph:", err)

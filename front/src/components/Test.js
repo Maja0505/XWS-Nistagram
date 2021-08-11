@@ -8,7 +8,7 @@ import UserDetailsOnHomePage from "./UserDetailsOnHomePage";
 import PostDetailsOnHomePage from "./PostDetailsOnHomePage";
 import UserHighlightsOnHomePage from "./UserHighlightsOnHomePage";
 
-const UserHomePage = () => {
+const Test = () => {
   const authorization = {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -28,8 +28,6 @@ const UserHomePage = () => {
   useEffect(() => {
     console.log(username);
     console.log(loggedInId);
-
-    setAllFollowers(null);
 
     axios
       .get("/api/user/" + username, authorization)
@@ -164,4 +162,4 @@ const UserHomePage = () => {
   );
 };
 
-export default UserHomePage;
+export default Test;

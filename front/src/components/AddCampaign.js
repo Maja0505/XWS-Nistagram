@@ -1,4 +1,4 @@
-import { Button, FormLabel, Grid, TextField } from "@material-ui/core";
+import { Button, Grid, TextField } from "@material-ui/core";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -30,19 +30,15 @@ const AddCampaign = ({ setTabValue }) => {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   };
-  const classes = useStyles();
 
   const [selectedFile, setSelectedFile] = useState([]);
   const [image, setImage] = useState([]);
   const [description, setDescription] = useState("");
   const loggedUserId = localStorage.getItem("id");
-  const loggedUsername = localStorage.getItem("username");
-
 
   const [isVideo, setIsVideo] = useState([]);
   const [imagesIdsForSave, setImagesIdsForSave] = useState([]);
   const [puklaSlika, setPuklaSlika] = useState(false);
-  const [listOfTaggedUserid, setListOfTaggedUserid] = useState([]);
   const [links, setLinks] = useState([]);
   const [repeat, setRepeat] = useState("");
   const [valueOneStart, onChangeOneStart] = useState(null);
@@ -51,8 +47,6 @@ const AddCampaign = ({ setTabValue }) => {
   const [repeatFactor, setRepeatFactor] = useState(0);
 
   const [location, setLocation] = useState("");
-  const [taggedUsers, setTaggedUsers] = useState("");
-  const [clearedDate, handleClearedDateChange] = useState(null);
   const [tags, setTags] = useState([]);
 
   const createPost = () => {
@@ -176,7 +170,7 @@ const AddCampaign = ({ setTabValue }) => {
       };
       console.log("Uspesno upload-ovao sliku");
       axios
-        .post("/api/agent/create-campaign", postDTO,authorization)
+        .post("/api/agent/create-campaign", postDTO, authorization)
         .then((res1) => {
           console.log("Uspesno kreirao post");
           //var postDTONew = { ...postDTO, ID: res1.data };

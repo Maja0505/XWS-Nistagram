@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -9,10 +9,10 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import { Grid, Divider } from "@material-ui/core";
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import { makeStyles } from "@material-ui/core/styles";
 import axios from "axios";
 
 const styles = (theme) => ({
@@ -26,20 +26,17 @@ const styles = (theme) => ({
     top: theme.spacing(1),
     color: theme.palette.grey[500],
   },
-
 });
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
+    width: "100%",
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
   },
 }));
 
 const DialogTitle = withStyles(styles)((props) => {
-  
   const { children, classes, onClose, ...other } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
@@ -70,8 +67,15 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOpen }) {
-
+export default function DialogForMuteUser({
+  loggedUserId,
+  muteUser,
+  open,
+  setOpen,
+  setRelationShip,
+  setOpenFirstDialog,
+  relationShip,
+}) {
   const authorization = {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -83,23 +87,26 @@ export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOp
   };
   const handleClickCancel = () => {
     setOpen(false);
-  }
+  };
 
   const handleClickMuteUser = () => {
     var muteDto = {
-        User: loggedUserId,
-        Friend: muteUserId,
-        Mute : true
-    }
-    axios.put('/api/user-follow/setMuteFriend',muteDto,authorization)
-    .then((res)=> {
-      console.log('uspelo')
-      setOpen(false)
-    }).catch((error) => {
-      //console.log(error);
-    });
-  }
-
+      User: loggedUserId,
+      Friend: muteUser.ID,
+      Mute: true,
+    };
+    axios
+      .put("/api/user-follow/setMuteFriend", muteDto, authorization)
+      .then((res) => {
+        console.log("uspelo");
+        setOpen(false);
+        setOpenFirstDialog(false);
+        setRelationShip({ ...relationShip, IsMuted: true });
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+  };
 
   return (
     <div>
@@ -111,30 +118,24 @@ export default function DialogForMuteUser({loggedUserId, muteUserId ,open, setOp
         <DialogTitle
           id="customized-dialog-title"
           onClose={handleClose}
-          style={{ textAlign: "center",width:400 }}
+          style={{ textAlign: "center", width: 400 }}
         >
-        <h3> Mute wajwai?</h3>
-        <p style={{textAlign:"left"}}></p>
+          <h3> Mute {muteUser.Username}?</h3>
+          <p style={{ textAlign: "left" }}></p>
         </DialogTitle>
-        <DialogContent
-        dividers>
-          
-
+        <DialogContent dividers>
           <List
             component="nav"
             className={classes.root}
             aria-label="mailbox folders"
           >
-
-           <ListItem button>
-              <ListItemText primary="Mute" onClick={handleClickMuteUser}/>
+            <ListItem button>
+              <ListItemText primary="Mute" onClick={handleClickMuteUser} />
             </ListItem>
             <Divider />
             <ListItem button divider onClick={handleClickCancel}>
               <ListItemText primary="Cancel" />
             </ListItem>
-        
-
           </List>
         </DialogContent>
       </Dialog>
