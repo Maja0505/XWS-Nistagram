@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Grid,
-  Button,
-} from "@material-ui/core";
+import { Dialog, DialogTitle, DialogContent, Grid } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import CamapignRequestForInfluencerOne from "./CamapignRequestForInfluencerOne";
 

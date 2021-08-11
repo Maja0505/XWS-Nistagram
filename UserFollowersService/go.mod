@@ -7,4 +7,5 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.3.0
+	github.com/rs/cors v1.8.0
 )

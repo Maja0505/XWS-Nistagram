@@ -2,29 +2,20 @@ package main
 
 import (
 	"XWS-Nistagram/UserFollowersService/handler"
+	"XWS-Nistagram/UserFollowersService/model"
 	"XWS-Nistagram/UserFollowersService/repository"
 	"XWS-Nistagram/UserFollowersService/service"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
 )
 
-func initDB()  (neo4j.Session, neo4j.Driver){
-	session, driver, err := ConnectToDB()
-	if err != nil {
-		log.Println(err)
-		log.Fatalln("Error connecting to Database")
-	}
-
-	log.Println("Starting to listen..")
-	return session,driver
-}
-
-func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
+func initDatabase() (neo4j.Session, neo4j.Driver, error) {
 	var (
 		driver  neo4j.Driver
 		session neo4j.Session
@@ -33,12 +24,14 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 
 	
 
-	if driver, err = neo4j.NewDriver("neo4j://" + os.Getenv("USER_FOLLOWERS_SERVICE_HOST") + ":7687", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
+	if driver, err = neo4j.NewDriver("bolt://neo4j", neo4j.BasicAuth("neo4j", "nistagram", "")); err != nil {
 		return nil, nil, err
 	}
 	if session = driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite}); err != nil {
 		return nil, nil, err
 	}
+
+	defer session.Close()
 
 	_,err  = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result,err := tx.Run("match (n) return n;", map[string]interface{}{})
@@ -59,7 +52,7 @@ func ConnectToDB() (neo4j.Session, neo4j.Driver, error) {
 	return session, driver, nil
 }
 
-func initUserFollowRepo(driver neo4j.Driver) *repository.UserFollowersRepository {
+func initUserFollowRepo(driver *neo4j.Driver) *repository.UserFollowersRepository {
 	return &repository.UserFollowersRepository{Driver: driver}
 }
 
@@ -67,8 +60,8 @@ func initUserFollowService(repo *repository.UserFollowersRepository) *service.Us
 	return &service.UserFollowersService{Repository:repo}
 }
 
-func initUserFollowHandler(service *service.UserFollowersService) *handler.UserFollowersHandler {
-	return &handler.UserFollowersHandler{Service: service}
+func initUserFollowHandler(service *service.UserFollowersService,service2 *service.BlockedUserService) *handler.UserFollowersHandler {
+	return &handler.UserFollowersHandler{Service: service,BlockedUserService: service2}
 }
 
 func initUserBlockRepo(driver neo4j.Driver) *repository.BlockedUserRepository {
@@ -109,8 +102,7 @@ func handleUserFollowFunctions(handler *handler.UserFollowersHandler,router *mux
 
 	router.HandleFunc("/followSuggestions/{userId}",handler.GetFollowSuggestions).Methods("GET")
 
-
-	router.HandleFunc("/test",handler.TestHttp).Methods("GET")
+	router.HandleFunc("/relationship/{userId1}/{userId2}",handler.GetRelationshipBetweenUsers).Methods("GET")
 
 
 }
@@ -133,19 +125,34 @@ func init() {
 	}
 }
 
+func SetupCors() *cors.Cors {
+	return cors.New(cors.Options{
+		AllowedOrigins: []string{"*"}, // All origins, for now
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"*"},
+		AllowCredentials: true,
+	})
+}
+
 
 func main() {
-	_,driver:= initDB()
 
-	userFollowRepo :=initUserFollowRepo(driver)
+	_,driver ,err:= initDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	userFollowRepo :=initUserFollowRepo(&driver)
 	userFollowService :=initUserFollowService(userFollowRepo)
-	userFollowHandler :=initUserFollowHandler(userFollowService)
 
-	go userFollowService.RedisConnection()
 
 	userBlockRepo :=initUserBlockRepo(driver)
 	userBlockService :=initUserBlockService(userBlockRepo)
 	userBlockHandler :=initUserBlockHandler(userBlockService)
+	userFollowHandler :=initUserFollowHandler(userFollowService,userBlockService)
+
+	go userFollowService.RedisConnection()
 
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -154,9 +161,47 @@ func main() {
 	handleUserBlockFunctions(userBlockHandler,router)
 
 
+	//userFollowHandler.Test()
+
+	//cacheMemoryOfNeo4j(userFollowHandler,userBlockHandler)
+
+	c := SetupCors()
+	http.Handle("/", c.Handler(router))
 	fmt.Println("Server running on port " + os.Getenv("USER_FOLLOWERS_SERVICE_PORT"))
-	userFollowHandler.Test()
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),router))
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("USER_FOLLOWERS_SERVICE_PORT")),c.Handler(router)))
+
+}
+
+func cacheMemoryOfNeo4j(userFollowHandler *handler.UserFollowersHandler,userBlockHandler *handler.BlockedUserHandler) {
+
+	for i := 0; i < 15; i++ {
+		userFollowHandler.Service.GetAllFollowersByUser("test")
+		userFollowHandler.Service.GetAllFollowsWhomUserIsNotCloseFriend("test")
+		userFollowHandler.Service.GetAllFollowsWhomUserIsCloseFriend("test")
+		userFollowHandler.Service.FollowSuggestions("test")
+		userFollowHandler.Service.GetAllNotMutedFollowedUsersByUser("test")
+		userFollowHandler.Service.Repository.CancelFollowRequest("test","test")
+		userFollowHandler.Service.GetAllMuteFriends("test")
+		userFollowHandler.Service.GetAllCloseFriends("test")
+		userFollowHandler.Service.Repository.SetFriendForClose("test","test",true)
+		userFollowHandler.Service.Repository.SetFriendForMute("test","test",true)
+		userFollowHandler.Service.CheckClosed("test","test")
+		userFollowHandler.Service.CheckMuted("test","test")
+		userFollowHandler.Service.CheckFollowing("test","test")
+		userFollowHandler.Service.CheckRequested("test","test")
+		userFollowHandler.Service.GetAllFollowedUsers("test")
+		userFollowHandler.Service.GetAllFollowRequests("test")
+		userFollowHandler.Service.Repository.AcceptFollowRequest("test","test")
+		userFollowHandler.Service.GetAllFollowsWithoutFollowsWhomUserIsCloseFriend("test")
+		userFollowHandler.Service.Repository.FollowUser(&model.FollowRelationship{User: "test",FollowedUser: "test",CloseFriend: false,Muted: false})
+		userFollowHandler.Service.Repository.UnfollowUser(&model.FollowRelationship{User: "test",FollowedUser: "test",CloseFriend: false,Muted: false})
+
+		userBlockHandler.Service.CheckBlock("test","test")
+		userBlockHandler.Service.BlockUser(&model.BlockRelationship{User: "test",BlockedUser: "test"})
+		userBlockHandler.Service.GetAllBlockedUser("test")
+		userBlockHandler.Service.UnblockUser(&model.BlockRelationship{User: "test",BlockedUser: "test"})
+	}
 
 }
 

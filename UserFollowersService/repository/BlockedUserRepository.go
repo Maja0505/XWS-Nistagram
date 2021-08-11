@@ -135,7 +135,7 @@ func (repository *BlockedUserRepository) GetAllBlockedUsers(user string) (*[]int
 	fmt.Println("Pocetak dobavljanja svih blokiranih : ",time.Now())
 	_,err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error){
 
-		query :=  "match (u1:User)-[r:block]->(u2) return u2.userId" +
+		query :=  "match (u1:User)-[r:block]->(u2) " +
 			"WHERE u1.userId = $user " +
 			"return u2.userId "
 
@@ -171,7 +171,7 @@ func (repository *BlockedUserRepository) CheckBlock(userId string, blockedUserId
 	defer session.Close()
 
 	fmt.Println("Pocetak provere da li je blokiran : ",time.Now())
-	_,err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error){
+	result,err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error){
 
 		query :=  "match (u1)-[r:block]->(u2:User) " +
 			"WHERE u1.userId = $userId1 and u2.userId = $userId2 " +
@@ -185,7 +185,7 @@ func (repository *BlockedUserRepository) CheckBlock(userId string, blockedUserId
 			fmt.Println(err)
 			return nil,err
 		}
-		if result.Next(){
+		for result.Next(){
 			return true,nil
 		}
 
@@ -198,7 +198,7 @@ func (repository *BlockedUserRepository) CheckBlock(userId string, blockedUserId
 		return nil, err
 	}
 
-	return nil, nil
+	return &result, nil
 }
 
 func (repository *BlockedUserRepository) UnblockUser(m *model.BlockRelationship) error {
