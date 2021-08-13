@@ -34,16 +34,16 @@ services:
     volumes:
       - micro_services:/app
 
-  notification-service:
-    image: notification-service:compose_build
+  messages-service:
+    image: messages-service:compose_build
     build:
-      context: ./NotificationService
+      context: ./MessagesService
       dockerfile: Dockerfile
     networks:
       - network1
     environment:
-      NOTIFICATION_SERVICE_PORT: 8080
-      NOTIFICATION_SERVICE_HOST: redis
+      MESSAGES_SERVICE_PORT: 8080
+      MESSAGES_SERVICE_HOST: redis
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
       AUTHENTICATION_SERVICE_DOMAIN: authentication-service
@@ -55,30 +55,6 @@ services:
     restart: on-failure
     volumes:
       - micro_services:/app
-
-
-  message-service:
-    image: message-service:compose_build
-    build:
-      context: ./MessageService
-      dockerfile: Dockerfile
-    networks:
-      - network1
-    environment:
-      MESSAGE_SERVICE_PORT: 8080
-      MESSAGE_SERVICE_HOST: redis
-      USER_SERVICE_PORT: 8080
-      USER_SERVICE_DOMAIN: user-service
-      AUTHENTICATION_SERVICE_DOMAIN: authentication-service
-      AUTHENTICATION_SERVICE_PORT: 8080
-    depends_on:
-      - redis
-    links: 
-      - redis
-    restart: on-failure
-    volumes:
-      - micro_services:/app
-
 
   post-service:
     image: post-service:compose_build

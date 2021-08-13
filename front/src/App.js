@@ -14,16 +14,30 @@ import PostsForCollection from "./components/PostsForCollection";
 import { useEffect } from "react";
 import Button from '@material-ui/core/Button';
 import { SnackbarProvider, useSnackbar  } from 'notistack';
-import Snackbar from './components/Snackbar'
 import LocationTagPost from "./components/LocationTagPost.js";
 import FollowSuggestions from "./components/FollowSuggestions";
 import Message from "./components/Message"
+import { connect, sendMsg } from "./api/index";
+
 
 function App() {
-  const logedUsername = localStorage.getItem("username");
+  const logedUsername = localStorage.getItem("username")
+  const userid = localStorage.getItem("id");
 
+  useEffect(() => {
+    if (userid !== null && userid !== undefined){
+      connect((msg) => {
+        console.log("New Message")
+      });
+    }
+  }, []);
+  const send = () => {
+    console.log("hello");
+    sendMsg('{"command": 0, "channel": '+ '"' + userid + '"' + '}');
+  }
   return (
     <div>
+      <button onClick={send}>Hit</button>
 
       <Router>
         <div className="App">
@@ -83,9 +97,6 @@ function App() {
           </Switch>
         </div>
       </Router>
-     <SnackbarProvider maxSnack={3}>
-       <Snackbar/>
-     </SnackbarProvider>
     </div>
   );
 }

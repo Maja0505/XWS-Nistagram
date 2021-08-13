@@ -1,5 +1,6 @@
 import { Grid, TextField, Button } from "@material-ui/core";
 import { useState } from "react";
+import { connect, sendMsg } from "../api/index";
 
 import axios from "axios";
 
@@ -10,7 +11,16 @@ const LoginPage = () => {
     window.location.href = "http://localhost:3000/registration";
   };
 
+  const send = () => {
+    console.log("hello");
+    sendMsg('{"command": 0, "channel": '+ '"' + localStorage.getItem("id") + '"' + '}');
+    console.log("bye");
+
+  }
+
+
   const login = () => {
+
     axios
       .get("/api/user/" + user.username)
       .then((res) => {
@@ -18,15 +28,17 @@ const LoginPage = () => {
         localStorage.setItem("username", res.data.Username);
         localStorage.setItem("id", res.data.ID);
         localStorage.setItem("isAgent", res.data.IsAgent);
-
         axios
           .post("/api/auth/login", {
             Username: user.username,
             Password: user.password,
           })
           .then((res1) => {
+            connect()
+            send()
             console.log(res1.data);
             localStorage.setItem("token", res1.data.access_token);
+            console.log("usao")
             if (user.username === "admin") {
               window.location.href = "http://localhost:3000/admin";
             } else {
@@ -37,10 +49,12 @@ const LoginPage = () => {
           .catch((error) => {
             alert("Wrong username or password");
           });
+          
       })
       .catch((error) => {
         alert("Wrong username or password");
       });
+
 
     //localStorage.setItem("username", user.username);
     /*window.location.href =
