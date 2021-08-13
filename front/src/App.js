@@ -12,13 +12,14 @@ import LikedDislikedPost from "./components/LikedDislikedPost";
 import HashTagPost from "./components/HashTagPost";
 import PostsForCollection from "./components/PostsForCollection";
 import { useEffect } from "react";
-import Button from '@material-ui/core/Button';
-import { SnackbarProvider, useSnackbar  } from 'notistack';
+import { connect, sendMsg } from "./api/index";
+import Button from "@material-ui/core/Button";
+import { SnackbarProvider, useSnackbar } from "notistack";
+import Snackbar from "./components/Snackbar";
 import LocationTagPost from "./components/LocationTagPost.js";
 import FollowSuggestions from "./components/FollowSuggestions";
-import Message from "./components/Message"
-import { connect, sendMsg } from "./api/index";
-
+import Message from "./components/Message";
+import Test from "./components/Test.js";
 
 function App() {
   const logedUsername = localStorage.getItem("username")
@@ -37,12 +38,11 @@ function App() {
   }
   return (
     <div>
-      <button onClick={send}>Hit</button>
 
       <Router>
         <div className="App">
           <NavBar></NavBar>
-          <Switch> 
+          <Switch>
             <Route exact path="/" component={StartPage}></Route>
             <Route
               exact
@@ -56,6 +56,12 @@ function App() {
               exact
               path="/homePage/:username"
               render={(props) => <UserHomePage {...props} />}
+            ></Route>
+
+            <Route
+              exact
+              path="/test/:username"
+              render={(props) => <Test {...props} />}
             ></Route>
 
             <Route
@@ -90,10 +96,7 @@ function App() {
               path="/follow-suggestions/"
               component={FollowSuggestions}
             ></Route>
-                   <Route
-              path="/messages/"
-              component={Message}
-            ></Route>
+            <Route path="/messages/" component={Message}></Route>
           </Switch>
         </div>
       </Router>

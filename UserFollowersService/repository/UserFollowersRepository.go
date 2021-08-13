@@ -9,13 +9,14 @@ import (
 )
 
 type UserFollowersRepository struct{
-	Driver neo4j.Driver
+	Driver *neo4j.Driver
 }
 
 
 func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationship) error{
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -51,7 +52,9 @@ func (repository *UserFollowersRepository) FollowUser(fr *model.FollowRelationsh
 
 
 func (repository *UserFollowersRepository) UnfollowUser(fr *model.FollowRelationship) error{
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -85,7 +88,8 @@ func (repository *UserFollowersRepository) UnfollowUser(fr *model.FollowRelation
 
 func (repository *UserFollowersRepository) SendFollowRequest(fr *model.FollowRelationship) error {
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -121,7 +125,8 @@ func (repository *UserFollowersRepository) SendFollowRequest(fr *model.FollowRel
 
 func (repository *UserFollowersRepository) CreateUserNodeIfNotExist(userId string) error{
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -152,7 +157,9 @@ func (repository *UserFollowersRepository) CreateUserNodeIfNotExist(userId strin
 
 func (repository *UserFollowersRepository) AcceptFollowRequest(user string,userWitchSendRequest string) error{
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -196,7 +203,8 @@ func (repository *UserFollowersRepository) AcceptFollowRequest(user string,userW
 
 func (repository *UserFollowersRepository) CancelFollowRequest(user string,userWitchSendRequest string) error{
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -238,7 +246,10 @@ func (repository *UserFollowersRepository) CancelFollowRequest(user string,userW
 
 
 func (repository *UserFollowersRepository) SetFriendForClose(userId string,friendId string, close bool) error{
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -278,7 +289,10 @@ func (repository *UserFollowersRepository) SetFriendForClose(userId string,frien
 
 
 func (repository *UserFollowersRepository) SetFriendForMute(userId string,friendId string, mute bool) error{
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -319,7 +333,9 @@ func (repository *UserFollowersRepository) SetFriendForMute(userId string,friend
 func (repository *UserFollowersRepository) GetAllUsers(userId string) (*[]interface{},error){
 	var followedUsers []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -357,7 +373,9 @@ func (repository *UserFollowersRepository) GetAllUsers(userId string) (*[]interf
 func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId string) (*[]interface{},error){
 	var followedUsers []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -395,7 +413,9 @@ func (repository *UserFollowersRepository) GetAllFollowedUsersByUser(userId stri
 func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -435,7 +455,9 @@ func (repository *UserFollowersRepository) GetAllFollowersByUser(userId string) 
 func (repository *UserFollowersRepository) GetAllNotMutedFollowedUsersByUser(userId string) (*[]interface{}, error){
 	var followedUsers []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -476,7 +498,9 @@ func (repository *UserFollowersRepository) GetAllNotMutedFollowedUsersByUser(use
 func (repository *UserFollowersRepository) GetAllFollowsWhomUserIsCloseFriend(userId string) (*[]interface{}, error){
 	var follows []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -517,7 +541,9 @@ func (repository *UserFollowersRepository) GetAllFollowsWhomUserIsCloseFriend(us
 func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (*[]interface{}, error) {
 	var followedUsers []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -559,7 +585,9 @@ func (repository *UserFollowersRepository) GetAllFollowRequests(userId string) (
 func (repository *UserFollowersRepository) GetAllCloseFriends(userId string) (*[]interface{}, error) {
 	var closeFriends []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -603,7 +631,9 @@ func (repository *UserFollowersRepository) GetAllCloseFriends(userId string) (*[
 func (repository *UserFollowersRepository) GetAllMuteFriends(userId string) (*[]interface{}, error) {
 	var muteFriends []interface{}
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -645,7 +675,9 @@ func (repository *UserFollowersRepository) GetAllMuteFriends(userId string) (*[]
 
 func (repository *UserFollowersRepository) CheckFollowing(userId string, followedUserId string) (*interface{}, error) {
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -667,7 +699,7 @@ func (repository *UserFollowersRepository) CheckFollowing(userId string, followe
 			return nil,err
 		}
 
-		if result.Next(){
+		for result.Next(){
 			return true,nil
 		}
 
@@ -692,7 +724,7 @@ func (repository *UserFollowersRepository) CheckFollowing(userId string, followe
 		return nil, err
 	}
 
-	if result.Next(){
+	for result.Next(){
 		return &result.Record().Values[0], nil
 	}
 
@@ -702,7 +734,9 @@ func (repository *UserFollowersRepository) CheckFollowing(userId string, followe
 
 func (repository *UserFollowersRepository) CheckRequested(userId string, followedUserId string) (*interface{}, error) {
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -724,7 +758,7 @@ func (repository *UserFollowersRepository) CheckRequested(userId string, followe
 			return nil,err
 		}
 
-		if result.Next(){
+		for result.Next(){
 			return true,nil
 		}
 
@@ -744,7 +778,10 @@ func (repository *UserFollowersRepository) CheckRequested(userId string, followe
 
 func (repository *UserFollowersRepository) DeleteAll(){
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeWrite,
 	})
 	defer session.Close()
@@ -773,7 +810,9 @@ func (repository *UserFollowersRepository) DeleteAll(){
 
 func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId string) (*interface{}, error ){
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -795,7 +834,7 @@ func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId
 			return nil,err
 		}
 
-		if result.Next(){
+		for result.Next(){
 			return &result.Record().Values[0],nil
 		}
 
@@ -813,7 +852,8 @@ func (repository *UserFollowersRepository) CheckMuted(userId string, mutedUserId
 
 func (repository *UserFollowersRepository) CheckClosed(userId string, closedUserId string) (*interface{}, error) {
 
-	session := repository.Driver.NewSession(neo4j.SessionConfig{
+		driver := *repository.Driver
+		session := driver.NewSession(neo4j.SessionConfig{
 		AccessMode:   neo4j.AccessModeRead,
 	})
 	defer session.Close()
@@ -835,7 +875,7 @@ func (repository *UserFollowersRepository) CheckClosed(userId string, closedUser
 			return nil,err
 		}
 
-		if result.Next(){
+		for result.Next(){
 			return &result.Record().Values[0],nil
 		}
 
