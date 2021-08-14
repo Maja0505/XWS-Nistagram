@@ -6,6 +6,7 @@ import Slider from "react-slick";
 import { makeStyles } from "@material-ui/core/styles";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { connect, sendMsg } from "../api/index";
 
 import TagLocationAndUser from "./TagLocationAndUser.js";
 
@@ -84,12 +85,7 @@ const AddPost = ({ setTabValue }) => {
           PostID: postDTO.ID,
         },authorization)
         .then((res) => {
-          let socket = new WebSocket("ws://localhost:8080/api/notification/chat/" + loggedUserId)
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            console.log("aa")
-            socket.send('{"user_who_follow":' + '"' + loggedUsername + '"' + ',"command": 2, "channel": ' + '"' + userid + '"' + ', "content": "tagged you in a post."' + ', "media": "' + postDTO.Media[0] + '"' + ', "post_id": "' + postDTO.ID + '"}')
-          };
+          sendMsg('{"user_from":' + '"' + loggedUsername + '"' + ',"command": 3, "channel": ' + '"' + userid + '"' + ', "content": "tagged you in a post."' + ', "media": "' + postDTO.Media[0] + '"' + ', "post_id": "' + postDTO.ID + '"}')
           console.log("Upisan user tag  " + userTag);
         })
         .catch((error) => {

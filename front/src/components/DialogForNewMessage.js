@@ -8,6 +8,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import { Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { connect, sendMsg } from "../api/index";
 
 import {
 
@@ -108,35 +109,14 @@ export default function DialogForNewMessage({ open, setOpen }) {
     var user = {}
     axios.get("/api/user/" + userForNewMessage,authorization)
         .then((res) => {
-            user = res.data
-            let socket = new WebSocket("ws://localhost:8080/api/message/chat/" + user.ID)
-
-            socket.onopen = () => {
-        
-                console.log("Successfully Connected");
-                socket.send('{"command": 0, "channel": ' + '"' +  loggedUserId +   '-' +  user.ID + '"' + '}')
-
-                setTimeout(500)
-
-                socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
-
-                socket.onopen = () => {
-                    console.log("Successfully Connected");
-                    socket.send('{"command": 0, "channel": ' + '"' +  loggedUserId +   '-' +  user.ID + '"' + '}')
-                    setTimeout(500)
-                    socket = new WebSocket("ws://localhost:8080/api/message/chat/" + loggedUserId)
-                        socket.onopen = () => {
-                        console.log("Successfully Connected");                
-                        socket.send('{"id":true' + ',"command": 2, "channel":"' + loggedUserId +   '-' +  user.ID  + '", "content": "","opened":false,"type":0,"text":"' +  text + '","user_from":"' + username + '","user_to":"' + user.Username + '"}')
-        
+          user = res.data
+          sendMsg('{"id":true' + ',"command": 2, "channel":"' + loggedUserId +   '-' +  user.ID  + '", "content": "","opened":false,"type":0,"text":"' +  text + '","user_from":"' + username + '","user_to":"' + user.Username + '"}')
+          
                 
-                      };
             
             
-                  };
         
         
-            };
         }).catch((error) => {
           //console.log(error);
         });

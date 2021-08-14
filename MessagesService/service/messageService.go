@@ -34,3 +34,31 @@ func SendMessage(rdb *redis.Client,message model.Message,u *model.UserWS) error 
 	return err
 }
 
+func GetChannels(rdb *redis.Client, userid string) ([]string, error) {
+	c, err := repository.GetChannels(rdb,userid)
+	if err != nil{
+		return nil, err
+	}
+	return c, nil
+}
+
+func GetAllMessagesFromChat(rdb *redis.Client, userid1 string,userid2 string) ([]string, error) {
+	c, err := repository.GetAllMessagesFromChat(rdb,userid1,userid2)
+	if err != nil{
+		return nil, err
+	}
+	return c, nil
+}
+
+func SendNotification(rdb *redis.Client,notification model.Message,u *model.UserWS) error {
+	err := repository.SendNotification(rdb,notification,u)
+	return err
+}
+
+func GetAllNotificationsFromChannel(rdb *redis.Client, channel string) ([]string, error) {
+	c, err := repository.GetAllNotificationsFromChannel(rdb,channel)
+	if err != nil{
+		return nil, err
+	}
+	return c, nil
+}

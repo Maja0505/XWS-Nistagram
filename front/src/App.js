@@ -38,7 +38,6 @@ function App() {
   }
   return (
     <div>
-
       <Router>
         <div className="App">
           <NavBar></NavBar>
@@ -100,6 +99,9 @@ function App() {
           </Switch>
         </div>
       </Router>
+      <SnackbarProvider maxSnack={3}>
+       <Snackbar/>
+     </SnackbarProvider>
     </div>
   );
 }

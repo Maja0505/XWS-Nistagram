@@ -36,7 +36,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import SendContentDialog from "./SendContentDialog.js";
-
+import { connect, sendMsg } from "../api/index";
 import avatar from "../images/nistagramAvatar.jpg";
 
 const PostDialog = () => {
@@ -107,17 +107,13 @@ const PostDialog = () => {
       .post("/api/post/add-comment", comment, authorization)
       .then((res) => {
         console.log("upisan komentar");
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
+
+          sendMsg(
+            '{"user_from":' +
               '"' +
               loggedUsername +
               '"' +
-              ',"command": 2, "channel": ' +
+              ',"command": 3, "channel": ' +
               '"' +
               imagePost.UserID +
               '"' +
@@ -132,7 +128,6 @@ const PostDialog = () => {
               imagePost.ID +
               '"}'
           );
-        };
         setNewComment("");
         axios
           .get("/api/post/get-comments-for-post/" + post, authorization)
@@ -278,17 +273,13 @@ const PostDialog = () => {
               LikesCount: Number(imagePost.LikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket(
-            "ws://localhost:8080/api/notification/chat/" + loggedUserId
-          );
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            socket.send(
-              '{"user_who_follow":' +
+
+            sendMsg(
+              '{"user_from":' +
                 '"' +
                 loggedUsername +
                 '"' +
-                ',"command": 2, "channel": ' +
+                ',"command": 3, "channel": ' +
                 '"' +
                 imagePost.UserID +
                 '"' +
@@ -300,7 +291,6 @@ const PostDialog = () => {
                 imagePost.ID +
                 '"}'
             );
-          };
           setPostIsLiked(true);
         }
       })
@@ -346,17 +336,13 @@ const PostDialog = () => {
               DislikesCount: Number(imagePost.DislikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket(
-            "ws://localhost:8080/api/notification/chat/" + loggedUserId
-          );
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            socket.send(
-              '{"user_who_follow":' +
+
+            sendMsg(
+              '{"user_from":' +
                 '"' +
                 loggedUsername +
                 '"' +
-                ',"command": 2, "channel": ' +
+                ',"command": 3, "channel": ' +
                 '"' +
                 imagePost.UserID +
                 '"' +
@@ -368,7 +354,6 @@ const PostDialog = () => {
                 imagePost.ID +
                 '"}'
             );
-          };
           setPostIsDisliked(true);
         }
       })

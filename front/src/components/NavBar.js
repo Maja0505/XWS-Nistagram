@@ -195,7 +195,7 @@ const NavBar = () => {
   const handleNotificationButton = () => {
     if (!openNotifications) {
       axios
-        .get("/api/notification/channels/" + loggedUserId, authorization)
+        .get("/ws/msg/channels/" + loggedUserId + "/view-notifications", authorization)
         .then((res) => {
           console.log(res.data);
           if (res.data) {
@@ -256,7 +256,7 @@ const NavBar = () => {
                             notification.post_id !== undefined &&
                             notification.post_id !== null
                               ? "/dialog/" + `${notification.post_id}`
-                              : "/homePage/" + `${notification.user_who_follow}`
+                              : "/homePage/" + `${notification.user_from}`
                           }
                           style={{ textDecoration: "none", color: "black" }}
                         >
@@ -268,14 +268,14 @@ const NavBar = () => {
                             notification.content ===
                               "tagged you in a post.") && (
                             <div style={{ width: "100%" }}>
-                              {notification.user_who_follow +
+                              {notification.user_from +
                                 " " +
                                 notification.content}
                             </div>
                           )}
                           {notification.content === "commented your post:" && (
                             <div style={{ width: "100%" }}>
-                              {notification.user_who_follow +
+                              {notification.user_from +
                                 " " +
                                 notification.content +
                                 " " +
