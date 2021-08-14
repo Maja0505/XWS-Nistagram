@@ -35,7 +35,7 @@ const LoginPage = () => {
           })
           .then((res1) => {
             connect()
-            send()
+            //send()
             console.log(res1.data);
             localStorage.setItem("token", res1.data.access_token);
             console.log("usao")

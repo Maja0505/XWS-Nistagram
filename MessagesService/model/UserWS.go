@@ -6,7 +6,9 @@ const (
 	UsersKey = "users"
 	UserChannelFmt = "user:%s:channels"
 	ChannelsKey = "channels"
-	UserChannelMessage = "channel:%s:message"
+	UserChannelMessage = "channel:%s:messages"
+	UserChannelNotification = "channel:%s:notifications"
+
 )
 
 

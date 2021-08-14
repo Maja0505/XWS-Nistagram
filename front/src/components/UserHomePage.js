@@ -36,7 +36,9 @@ const UserHomePage = () => {
       .then((res) => {
         setUser(res.data);
         console.log(res.data);
+        
         if (logedInUsername !== username) {
+          console.log('usao u if')
           axios
             .get(
               "/api/user-follow/relationship/" +
@@ -46,6 +48,7 @@ const UserHomePage = () => {
               authorization
             )
             .then((res1) => {
+              console.log(res1.data)
               setRelationShip(res1.data);
             })
             .catch((error) => {

@@ -14,6 +14,8 @@ import { Autocomplete } from "@material-ui/lab";
 import axios from "axios";
 import avatar from "../images/nistagramAvatar.jpg";
 import { RoomRounded, ThreeDRotation } from "@material-ui/icons";
+import { connect, sendMsg } from "../api/index";
+
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -106,17 +108,13 @@ export default function SendContentDialog({
 
       axios
         .get(
-          "/api/message/channels/" + loggedUserId + "/" + user.ID + "/messages",
+          "/ws/msg/channels/" + loggedUserId + "/" + user.ID + "/messages",
           authorization
         )
         .then((res1) => {
           if (res1.data.channel !== undefined) {
-            let socket = new WebSocket(
-              "ws://localhost:8080/api/message/chat/" + loggedUserId
-            );
-            socket.onopen = () => {
-              console.log("Successfully Connected");
-              socket.send(
+
+              sendMsg(
                 '{"id":true' +
                   ',"command": 2, "channel":"' +
                   res1.data.channel +
@@ -136,72 +134,41 @@ export default function SendContentDialog({
                   postId +
                   '"}'
               );
-            };
           } else {
-            let socket = new WebSocket(
-              "ws://localhost:8080/api/message/chat/" + user.ID
+
+            sendMsg(
+              '{"command": 0, "channel": ' +
+                '"' +
+                loggedUserId +
+                "-" +
+                user.ID +
+                '"' +
+                "}"
             );
-
-            socket.onopen = () => {
-              console.log("Successfully Connected");
-              socket.send(
-                '{"command": 0, "channel": ' +
-                  '"' +
-                  loggedUserId +
-                  "-" +
-                  user.ID +
-                  '"' +
-                  "}"
-              );
-
-              setTimeout(500);
-
-              socket = new WebSocket(
-                "ws://localhost:8080/api/message/chat/" + loggedUserId
-              );
-
-              socket.onopen = () => {
-                console.log("Successfully Connected");
-                socket.send(
-                  '{"command": 0, "channel": ' +
-                    '"' +
-                    loggedUserId +
-                    "-" +
-                    user.ID +
-                    '"' +
-                    "}"
-                );
-                setTimeout(500);
-                socket = new WebSocket(
-                  "ws://localhost:8080/api/message/chat/" + loggedUserId
-                );
-                socket.onopen = () => {
-                  console.log("Successfully Connected");
-                  socket.send(
-                    '{"id":true' +
-                      ',"command": 2, "channel":"' +
-                      loggedUserId +
-                      "-" +
-                      user.ID +
-                      '", "content": "","opened":false,"type":1,"text":"' +
-                      text +
-                      '","user_from":"' +
-                      username +
-                      '","user_to":"' +
-                      user.Username +
-                      '"' +
-                      ',"user_for_content_id":' +
-                      '"' +
-                      userForPost +
-                      '"' +
-                      ',"content_id":' +
-                      '"' +
-                      postId +
-                      '"}'
-                  );
-                };
-              };
-            };
+            setTimeout(500);
+     
+            sendMsg(
+              '{"id":true' +
+                ',"command": 2, "channel":"' +
+                loggedUserId +
+                "-" +
+                user.ID +
+                '", "content": "","opened":false,"type":1,"text":"' +
+                text +
+                '","user_from":"' +
+                username +
+                '","user_to":"' +
+                user.Username +
+                '"' +
+                ',"user_for_content_id":' +
+                '"' +
+                userForPost +
+                '"' +
+                ',"content_id":' +
+                '"' +
+                postId +
+                '"}'
+            );
           }
         })
         .catch((error) => {

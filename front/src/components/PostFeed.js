@@ -34,6 +34,7 @@ import DialogForSaveToFavorites from "./DialogForSaveToFavorites";
 import Slider from "react-slick";
 import Picker from "emoji-picker-react";
 import SendContentDialog from "./SendContentDialog.js";
+import { connect, sendMsg } from "../api/index";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -249,17 +250,13 @@ const PostFeed = ({ feed }) => {
               LikesCount: Number(copyOfFeed.LikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket(
-            "ws://localhost:8080/api/notification/chat/" + loggedUserId
-          );
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            socket.send(
-              '{"user_who_follow":' +
+    
+            sendMsg(
+              '{"user_from":' +
                 '"' +
                 loggedUsername +
                 '"' +
-                ',"command": 2, "channel": ' +
+                ',"command": 3, "channel": ' +
                 '"' +
                 feed.UserID +
                 '"' +
@@ -271,7 +268,6 @@ const PostFeed = ({ feed }) => {
                 feed.ID +
                 '"}'
             );
-          };
         } else {
           if (isDisliked) {
             setIsDisliked(!isDisliked);
@@ -316,17 +312,13 @@ const PostFeed = ({ feed }) => {
               DislikesCount: Number(copyOfFeed.DislikesCount) + Number(1),
             });
           }
-          let socket = new WebSocket(
-            "ws://localhost:8080/api/notification/chat/" + loggedUserId
-          );
-          socket.onopen = () => {
-            console.log("Successfully Connected");
-            socket.send(
-              '{"user_who_follow":' +
+
+           sendMsg(
+              '{"user_from":' +
                 '"' +
                 loggedUsername +
                 '"' +
-                ',"command": 2, "channel": ' +
+                ',"command": 3, "channel": ' +
                 '"' +
                 feed.UserID +
                 '"' +
@@ -338,7 +330,6 @@ const PostFeed = ({ feed }) => {
                 feed.ID +
                 '"}'
             );
-          };
         } else {
           if (isLiked) {
             setIsLiked(!isLiked);
@@ -373,17 +364,13 @@ const PostFeed = ({ feed }) => {
         authorization
       )
       .then((res) => {
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/notification/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
-            '{"user_who_follow":' +
+  
+          sendMsg(
+            '{"user_from":' +
               '"' +
               loggedUsername +
               '"' +
-              ',"command": 2, "channel": ' +
+              ',"command": 3, "channel": ' +
               '"' +
               feed.UserID +
               '"' +
@@ -398,7 +385,6 @@ const PostFeed = ({ feed }) => {
               feed.ID +
               '"}'
           );
-        };
         axios
           .get("/api/post/get-comments-for-post/" + feed.ID, authorization)
           .then((res) => {

@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 )
@@ -14,11 +15,11 @@ import (
 var rdb *redis.Client
 
 func init(){
-	//err := godotenv.Load(".env")
+	err := godotenv.Load(".env")
 
-	//if err != nil {
-	//	log.Fatal("Error loading .env file")
-	//}
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	rdb = redis.NewClient(&redis.Options{Addr: "redis:6379"})
 	pong, err := rdb.Ping().Result()
@@ -39,6 +40,11 @@ func setupRoutes() {
 
 	r := mux.NewRouter()
 	r.Path("/connect-ws/{id}").Methods("GET").HandlerFunc(handler.H(rdb, handler.ServeWS))
+	r.Path("/user/{id}/all-chats").Methods("GET").HandlerFunc(handler.H(rdb, handler.GetAllMessageChatForUser))
+	r.Path("/channels/{userid1}/{userid2}/view-messages").Methods("GET").HandlerFunc(handler.H(rdb, handler.ViewMessagesInChat))
+	r.Path("/channels/{channel}/view-notifications").Methods("GET").HandlerFunc(handler.H(rdb, handler.ViewAllNotificationsInChannel))
+
+
 	port := ":8080"
 
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})

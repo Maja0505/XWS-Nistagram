@@ -78,7 +78,7 @@ export default function OneTimeMessage({ open, setOpen, message, user }) {
   const handleClose = () => {
     axios
       .put(
-        "/api/message/user/" +
+        "/ws/msg/user/" +
           user +
           "/channels/" +
           message.channel +

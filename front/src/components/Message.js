@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import DialogForNewMessage from "./DialogForNewMessage";
 import OneTimeMessage from "./OneTimeMessage";
+import { connect, sendMsg } from "../api/index";
 
 import React, { useEffect, useState } from "react";
 
@@ -48,12 +49,7 @@ const Message = () => {
   const [openPicker, setOpenPicker] = useState(false);
 
   const handleClickPostComment = () => {
-    let socket = new WebSocket(
-      "ws://localhost:8080/api/message/chat/" + loggedUserId
-    );
-    socket.onopen = () => {
-      console.log("Successfully Connected");
-      socket.send(
+      sendMsg(
         '{"id":true' +
           ',"command": 2, "channel":"' +
           channelName +
@@ -63,25 +59,13 @@ const Message = () => {
           username +
           '","user_to":"' +
           userFromChatUsername +
-          '"}'
+          '"' +
+          ',"user_id_to":"' +
+          userIDFromMessage +
+          '"' + '}'
       );
       setNewComment("");
-      socket.send(
-        '{"user_who_follow":' +
-          '"' +
-          username +
-          '"' +
-          ',"command": 2, "channel": ' +
-          '"' +
-          userIDFromMessage +
-          '"' +
-          ', "content": "sent you a message."' +
-          ', "media": "' +
-          '"' +
-          ', "post_id": "' +
-          '"}'
-      );
-    };
+ 
   };
   const addToComment = (event, emojiObject) => {
     setNewComment(newComment + emojiObject.emoji);
@@ -111,9 +95,10 @@ const Message = () => {
   };
 
   useEffect(() => {
+    
     axios
       .get(
-        "http://localhost:8080/api/message/user/" + loggedUserId + "/chats",
+        "http://localhost:8080/ws/msg/user/" + loggedUserId + "/all-chats",
         authorization
       )
       .then((res) => {
@@ -122,16 +107,6 @@ const Message = () => {
       .catch((error) => {
         //console.log(error);
       });
-    let socket = new WebSocket(
-      "ws://localhost:8080/api/message/chat/" + loggedUserId
-    );
-
-    socket.onclose = (event) => {
-      console.log("Socket Closed Connection: ", event);
-      let socket = new WebSocket(
-        "ws://localhost:8080/api/message/chat/" + loggedUserId
-      );
-    };
   }, []);
 
   const handleClickOpenNewMessageDialog = () => {
@@ -153,12 +128,8 @@ const Message = () => {
         }
       )
       .then((res) => {
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/message/chat/" + loggedUserId
-        );
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
+
+          sendMsg(
             '{"id":true' +
               ',"command": 2, "channel":"' +
               channelName +
@@ -169,6 +140,9 @@ const Message = () => {
               '","user_to":"' +
               userFromChatUsername +
               '"' +
+              ',"user_id_to":"' +
+              userIDFromMessage +
+              '"' +
               ',"user_for_content_id":' +
               '"' +
               username +
@@ -178,22 +152,7 @@ const Message = () => {
               imageId +
               '"}'
           );
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              username +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              userIDFromMessage +
-              '"' +
-              ', "content": "sent you a message."' +
-              ', "media": "' +
-              '"' +
-              ', "post_id": "' +
-              '"}'
-          );
-        };
+
         setNewComment("");
       })
       .catch((error) => {
@@ -218,13 +177,8 @@ const Message = () => {
         }
       )
       .then((res) => {
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/message/chat/" + loggedUserId
-        );
 
-        socket.onopen = () => {
-          console.log("Successfully Connected");
-          socket.send(
+          sendMsg(
             '{"id":true' +
               ',"command": 2, "channel":"' +
               channelName +
@@ -235,6 +189,9 @@ const Message = () => {
               '","user_to":"' +
               userFromChatUsername +
               '"' +
+              ',"user_id_to":"' +
+              userIDFromMessage +
+              '"' +
               ',"user_for_content_id":' +
               '"' +
               username +
@@ -244,22 +201,6 @@ const Message = () => {
               imageId +
               '"}'
           );
-          socket.send(
-            '{"user_who_follow":' +
-              '"' +
-              username +
-              '"' +
-              ',"command": 2, "channel": ' +
-              '"' +
-              userIDFromMessage +
-              '"' +
-              ', "content": "sent you a message."' +
-              ', "media": "' +
-              '"' +
-              ', "post_id": "' +
-              '"}'
-          );
-        };
         setNewComment("");
       })
       .catch((error) => {
@@ -271,12 +212,11 @@ const Message = () => {
   const handleOpenChat = (user) => {
     axios
       .get(
-        "/api/message/channels/" + loggedUserId + "/" + user + "/" + "messages",
-        authorization
-      )
+        "/ws/msg/channels/" + loggedUserId + "/" + user + "/" + "view-messages")
       .then((res) => {
         console.log(res.data);
         setMessages(res.data);
+     
         setChannelName(res.data[0].channel);
         setUserIDFromMessage(user);
         if (res.data[0].user_from !== username) {
@@ -284,17 +224,6 @@ const Message = () => {
         } else {
           setUserFromChatUsername(res.data[0].user_to);
         }
-        let socket = new WebSocket(
-          "ws://localhost:8080/api/message/chat/" + loggedUserId
-        );
-
-        socket.onclose = (event) => {
-          console.log("Socket Closed Connection: ", event);
-          let socket = new WebSocket(
-            "ws://localhost:8080/api/message/chat/" + loggedUserId
-          );
-        };
-
         setOpenChat(true);
       })
       .catch((error) => {
@@ -335,7 +264,7 @@ const Message = () => {
 
       <Grid container>
         <Grid item xs={3}>
-          {fromUsersMessage !== null && (
+          {fromUsersMessage !== null &&  fromUsersMessage.length >= 1 && fromUsersMessage !== undefined && (
             <Paper>
               <MenuList id="menu-list-grow">
                 {fromUsersMessage.map((user) => (

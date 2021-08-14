@@ -10,6 +10,7 @@ import UserBlockMuteCloseDialog from "./UserBlockMuteCloseDialog";
 import FollowRequest from "./FollowRequests";
 import ViewCampaignRequestsForInfluencerDialog from "./ViewCampaignRequestsForInfluencerDialog";
 import AddCampaignToInfluencerDialog from "./AddCampaignToInfluencerDialog";
+import { connect, sendMsg } from "../api/index";
 
 const UserDetailsOnHomePage = ({
   user,
@@ -54,6 +55,15 @@ const UserDetailsOnHomePage = ({
       axios
         .post("/api/user-follow/followUser", follow, authorization)
         .then((res) => {
+          sendMsg('{"user_from":' +
+          '"' +
+          loggedInUsername +
+          '"' +
+          ',"command": 3, "channel": ' +
+          '"' +
+          user.IdString +
+          '"' +
+          ', "content": "requested to following you."}')
           console.log("uspesno");
         })
         .catch((error) => {
@@ -73,6 +83,15 @@ const UserDetailsOnHomePage = ({
       axios
         .post("/api/user-follow/followUser", follow, authorization)
         .then((res) => {
+          sendMsg('{"user_from":' +
+          '"' +
+          loggedInUsername +
+          '"' +
+          ',"command": 3, "channel": ' +
+          '"' +
+          user.IdString +
+          '"' +
+          ', "content": "started following you."}')
           console.log("uspesno");
         })
         .catch((error) => {
