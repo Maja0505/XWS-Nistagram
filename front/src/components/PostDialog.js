@@ -97,37 +97,18 @@ const PostDialog = () => {
 
   const handleClickPostComment = () => {
     var comment = {
-      ID: "0433e24a-d6d2-46f7-9111-33152b10d846",
       PostID: post,
       UserID: loggedUserId,
-      CreatedAt: "2018-12-10T13:49:51.141Z",
       Content: newComment,
+      Username: loggedUsername,
+      PostUserID: imagePost.UserID,
+      MediaID: imagePost.Media[0]
     };
     axios
       .post("/api/post/add-comment", comment, authorization)
       .then((res) => {
         console.log("upisan komentar");
 
-          sendMsg(
-            '{"user_from":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 3, "channel": ' +
-              '"' +
-              imagePost.UserID +
-              '"' +
-              ', "content": "commented your post:"' +
-              ', "media": "' +
-              imagePost.Media[0] +
-              '"' +
-              ', "comment": "' +
-              newComment +
-              '"}' +
-              ', "post_id": "' +
-              imagePost.ID +
-              '"}'
-          );
         setNewComment("");
         axios
           .get("/api/post/get-comments-for-post/" + post, authorization)
@@ -240,6 +221,9 @@ const PostDialog = () => {
     var like = {
       PostID: post,
       UserID: loggedUserId,
+      Username: loggedUsername,
+      PostUserID: imagePost.UserID,
+      MediaID: imagePost.Media[0]
     };
     axios
       .post("/api/post/like-post", like, authorization)
@@ -274,23 +258,6 @@ const PostDialog = () => {
             });
           }
 
-            sendMsg(
-              '{"user_from":' +
-                '"' +
-                loggedUsername +
-                '"' +
-                ',"command": 3, "channel": ' +
-                '"' +
-                imagePost.UserID +
-                '"' +
-                ', "content": "liked your photo."' +
-                ', "media": "' +
-                imagePost.Media[0] +
-                '"' +
-                ', "post_id": "' +
-                imagePost.ID +
-                '"}'
-            );
           setPostIsLiked(true);
         }
       })
@@ -303,6 +270,9 @@ const PostDialog = () => {
     var dislike = {
       PostID: post,
       UserID: loggedUserId,
+      Username: loggedUsername,
+      PostUserID: imagePost.UserID,
+      MediaID: imagePost.Media[0]
     };
     axios
       .post("/api/post/dislike-post", dislike, authorization)
@@ -337,23 +307,6 @@ const PostDialog = () => {
             });
           }
 
-            sendMsg(
-              '{"user_from":' +
-                '"' +
-                loggedUsername +
-                '"' +
-                ',"command": 3, "channel": ' +
-                '"' +
-                imagePost.UserID +
-                '"' +
-                ', "content": "disliked your photo."' +
-                ', "media": "' +
-                imagePost.Media[0] +
-                '"' +
-                ', "post_id": "' +
-                imagePost.ID +
-                '"}'
-            );
           setPostIsDisliked(true);
         }
       })

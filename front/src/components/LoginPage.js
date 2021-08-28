@@ -11,13 +11,6 @@ const LoginPage = () => {
     window.location.href = "http://localhost:3000/registration";
   };
 
-  const send = () => {
-    console.log("hello");
-    sendMsg('{"command": 0, "channel": '+ '"' + localStorage.getItem("id") + '"' + '}');
-    console.log("bye");
-
-  }
-
 
   const login = () => {
 

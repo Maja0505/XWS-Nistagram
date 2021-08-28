@@ -11,4 +11,8 @@ type CommentDTO struct {
 	UserID 			string 	`json:"UserID"`
 	CreatedAt 		time.Time 	`json:"CreatedAt"`
 	Content  		string 		`json:"Content"`
+	Username string
+	PostUserID string
+	MediaID string
+
 }

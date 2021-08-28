@@ -7,4 +7,7 @@ import (
 type Dislike struct {
 	PostID 			gocql.UUID 		`json:"PostID"`
 	UserID 			string 			`json:"UserID"`
+	Username string
+	PostUserID string
+	MediaID string
 }

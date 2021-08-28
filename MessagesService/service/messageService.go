@@ -50,8 +50,8 @@ func GetAllMessagesFromChat(rdb *redis.Client, userid1 string,userid2 string) ([
 	return c, nil
 }
 
-func SendNotification(rdb *redis.Client,notification model.Message,u *model.UserWS) error {
-	err := repository.SendNotification(rdb,notification,u)
+func SendNotification(rdb *redis.Client,notification model.Notification) error {
+	err := repository.SendNotification(rdb,notification)
 	return err
 }
 

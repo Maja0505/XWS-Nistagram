@@ -34,5 +34,4 @@ const (
 	CommandSubscribe = iota
 	CommandUnsubscribe
 	CommandSendMessage
-	CommandSendNotification
 )

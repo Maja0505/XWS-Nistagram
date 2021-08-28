@@ -232,7 +232,7 @@ const PostFeed = ({ feed }) => {
     axios
       .post(
         "/api/post/like-post",
-        { PostID: feed.ID, UserID: loggedUserId },
+        { PostID: feed.ID, UserID: loggedUserId, Username: loggedUsername, PostUserID: feed.UserID, MediaID: feed.Media[0] },
         authorization
       )
       .then((res) => {
@@ -251,23 +251,6 @@ const PostFeed = ({ feed }) => {
             });
           }
     
-            sendMsg(
-              '{"user_from":' +
-                '"' +
-                loggedUsername +
-                '"' +
-                ',"command": 3, "channel": ' +
-                '"' +
-                feed.UserID +
-                '"' +
-                ', "content": "liked your photo."' +
-                ', "media": "' +
-                feed.Media[0] +
-                '"' +
-                ', "post_id": "' +
-                feed.ID +
-                '"}'
-            );
         } else {
           if (isDisliked) {
             setIsDisliked(!isDisliked);
@@ -294,7 +277,7 @@ const PostFeed = ({ feed }) => {
     axios
       .post(
         "/api/post/dislike-post",
-        { PostID: feed.ID, UserID: loggedUserId },
+        { PostID: feed.ID, UserID: loggedUserId, Username: loggedUsername, PostUserID: feed.UserID, MediaID: feed.Media[0] },
         authorization
       )
       .then((res) => {
@@ -313,23 +296,6 @@ const PostFeed = ({ feed }) => {
             });
           }
 
-           sendMsg(
-              '{"user_from":' +
-                '"' +
-                loggedUsername +
-                '"' +
-                ',"command": 3, "channel": ' +
-                '"' +
-                feed.UserID +
-                '"' +
-                ', "content": "disliked your photo."' +
-                ', "media": "' +
-                feed.Media[0] +
-                '"' +
-                ', "post_id": "' +
-                feed.ID +
-                '"}'
-            );
         } else {
           if (isLiked) {
             setIsLiked(!isLiked);
@@ -360,31 +326,14 @@ const PostFeed = ({ feed }) => {
           PostID: feed.ID,
           UserID: loggedUserId,
           Content: newComment,
+          Username: loggedUsername,
+          PostUserID: feed.UserID,
+          MediaID: feed.Media[0]
         },
         authorization
       )
       .then((res) => {
   
-          sendMsg(
-            '{"user_from":' +
-              '"' +
-              loggedUsername +
-              '"' +
-              ',"command": 3, "channel": ' +
-              '"' +
-              feed.UserID +
-              '"' +
-              ', "content": "commented your post:"' +
-              ', "media": "' +
-              feed.Media[0] +
-              '"' +
-              ', "comment": "' +
-              newComment +
-              '"' +
-              ', "post_id": "' +
-              feed.ID +
-              '"}'
-          );
         axios
           .get("/api/post/get-comments-for-post/" + feed.ID, authorization)
           .then((res) => {

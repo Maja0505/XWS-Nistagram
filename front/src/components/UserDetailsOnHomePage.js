@@ -51,19 +51,12 @@ const UserDetailsOnHomePage = ({
         User: loggedInId,
         FollowedUser: user.ID,
         Private: true,
+        Username: loggedInUsername
+
       };
       axios
         .post("/api/user-follow/followUser", follow, authorization)
         .then((res) => {
-          sendMsg('{"user_from":' +
-          '"' +
-          loggedInUsername +
-          '"' +
-          ',"command": 3, "channel": ' +
-          '"' +
-          user.IdString +
-          '"' +
-          ', "content": "requested to following you."}')
           console.log("uspesno");
         })
         .catch((error) => {
@@ -79,19 +72,12 @@ const UserDetailsOnHomePage = ({
         User: loggedInId,
         FollowedUser: user.ID,
         Private: false,
+        Username: loggedInUsername,
+
       };
       axios
         .post("/api/user-follow/followUser", follow, authorization)
         .then((res) => {
-          sendMsg('{"user_from":' +
-          '"' +
-          loggedInUsername +
-          '"' +
-          ',"command": 3, "channel": ' +
-          '"' +
-          user.IdString +
-          '"' +
-          ', "content": "started following you."}')
           console.log("uspesno");
         })
         .catch((error) => {

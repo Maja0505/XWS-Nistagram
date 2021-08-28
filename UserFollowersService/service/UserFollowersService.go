@@ -25,14 +25,40 @@ func (service *UserFollowersService) FollowUser(dto *dto.FollowRelationshipDTO) 
 	fr := mapper.ConvertFollowRelationshipDTOTOFollowRelationship(dto)
 
 	var err error
+	var b []byte
 	if dto.Private == false {
 		err = service.Repository.FollowUser(fr)
+		b = []byte( `{"user_from":` +
+			`"` +
+			dto.Username +
+			`"` +
+			`, "channel": ` +
+			`"` +
+			dto.FollowedUser +
+			`"` +
+			`, "content": "started following you."}`)
 	}else{
 		err = service.Repository.SendFollowRequest(fr)
+		b = []byte( `{"user_from":` +
+			`"` +
+			dto.Username +
+			`"` +
+			`, "channel": ` +
+			`"` +
+			dto.FollowedUser +
+			`"` +
+			`, "content": "requested to following you."}`)
 	}
 
 	if err != nil {
 		return err
+	}
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("MESSAGES_SERVICE_DOMAIN") + ":" + os.Getenv("MESSAGES_SERVICE_PORT") + "/send-notification")
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(b))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
 	}
 	return nil
 }

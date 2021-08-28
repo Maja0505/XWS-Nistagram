@@ -37,6 +37,32 @@ func (service *PostService) AddComment(commentDTO *DTO.CommentDTO) error {
 		fmt.Println(err)
 		return  err
 	}
+	b := []byte(`{"user_from":` +
+		`"` +
+		commentDTO.Username +
+		`"` +
+		`, "channel": ` +
+		`"` +
+		commentDTO.PostUserID +
+		`"` +
+		`, "content": "commented your post:"` +
+		`, "media": "` +
+		commentDTO.MediaID+
+		`"` +
+		`, "comment": "` +
+		commentDTO.Content +
+		`"` +
+		`, "post_id": "` +
+		commentDTO.PostID.String() +
+		`"}`)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("MESSAGES_SERVICE_DOMAIN") + ":" + os.Getenv("MESSAGES_SERVICE_PORT") + "/send-notification")
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(b))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+	}
+
 	return nil
 }
 
@@ -54,6 +80,15 @@ func (service *PostService) AddTag(tag *Model.Tag) error {
 	if err != nil{
 		fmt.Println(err)
 		return  err
+	}
+
+	b := []byte( `{"user_from":` + `"` + tag.Username + `"` + `, "channel": ` + `"` + tag.PostUserID + `"` + `, "content": "tagged you in a post."` + `, "media": "` + tag.MediaID + `"` + `, "post_id": "` + tag.PostID.String() + `"}`)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("MESSAGES_SERVICE_DOMAIN") + ":" + os.Getenv("MESSAGES_SERVICE_PORT") + "/send-notification")
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(b))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
 	}
 	return nil
 }
@@ -109,6 +144,28 @@ func (service *PostService) LikePost(like *Model.Like) error {
 		fmt.Println(err)
 		return  err
 	}
+	b := []byte( `{"user_from":` +
+		`"` +
+		like.Username +
+		`"` +
+		`, "channel": ` +
+		`"` +
+		like.PostUserID +
+		`"` +
+		`, "content": "liked your photo."` +
+		`, "media": "` +
+		like.MediaID +
+		`"` +
+		`, "post_id": "` +
+		like.PostID.String() +
+		`"}`)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("MESSAGES_SERVICE_DOMAIN") + ":" + os.Getenv("MESSAGES_SERVICE_PORT") + "/send-notification")
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(b))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
+	}
 	return nil
 }
 
@@ -117,6 +174,28 @@ func (service *PostService) DislikePost(dislike *Model.Dislike) error {
 	if err != nil{
 		fmt.Println(err)
 		return  err
+	}
+	b := []byte( `{"user_from":` +
+		`"` +
+		dislike.Username +
+		`"` +
+		`,"command": 3, "channel": ` +
+		`"` +
+		dislike.PostUserID +
+		`"` +
+		`, "content": "disliked your photo."` +
+		`, "media": "` +
+		dislike.MediaID +
+		`"` +
+		`, "post_id": "` +
+		dislike.PostID.String() +
+		`"}`)
+
+	reqUrl := fmt.Sprintf("http://" + os.Getenv("MESSAGES_SERVICE_DOMAIN") + ":" + os.Getenv("MESSAGES_SERVICE_PORT") + "/send-notification")
+
+	resp, err := http.Post(reqUrl,"appliation/json",bytes.NewBuffer(b))
+	if err != nil || resp.StatusCode == 404 {
+		fmt.Println(err)
 	}
 	return nil
 }

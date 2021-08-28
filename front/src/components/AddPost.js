@@ -83,9 +83,11 @@ const AddPost = ({ setTabValue }) => {
         .post("/api/post/add-tag", {
           Tag: userTag,
           PostID: postDTO.ID,
+          Username: loggedUsername,
+          PostUserID: userid,
+          MediaID: postDTO.Media[0]
         },authorization)
         .then((res) => {
-          sendMsg('{"user_from":' + '"' + loggedUsername + '"' + ',"command": 3, "channel": ' + '"' + userid + '"' + ', "content": "tagged you in a post."' + ', "media": "' + postDTO.Media[0] + '"' + ', "post_id": "' + postDTO.ID + '"}')
           console.log("Upisan user tag  " + userTag);
         })
         .catch((error) => {

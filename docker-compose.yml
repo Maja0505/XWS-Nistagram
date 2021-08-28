@@ -68,6 +68,8 @@ services:
       POST_SERVICE_HOST: cass
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      MESSAGES_SERVICE_PORT: 8080
+      MESSAGES_SERVICE_DOMAIN: messages-service
       USER_FOLLOWERS_SERVICE_PORT: 8080
       USER_FOLLOWERS_SERVICE_DOMAIN: user-followers-service
       AUTHENTICATION_SERVICE_DOMAIN: authentication-service
@@ -115,6 +117,8 @@ services:
       USER_FOLLOWERS_SERVICE_HOST: neo4j
       USER_SERVICE_PORT: 8080
       USER_SERVICE_DOMAIN: user-service
+      MESSAGES_SERVICE_PORT: 8080
+      MESSAGES_SERVICE_DOMAIN: messages-service
       AUTHENTICATION_SERVICE_DOMAIN: authentication-service
       AUTHENTICATION_SERVICE_PORT: 8080
     restart: on-failure

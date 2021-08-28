@@ -25,6 +25,9 @@ let connect = cb => {
     cb(msg);
     var p1 = JSON.parse(msg.data);
     var p2 = JSON.parse(p1.content)
+    console.log(p2.content)
+    console.log(p2.channel)
+    
     if(p2.content === "tagged you in a post." && p2.channel === userid){
       localStorage.setItem('invisibleNotification',false)
       handleClick(p2.user_from + " " + p2.content)

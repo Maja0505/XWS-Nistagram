@@ -32,10 +32,7 @@ function App() {
       });
     }
   }, []);
-  const send = () => {
-    console.log("hello");
-    sendMsg('{"command": 0, "channel": '+ '"' + userid + '"' + '}');
-  }
+
   return (
     <div>
       <Router>

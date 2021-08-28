@@ -91,6 +91,7 @@ func onChannelMessage(conn *websocket.Conn, r *http.Request) {
 	id := vars["id"]
 	u := connectedUsers[id]
 
+	//WebSocketListener
 	go func() {
 		for m := range u.MessageChan {
 
@@ -108,7 +109,6 @@ func onChannelMessage(conn *websocket.Conn, r *http.Request) {
 }
 
 func onUserMessage(conn *websocket.Conn, r *http.Request, rdb *redis.Client) {
-	fmt.Println("Primio poruku ili notifikaciju")
 
 	var message model.Message
 
@@ -132,11 +132,6 @@ func onUserMessage(conn *websocket.Conn, r *http.Request, rdb *redis.Client) {
 		}
 	case model.CommandSendMessage:
 		if err := service.SendMessage(rdb,message,u); err != nil {
-			fmt.Println(err)
-		}
-	case model.CommandSendNotification:
-		fmt.Println("ajde vise")
-		if err := service.SendNotification(rdb,message,u); err != nil {
 			fmt.Println(err)
 		}
 	}
@@ -199,9 +194,9 @@ func ViewAllNotificationsInChannel(w http.ResponseWriter, r *http.Request, rdb *
 		fmt.Println(err)
 		return
 	}
-	var notifications []model.Message
+	var notifications []model.Notification
 	for _, n := range list {
-		var v model.Message
+		var v model.Notification
 		json.Unmarshal([]byte(n),&v)
 		notifications = append(notifications, v)
 	}
@@ -212,6 +207,26 @@ func ViewAllNotificationsInChannel(w http.ResponseWriter, r *http.Request, rdb *
 	}
 
 }
+
+func SendNotification(w http.ResponseWriter, r *http.Request, rdb *redis.Client) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+
+	var notification model.Notification
+	err := json.NewDecoder(r.Body).Decode(&notification)
+	if err != nil{
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = service.SendNotification(rdb,notification)
+	if err != nil{
+		fmt.Println(err)
+	}
+}
+
 func H(rdb *redis.Client, fn func(http.ResponseWriter, *http.Request, *redis.Client)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fn(w, r, rdb)
